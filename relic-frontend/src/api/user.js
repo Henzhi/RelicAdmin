@@ -4,6 +4,14 @@ export function getUserPage(params) {
   return adminApi.get('/user/page', { params })
 }
 
+export function createUser(data) {
+  return adminApi.post('/user', data)
+}
+
+export function deleteUser(id) {
+  return adminApi.delete(`/user/${id}`)
+}
+
 export function banUser(userId, data) {
   return adminApi.put(`/user/ban/${userId}`, data)
 }

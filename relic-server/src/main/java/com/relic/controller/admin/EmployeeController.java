@@ -1,12 +1,13 @@
 package com.relic.controller.admin;
 
-import com.relic.constant.MessageConstant;
 import com.relic.dto.LoginDTO;
 import com.relic.entity.User;
-import com.relic.mapper.UserMapper;
 import com.relic.properties.JwtProperties;
 import com.relic.result.Result;
 import com.relic.utils.JwtUtil;
+import com.relic.mapper.UserMapper;
+import com.relic.vo.LoginVO;
+import com.relic.converter.VoConverter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,7 +30,7 @@ public class EmployeeController {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    public Result<Map<String, Object>> login(@RequestBody LoginDTO dto) {
+    public Result<LoginVO> login(@RequestBody LoginDTO dto) {
         User user = userMapper.selectByUsername(dto.getUsername());
         if (user == null) {
             return Result.error("账号不存在");
@@ -47,12 +48,9 @@ public class EmployeeController {
         String token = JwtUtil.createJWT(jwtProperties.getAdminSecretKey(),
                 jwtProperties.getAdminTtl(), claims);
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("id", user.getId());
-        data.put("username", user.getUsername());
-        data.put("nickname", user.getNickname());
-        data.put("token", token);
-        return Result.success(data);
+        LoginVO vo = VoConverter.toLoginVO(user);
+        vo.setToken(token);
+        return Result.success(vo);
     }
 
     @PostMapping("/logout")

@@ -1,11 +1,13 @@
 package com.relic.controller.admin;
 
-import com.relic.dto.PageDTO;
 import com.relic.dto.PermissionAssignDTO;
-import com.relic.entity.Permission;
-import com.relic.entity.Role;
+import com.relic.dto.RoleCreateDTO;
+import com.relic.dto.RoleUpdateDTO;
 import com.relic.result.Result;
 import com.relic.service.RoleService;
+import com.relic.vo.PageResultVO;
+import com.relic.vo.PermissionVO;
+import com.relic.vo.RoleVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -21,31 +23,31 @@ public class AdminRoleController {
     private final RoleService roleService;
 
     @GetMapping("/page")
-    public Result<PageDTO<Role>> page(@RequestParam(defaultValue = "1") int page,
-                                       @RequestParam(defaultValue = "10") int pageSize,
-                                       @RequestParam(required = false) String name) {
+    public Result<PageResultVO<RoleVO>> page(@RequestParam(defaultValue = "1") int page,
+                                              @RequestParam(defaultValue = "10") int pageSize,
+                                              @RequestParam(required = false) String name) {
         return Result.success(roleService.page(name, page, pageSize));
     }
 
     @GetMapping("/list")
-    public Result<List<Role>> list() {
+    public Result<List<RoleVO>> list() {
         return Result.success(roleService.listAll());
     }
 
     @GetMapping("/{id}")
-    public Result<Role> getById(@PathVariable Integer id) {
+    public Result<RoleVO> getById(@PathVariable Integer id) {
         return Result.success(roleService.getById(id));
     }
 
     @PostMapping
-    public Result<Void> create(@RequestBody Role role) {
-        roleService.create(role);
+    public Result<Void> create(@RequestBody RoleCreateDTO dto) {
+        roleService.create(dto);
         return Result.success();
     }
 
     @PutMapping("/{id}")
-    public Result<Void> update(@PathVariable Integer id, @RequestBody Role role) {
-        roleService.update(id, role);
+    public Result<Void> update(@PathVariable Integer id, @RequestBody RoleUpdateDTO dto) {
+        roleService.update(id, dto);
         return Result.success();
     }
 
@@ -63,7 +65,7 @@ public class AdminRoleController {
     }
 
     @GetMapping("/{roleId}/permissions")
-    public Result<List<Permission>> getPermissions(@PathVariable Integer roleId) {
+    public Result<List<PermissionVO>> getPermissions(@PathVariable Integer roleId) {
         return Result.success(roleService.getRolePermissions(roleId));
     }
 }

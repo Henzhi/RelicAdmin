@@ -106,4 +106,8 @@
         UPDATE users SET last_login = #{lastLogin}, last_ip = #{lastIp} WHERE id = #{id}
     </update>
 
+    <delete id="deleteById">
+        DELETE FROM users WHERE id = #{id}
+    </delete>
+
 </mapper>

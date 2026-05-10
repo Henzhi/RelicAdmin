@@ -1,9 +1,9 @@
 package com.relic.service.impl;
 
 import com.relic.context.BaseContext;
-import com.relic.dto.LoginDTO;
-import com.relic.dto.PasswordChangeDTO;
-import com.relic.dto.RegisterDTO;
+import com.relic.converter.VoConverter;
+import com.relic.dto.*;
+import com.relic.entity.Role;
 import com.relic.entity.User;
 import com.relic.exception.AccountNotFoundException;
 import com.relic.exception.PasswordErrorException;
@@ -11,6 +11,8 @@ import com.relic.mapper.UserMapper;
 import com.relic.properties.JwtProperties;
 import com.relic.service.AuthService;
 import com.relic.utils.JwtUtil;
+import com.relic.vo.LoginVO;
+import com.relic.vo.UserVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,7 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
-    public User login(LoginDTO dto) {
+    public UserVO login(LoginDTO dto) {
         User user = userMapper.selectByUsername(dto.getUsername());
         if (user == null) {
             throw new AccountNotFoundException("账号不存在");
@@ -37,18 +39,17 @@ public class AuthServiceImpl implements AuthService {
         if (!passwordEncoder.matches(dto.getPassword(), user.getPasswordHash())) {
             throw new PasswordErrorException("密码错误");
         }
-        if ("banned".equals(user.getStatus())) {
+        if (Boolean.TRUE.equals("banned".equals(user.getStatus()))) {
             throw new AccountNotFoundException("账号被锁定");
         }
         userMapper.updateLastLogin(user.getId(),
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 "");
-        user.setPasswordHash(null);
-        return user;
+        return VoConverter.toUserVO(user);
     }
 
     @Override
-    public User register(RegisterDTO dto) {
+    public UserVO register(RegisterDTO dto) {
         User existing = userMapper.selectByUsername(dto.getUsername());
         if (existing != null) {
             throw new RuntimeException("账号已存在");
@@ -68,8 +69,7 @@ public class AuthServiceImpl implements AuthService {
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
         userMapper.insert(user);
-        user.setPasswordHash(null);
-        return user;
+        return VoConverter.toUserVO(user);
     }
 
     @Override
@@ -90,10 +90,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String generateToken(User user) {
+    public String generateToken(Integer userId, String username) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("user_id", user.getId());
-        claims.put("username", user.getUsername());
+        claims.put("user_id", userId);
+        claims.put("username", username);
         return JwtUtil.createJWT(jwtProperties.getUserSecretKey(), jwtProperties.getUserTtl(), claims);
     }
 }

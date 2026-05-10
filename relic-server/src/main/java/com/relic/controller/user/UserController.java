@@ -1,18 +1,18 @@
 package com.relic.controller.user;
 
+import com.relic.context.BaseContext;
 import com.relic.dto.LoginDTO;
 import com.relic.dto.PasswordChangeDTO;
 import com.relic.dto.RegisterDTO;
-import com.relic.entity.User;
+import com.relic.dto.UserUpdateDTO;
 import com.relic.result.Result;
 import com.relic.service.AuthService;
 import com.relic.service.UserService;
+import com.relic.vo.LoginVO;
+import com.relic.vo.UserVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/user/user")
@@ -24,43 +24,38 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public Result<Map<String, Object>> register(@RequestBody RegisterDTO dto) {
-        User user = authService.register(dto);
-        Map<String, Object> data = new HashMap<>();
-        data.put("id", user.getId());
-        data.put("username", user.getUsername());
-        data.put("nickname", user.getNickname());
-        return Result.success(data);
+    public Result<UserVO> register(@RequestBody RegisterDTO dto) {
+        return Result.success(authService.register(dto));
     }
 
     @PostMapping("/login")
-    public Result<Map<String, Object>> login(@RequestBody LoginDTO dto) {
-        User user = authService.login(dto);
-        String token = authService.generateToken(user);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("id", user.getId());
-        data.put("username", user.getUsername());
-        data.put("nickname", user.getNickname());
-        data.put("avatarUrl", user.getAvatarUrl());
-        data.put("token", token);
-        return Result.success(data);
+    public Result<LoginVO> login(@RequestBody LoginDTO dto) {
+        UserVO userVO = authService.login(dto);
+        String token = authService.generateToken(userVO.getId(), userVO.getUsername());
+        LoginVO loginVO = LoginVO.builder()
+                .id(userVO.getId())
+                .username(userVO.getUsername())
+                .nickname(userVO.getNickname())
+                .avatarUrl(userVO.getAvatarUrl())
+                .token(token)
+                .build();
+        return Result.success(loginVO);
     }
 
     @GetMapping("/info")
-    public Result<User> info() {
+    public Result<UserVO> info() {
         return Result.success(userService.getCurrentUser());
     }
 
     @PutMapping("/update")
-    public Result<Void> update(@RequestBody User user) {
-        userService.update(user);
+    public Result<Void> update(@RequestBody UserUpdateDTO dto) {
+        userService.update(dto);
         return Result.success();
     }
 
     @PutMapping("/password")
     public Result<Void> password(@RequestBody PasswordChangeDTO dto) {
-        Long userId = com.relic.context.BaseContext.getCurrentId();
+        Long userId = BaseContext.getCurrentId();
         authService.changePassword(userId.intValue(), dto);
         return Result.success();
     }

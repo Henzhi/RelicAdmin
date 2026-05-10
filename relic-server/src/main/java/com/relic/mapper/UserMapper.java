@@ -21,4 +21,5 @@ public interface UserMapper {
     int updateCommentDisabled(@Param("id") Integer id, @Param("commentDisabled") Integer commentDisabled);
     int updateUploadDisabled(@Param("id") Integer id, @Param("uploadDisabled") Integer uploadDisabled);
     int updateLastLogin(@Param("id") Integer id, @Param("lastLogin") String lastLogin, @Param("lastIp") String lastIp);
+    int deleteById(@Param("id") Integer id);
 }

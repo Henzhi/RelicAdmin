@@ -1,18 +1,24 @@
 package com.relic.service.impl;
 
-import com.relic.dto.PageDTO;
+import com.relic.converter.VoConverter;
+import com.relic.dto.RoleCreateDTO;
+import com.relic.dto.RoleUpdateDTO;
 import com.relic.entity.Permission;
 import com.relic.entity.Role;
 import com.relic.mapper.PermissionMapper;
 import com.relic.mapper.RoleMapper;
 import com.relic.mapper.RolePermissionMapper;
 import com.relic.service.RoleService;
+import com.relic.vo.PageResultVO;
+import com.relic.vo.PermissionVO;
+import com.relic.vo.RoleVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,33 +29,38 @@ public class RoleServiceImpl implements RoleService {
     private final RolePermissionMapper rolePermissionMapper;
 
     @Override
-    public PageDTO<Role> page(String name, int page, int pageSize) {
+    public PageResultVO<RoleVO> page(String name, int page, int pageSize) {
         int offset = (page - 1) * pageSize;
-        List<Role> records = roleMapper.selectByPage(name, offset, pageSize);
+        List<Role> entities = roleMapper.selectByPage(name, offset, pageSize);
         long total = roleMapper.countByPage(name);
-        return new PageDTO<>(total, records, page, pageSize);
+        List<RoleVO> records = entities.stream().map(VoConverter::toRoleVO).collect(Collectors.toList());
+        return new PageResultVO<>(total, records, page, pageSize);
     }
 
     @Override
-    public List<Role> listAll() {
-        return roleMapper.selectAll();
+    public List<RoleVO> listAll() {
+        return roleMapper.selectAll().stream().map(VoConverter::toRoleVO).collect(Collectors.toList());
     }
 
     @Override
-    public Role getById(Integer id) {
+    public RoleVO getById(Integer id) {
         Role role = roleMapper.selectById(id);
         if (role == null) {
             throw new RuntimeException("角色不存在");
         }
-        return role;
+        return VoConverter.toRoleVO(role);
     }
 
     @Override
-    public void create(Role role) {
-        Role existing = roleMapper.selectByName(role.getName());
+    public void create(RoleCreateDTO dto) {
+        Role existing = roleMapper.selectByName(dto.getName());
         if (existing != null) {
             throw new RuntimeException("角色名称已存在");
         }
+        Role role = new Role();
+        role.setName(dto.getName());
+        role.setDisplayName(dto.getDisplayName());
+        role.setDescription(dto.getDescription());
         LocalDateTime now = LocalDateTime.now();
         role.setCreatedAt(now);
         role.setUpdatedAt(now);
@@ -57,8 +68,11 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public void update(Integer id, Role role) {
+    public void update(Integer id, RoleUpdateDTO dto) {
+        Role role = new Role();
         role.setId(id);
+        role.setDisplayName(dto.getDisplayName());
+        role.setDescription(dto.getDescription());
         role.setUpdatedAt(LocalDateTime.now());
         roleMapper.update(role);
     }
@@ -82,7 +96,8 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public List<Permission> getRolePermissions(Integer roleId) {
-        return permissionMapper.selectByRoleId(roleId);
+    public List<PermissionVO> getRolePermissions(Integer roleId) {
+        return permissionMapper.selectByRoleId(roleId).stream()
+                .map(VoConverter::toPermissionVO).collect(Collectors.toList());
     }
 }
