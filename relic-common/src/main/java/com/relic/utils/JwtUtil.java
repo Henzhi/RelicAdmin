@@ -2,6 +2,7 @@ package com.relic.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -20,7 +21,7 @@ public class JwtUtil {
      */
     public static String createJWT(String secretKey, long ttlMillis, Map<String, Object> claims) {
         // 生成安全密钥
-        Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
         // 计算过期时间
         long expMillis = System.currentTimeMillis() + ttlMillis;
         Date exp = new Date(expMillis);
@@ -40,7 +41,7 @@ public class JwtUtil {
      * @return Claims
      */
     public static Claims parseJWT(String secretKey, String token) {
-        Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()

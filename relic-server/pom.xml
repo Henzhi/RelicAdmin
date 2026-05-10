@@ -118,6 +118,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Spring Security Crypto (BCrypt) -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
         <!-- Apache POI -->
         <dependency>
             <groupId>org.apache.poi</groupId>
