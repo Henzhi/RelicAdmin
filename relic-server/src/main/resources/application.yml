@@ -1,0 +1,62 @@
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: dev
+  main:
+    allow-circular-references: true
+#  datasource:
+#    druid:
+#      driver-class-name: ${relic.datasource.driver-class-name}
+#      url: jdbc:mysql://${relic.datasource.host}:${relic.datasource.port}/${relic.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+#      username: ${relic.datasource.username}
+#      password: ${relic.datasource.password}
+  datasource:
+    driver-class-name: ${relic.datasource.driver-class-name}
+    url: jdbc:mysql://${relic.datasource.host}:${relic.datasource.port}/${relic.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${relic.datasource.username}
+    password: ${relic.datasource.password}
+
+  data:
+    redis:
+      host: ${relic.redis.host}
+      port: ${relic.redis.port}
+      password: ${relic.redis.password}
+      database: ${relic.redis.database}
+
+mybatis:
+  #mapper配置文件
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.relic.entity
+  configuration:
+    #开启驼峰命名
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com:
+      relic:
+        mapper: debug
+        service: info
+        controller: info
+
+relic:
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    admin-secret-key: itcast
+    # 设置jwt过期时间
+    admin-ttl: 7200000
+    # 设置前端传递过来的令牌名称
+    admin-token-name: token
+    user-secret-key: seitem
+    user-ttl: 7200000
+    user-token-name: authentication
+    bucket-name: relic-itcast
+
+#  alioss:
+#    endpoint: ${relic.alioss.endpoint}
+#    access-key-id: ${relic.alioss.access-key-id}
+#    access-key-secret: ${relic.alioss.access-key-secret}
+#    bucket-name: ${relic.alioss.bucket-name}
+

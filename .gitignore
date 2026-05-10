@@ -1,0 +1,18 @@
+# 忽略 node_modules 目录（前端依赖，不需要提交）
+node_modules/
+
+# 忽略 IDE / 工具生成的目录
+.trae/
+.vscode/
+.idea/
+
+# 忽略编译输出（如果是 Java 项目，也加上）
+target/
+*.class
+
+# 忽略日志文件
+*.log
+
+# 忽略系统文件
+.DS_Store
+Thumbs.db
