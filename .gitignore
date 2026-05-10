@@ -19,4 +19,4 @@ Thumbs.db
 .gitignore
 
 # 忽略敏感信息
-application-dev.yml
+**/application-dev.yml
