@@ -17,6 +17,11 @@ target/
 .DS_Store
 Thumbs.db
 .gitignore
+项目开发文档.md
+Sql-create.md
+Mysql-connect.md
+Github-SSH-connect.md
 
 # 忽略敏感信息
 **/application-dev.yml
+
