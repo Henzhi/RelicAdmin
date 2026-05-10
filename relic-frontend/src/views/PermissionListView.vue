@@ -48,7 +48,7 @@
           layout="total, sizes, prev, pager, next"
           :total="pagination.total"
           @size-change="handleSearch"
-          @current-change="handleSearch"
+          @current-change="handlePageChange"
         />
       </div>
     </el-card>
@@ -101,6 +101,11 @@ async function fetchData() {
 
 function handleSearch() {
   pagination.page = 1
+  fetchData()
+}
+
+function handlePageChange(page) {
+  pagination.page = page
   fetchData()
 }
 

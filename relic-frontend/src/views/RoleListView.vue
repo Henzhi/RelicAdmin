@@ -30,8 +30,8 @@
           :page-sizes="[10, 20]"
           layout="total, sizes, prev, pager, next"
           :total="pagination.total"
-          @size-change="fetchData"
-          @current-change="fetchData"
+          @size-change="handleSizeChange"
+          @current-change="handlePageChange"
         />
       </div>
     </el-card>
@@ -91,6 +91,16 @@ async function fetchData() {
   } finally {
     loading.value = false
   }
+}
+
+function handleSizeChange() {
+  pagination.page = 1
+  fetchData()
+}
+
+function handlePageChange(page) {
+  pagination.page = page
+  fetchData()
 }
 
 const formVisible = ref(false)
