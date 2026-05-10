@@ -56,7 +56,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                         .title("Relic项目接口文档")
                         .version("2.0")
                         .description("Relic项目接口文档 - Spring Boot 3 + Knife4j 4.x")
-                        .contact(new Contact().name("Your Name").url("").email(""))
+                        .contact(new Contact().name("Henzhi").url("").email("mahh315@163.com"))
                         .license(new License().name("Apache 2.0").url("http://springdoc.org")));
     }
 
@@ -86,6 +86,6 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         log.info("扩展消息转换器...");
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setObjectMapper(new JacksonObjectMapper());
-        converters.add(0, converter);
+        converters.add(converters.size(), converter);
     }
 }
