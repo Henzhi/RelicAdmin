@@ -75,6 +75,12 @@ const routes = [
         name: 'ArtifactImageList',
         component: () => import('@/views/ArtifactImageView.vue'),
         meta: { title: '文物图片管理', icon: 'Picture' }
+      },
+      {
+        path: 'artifact-types',
+        name: 'ArtifactTypeList',
+        component: () => import('@/views/ArtifactTypeListView.vue'),
+        meta: { title: '文物类型管理', icon: 'Collection' }
       }
     ]
   }

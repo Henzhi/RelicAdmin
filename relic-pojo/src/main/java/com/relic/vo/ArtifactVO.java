@@ -34,4 +34,7 @@ public class ArtifactVO {
     private Integer imageValidated;
     private LocalDateTime lastUpdated;
     private LocalDateTime createdAt;
+    private String dynastyName;
+    private String museumName;
+    private String locationName;
 }

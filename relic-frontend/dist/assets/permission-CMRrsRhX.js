@@ -1,0 +1,1 @@
+import{h as i}from"./index-DznhxV_t.js";function r(e){return i.get("/permission/page",{params:e})}function t(){return i.get("/permission/list")}function o(e){return i.post("/permission",e)}function m(e,s){return i.put(`/permission/${e}`,s)}function u(e){return i.delete(`/permission/${e}`)}export{r as a,o as c,u as d,t as g,m as u};

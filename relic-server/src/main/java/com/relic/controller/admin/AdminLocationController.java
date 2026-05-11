@@ -24,11 +24,21 @@ public class AdminLocationController {
         return Result.success(locationService.tree());
     }
 
+    @GetMapping("/all")
+    public Result<List<LocationVO>> all() {
+        return Result.success(locationService.listAllFlat());
+    }
+
     @GetMapping("/list")
     public Result<List<LocationVO>> list(
             @RequestParam(required = false) String type,
             @RequestParam(required = false) Integer parentId) {
         return Result.success(locationService.list(type, parentId));
+    }
+
+    @GetMapping("/parents")
+    public Result<List<LocationVO>> parents(@RequestParam String type) {
+        return Result.success(locationService.listParents(type));
     }
 
     @PostMapping

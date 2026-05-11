@@ -4,8 +4,16 @@ export function getLocationTree() {
   return adminApi.get('/location/tree')
 }
 
+export function getLocationAll() {
+  return adminApi.get('/location/all')
+}
+
 export function getLocationList(params) {
   return adminApi.get('/location/list', { params })
+}
+
+export function getLocationParents(type) {
+  return adminApi.get('/location/parents', { params: { type } })
 }
 
 export function createLocation(data) {

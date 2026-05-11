@@ -37,7 +37,7 @@
         <el-table-column prop="type" label="类型" width="100" />
         <el-table-column prop="material" label="材质" width="120" show-overflow-tooltip />
         <el-table-column prop="timePeriod" label="年代" width="100" />
-        <el-table-column prop="museumId" label="博物馆ID" width="90" />
+        <el-table-column prop="museumName" label="所属博物馆" width="120" show-overflow-tooltip />
         <el-table-column prop="imageValidated" label="图片校验" width="90">
           <template #default="{ row }">
             <el-tag :type="row.imageValidated === 1 ? 'success' : 'danger'" size="small">{{ row.imageValidated === 1 ? '已校验' : '未校验' }}</el-tag>

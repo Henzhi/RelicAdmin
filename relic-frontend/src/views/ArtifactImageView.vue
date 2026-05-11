@@ -42,10 +42,35 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px" :close-on-click-modal="false">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="90px">
-        <el-form-item label="图片URL" prop="imageUrl">
+        <el-form-item label="图片URL" prop="imageUrl" v-if="false">
           <el-input v-model="formData.imageUrl" placeholder="请输入图片URL" />
         </el-form-item>
-        <el-form-item label="本地路径" prop="imagePath">
+        <el-form-item label="上传图片" prop="imageUrl">
+          <div v-if="formData.imageUrl" class="upload-preview">
+            <el-image :src="formData.imageUrl" style="width: 200px; height: 150px" fit="cover" />
+            <el-button type="danger" size="small" circle :icon="Close" class="remove-btn" @click="formData.imageUrl = ''" />
+          </div>
+          <el-upload
+            v-else
+            ref="uploadRef"
+            :action="uploadAction"
+            :headers="uploadHeaders"
+            :accept="uploadAccept"
+            :limit="1"
+            :on-progress="onUploadProgress"
+            :on-success="onUploadSuccess"
+            :on-error="onUploadError"
+            :auto-upload="true"
+            :show-file-list="false"
+          >
+            <el-button type="primary" :icon="Upload" :loading="uploadLoading">上传图片</el-button>
+            <template #tip>
+              <div class="el-upload__tip">支持 jpg/png/webp 格式，单文件最大 10MB</div>
+            </template>
+          </el-upload>
+          <el-progress v-if="uploadPercent > 0 && uploadPercent < 100" :percentage="uploadPercent" />
+        </el-form-item>
+        <el-form-item label="本地路径" prop="imagePath" v-if="false">
           <el-input v-model="formData.imagePath" placeholder="请输入本地路径" />
         </el-form-item>
         <el-form-item label="是否主图" prop="isPrimary">
@@ -64,10 +89,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Plus, ArrowLeft, Edit, Delete } from '@element-plus/icons-vue'
+import { Plus, ArrowLeft, Edit, Delete, Upload, Close } from '@element-plus/icons-vue'
 import { getArtifactImages, createArtifactImage, updateArtifactImage, deleteArtifactImage, setPrimaryImage } from '@/api/artifactImage'
 
 const route = useRoute()
@@ -85,8 +110,37 @@ const formRef = ref(null)
 const formData = reactive({
   imageUrl: '', imagePath: '', isPrimary: 0, sortOrder: 0
 })
+const uploadRef = ref(null)
+const uploadLoading = ref(false)
+const uploadPercent = ref(0)
+const uploadAction = computed(() => '/admin/artifact/' + artifactId.value + '/upload')
+const uploadHeaders = computed(() => ({ token: localStorage.getItem('admin_token') || '' }))
+const uploadAccept = '.jpg,.jpeg,.png,.webp,.gif'
+
 const formRules = {
-  imageUrl: [{ required: true, message: '请输入图片URL', trigger: 'blur' }]
+  imageUrl: [{ required: true, message: '请上传图片', trigger: 'change' }]
+}
+
+function onUploadProgress(event) {
+  uploadLoading.value = true
+  uploadPercent.value = Math.round((event.loaded / event.total) * 100)
+}
+
+function onUploadSuccess(response) {
+  uploadLoading.value = false
+  uploadPercent.value = 0
+  if (response.code === 200) {
+    formData.imageUrl = response.data.imageUrl
+    ElMessage.success('图片上传成功')
+  } else {
+    ElMessage.error(response.message || '上传失败')
+  }
+}
+
+function onUploadError() {
+  uploadLoading.value = false
+  uploadPercent.value = 0
+  ElMessage.error('图片上传失败，请检查网络或文件大小')
 }
 
 onMounted(() => { fetchData() })
@@ -178,4 +232,6 @@ async function handleSetPrimary(row) {
 .page-container { padding: 20px; }
 .card-header { display: flex; justify-content: space-between; align-items: center; }
 .card-title { font-size: 18px; font-weight: 600; }
+.upload-preview { position: relative; display: inline-block; }
+.upload-preview .remove-btn { position: absolute; top: -8px; right: -8px; }
 </style>

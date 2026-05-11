@@ -9,6 +9,8 @@ import java.util.List;
 public interface LocationService {
     List<LocationVO> tree();
     List<LocationVO> list(String type, Integer parentId);
+    List<LocationVO> listAllFlat();
+    List<LocationVO> listParents(String type);
     void create(LocationCreateDTO dto);
     void update(Integer id, LocationUpdateDTO dto);
     void delete(Integer id);

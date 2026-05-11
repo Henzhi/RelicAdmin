@@ -7,6 +7,7 @@ import com.relic.vo.ArtifactImageVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -27,6 +28,11 @@ public class AdminArtifactImageController {
     public Result<Void> create(@PathVariable Integer artifactId, @RequestBody ArtifactImageCreateDTO dto) {
         artifactImageService.create(artifactId, dto);
         return Result.success();
+    }
+
+    @PostMapping("/upload")
+    public Result<ArtifactImageVO> upload(@PathVariable Integer artifactId, @RequestParam("file") MultipartFile file) {
+        return Result.success(artifactImageService.ossUpload(artifactId, file));
     }
 
     @PutMapping("/{imageId}")

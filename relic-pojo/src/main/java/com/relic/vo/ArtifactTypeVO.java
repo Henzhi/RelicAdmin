@@ -11,17 +11,10 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ArtistVO {
+public class ArtifactTypeVO {
     private Integer id;
-    private String nameZh;
-    private String nameEn;
-    private Integer birthYear;
-    private Integer deathYear;
-    private Integer dynastyId;
-    private String dynastyName;
-    private String biography;
-    private String baiduUrl;
-    private String wikiUrl;
+    private String name;
+    private String description;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

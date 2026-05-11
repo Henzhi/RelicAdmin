@@ -24,7 +24,7 @@
         <el-table-column prop="nameEn" label="英文名" min-width="150" show-overflow-tooltip />
         <el-table-column prop="birthYear" label="出生年份" width="100" />
         <el-table-column prop="deathYear" label="逝世年份" width="100" />
-        <el-table-column prop="dynastyId" label="朝代ID" width="80" />
+        <el-table-column prop="dynastyName" label="朝代" width="120" />
         <el-table-column prop="biography" label="简介" min-width="200" show-overflow-tooltip />
         <el-table-column prop="createdAt" label="创建时间" width="170" />
         <el-table-column label="操作" width="180" fixed="right">

@@ -70,6 +70,10 @@
               <el-icon><CollectionTag /></el-icon>
               <span>文物管理</span>
             </el-menu-item>
+            <el-menu-item index="/artifact-types">
+              <el-icon><Collection /></el-icon>
+              <span>文物类型管理</span>
+            </el-menu-item>
           </el-sub-menu>
         </el-menu>
       </el-aside>

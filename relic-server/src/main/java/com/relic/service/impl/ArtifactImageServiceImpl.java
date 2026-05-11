@@ -5,19 +5,26 @@ import com.relic.dto.ArtifactImageCreateDTO;
 import com.relic.entity.ArtifactImage;
 import com.relic.mapper.ArtifactImageMapper;
 import com.relic.service.ArtifactImageService;
+import com.relic.utils.AliOssUtil;
 import com.relic.vo.ArtifactImageVO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ArtifactImageServiceImpl implements ArtifactImageService {
 
     private final ArtifactImageMapper artifactImageMapper;
+    private final AliOssUtil aliOssUtil;
 
     @Override
     public List<ArtifactImageVO> getByArtifactId(Integer artifactId) {
@@ -34,6 +41,28 @@ public class ArtifactImageServiceImpl implements ArtifactImageService {
         image.setIsPrimary(dto.getIsPrimary() != null ? dto.getIsPrimary() : 0);
         image.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
         artifactImageMapper.insert(image);
+    }
+
+    @Override
+    public ArtifactImageVO ossUpload(Integer artifactId, MultipartFile file) {
+        try {
+            String originalFilename = file.getOriginalFilename();
+            String ext = originalFilename != null && originalFilename.contains(".")
+                    ? originalFilename.substring(originalFilename.lastIndexOf(".")) : ".jpg";
+            String objectName = "artifact/" + artifactId + "/" + UUID.randomUUID() + ext;
+            byte[] bytes = file.getBytes();
+            String imageUrl = aliOssUtil.upload(bytes, objectName);
+            ArtifactImage image = new ArtifactImage();
+            image.setArtifactId(artifactId);
+            image.setImageUrl(imageUrl);
+            image.setIsPrimary(0);
+            image.setSortOrder(0);
+            artifactImageMapper.insert(image);
+            return VoConverter.toArtifactImageVO(image);
+        } catch (IOException e) {
+            log.error("OSS上传失败", e);
+            throw new RuntimeException("图片上传失败: " + e.getMessage());
+        }
     }
 
     @Override

@@ -18,6 +18,7 @@ public class LocationVO {
     private String nameEn;
     private String type;
     private Integer parentId;
+    private String parentName;
     private List<LocationVO> children;
     private LocalDateTime createdAt;
 }
