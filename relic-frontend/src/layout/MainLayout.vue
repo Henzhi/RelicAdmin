@@ -41,9 +41,28 @@
             <span>角色管理</span>
           </el-menu-item>
           <el-menu-item index="/permissions">
-            <el-icon><Key /></el-icon>
+            <el-icon><Lock /></el-icon>
             <span>权限管理</span>
           </el-menu-item>
+
+          <el-sub-menu index="content">
+            <template #title>
+              <el-icon><Collection /></el-icon>
+              <span>内容管理</span>
+            </template>
+            <el-menu-item index="/museums">
+              <el-icon><OfficeBuilding /></el-icon>
+              <span>博物馆管理</span>
+            </el-menu-item>
+            <el-menu-item index="/dynasties">
+              <el-icon><Clock /></el-icon>
+              <span>朝代管理</span>
+            </el-menu-item>
+            <el-menu-item index="/artists">
+              <el-icon><UserFilled /></el-icon>
+              <span>艺术家管理</span>
+            </el-menu-item>
+          </el-sub-menu>
         </el-menu>
       </el-aside>
       <el-main class="layout-main">

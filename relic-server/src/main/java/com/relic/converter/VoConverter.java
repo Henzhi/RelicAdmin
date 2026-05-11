@@ -1,9 +1,15 @@
 package com.relic.converter;
 
+import com.relic.entity.Artist;
+import com.relic.entity.Dynasty;
+import com.relic.entity.Museum;
 import com.relic.entity.Permission;
 import com.relic.entity.Role;
 import com.relic.entity.User;
+import com.relic.vo.ArtistVO;
+import com.relic.vo.DynastyVO;
 import com.relic.vo.LoginVO;
+import com.relic.vo.MuseumVO;
 import com.relic.vo.PermissionVO;
 import com.relic.vo.RoleVO;
 import com.relic.vo.UserVO;
@@ -58,6 +64,48 @@ public class VoConverter {
                 .displayName(permission.getDisplayName())
                 .module(permission.getModule())
                 .createdAt(permission.getCreatedAt())
+                .build();
+    }
+
+    public static MuseumVO toMuseumVO(Museum museum) {
+        return MuseumVO.builder()
+                .id(museum.getId())
+                .name(museum.getName())
+                .shortName(museum.getShortName())
+                .country(museum.getCountry())
+                .city(museum.getCity())
+                .website(museum.getWebsite())
+                .collectionUrl(museum.getCollectionUrl())
+                .createdAt(museum.getCreatedAt())
+                .updatedAt(museum.getUpdatedAt())
+                .build();
+    }
+
+    public static DynastyVO toDynastyVO(Dynasty dynasty) {
+        return DynastyVO.builder()
+                .id(dynasty.getId())
+                .nameZh(dynasty.getNameZh())
+                .nameEn(dynasty.getNameEn())
+                .startYear(dynasty.getStartYear())
+                .endYear(dynasty.getEndYear())
+                .description(dynasty.getDescription())
+                .createdAt(dynasty.getCreatedAt())
+                .build();
+    }
+
+    public static ArtistVO toArtistVO(Artist artist) {
+        return ArtistVO.builder()
+                .id(artist.getId())
+                .nameZh(artist.getNameZh())
+                .nameEn(artist.getNameEn())
+                .birthYear(artist.getBirthYear())
+                .deathYear(artist.getDeathYear())
+                .dynastyId(artist.getDynastyId())
+                .biography(artist.getBiography())
+                .baiduUrl(artist.getBaiduUrl())
+                .wikiUrl(artist.getWikiUrl())
+                .createdAt(artist.getCreatedAt())
+                .updatedAt(artist.getUpdatedAt())
                 .build();
     }
 }

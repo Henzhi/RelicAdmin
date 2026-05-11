@@ -1,40 +1,62 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import MainLayout from '@/layout/MainLayout.vue'
 
 const routes = [
   {
+    path: '/',
+    redirect: '/dashboard'
+  },
+  {
     path: '/login',
     name: 'Login',
-    component: () => import('../views/LoginView.vue'),
+    component: () => import('@/views/LoginView.vue'),
     meta: { title: '登录' }
   },
   {
     path: '/',
-    component: () => import('../layout/MainLayout.vue'),
-    redirect: '/dashboard',
+    component: MainLayout,
     children: [
       {
         path: 'dashboard',
         name: 'Dashboard',
-        component: () => import('../views/DashboardView.vue'),
-        meta: { title: '仪表盘' }
+        component: () => import('@/views/DashboardView.vue'),
+        meta: { title: '仪表盘', icon: 'Odometer' }
       },
       {
         path: 'users',
-        name: 'Users',
-        component: () => import('../views/UserListView.vue'),
-        meta: { title: '用户管理' }
+        name: 'UserList',
+        component: () => import('@/views/UserListView.vue'),
+        meta: { title: '用户管理', icon: 'User' }
       },
       {
         path: 'roles',
-        name: 'Roles',
-        component: () => import('../views/RoleListView.vue'),
-        meta: { title: '角色管理' }
+        name: 'RoleList',
+        component: () => import('@/views/RoleListView.vue'),
+        meta: { title: '角色管理', icon: 'Avatar' }
       },
       {
         path: 'permissions',
-        name: 'Permissions',
-        component: () => import('../views/PermissionListView.vue'),
-        meta: { title: '权限管理' }
+        name: 'PermissionList',
+        component: () => import('@/views/PermissionListView.vue'),
+        meta: { title: '权限管理', icon: 'Lock' }
+      },
+      {
+        path: 'museums',
+        name: 'MuseumList',
+        component: () => import('@/views/MuseumListView.vue'),
+        meta: { title: '博物馆管理', icon: 'OfficeBuilding' }
+      },
+      {
+        path: 'dynasties',
+        name: 'DynastyList',
+        component: () => import('@/views/DynastyListView.vue'),
+        meta: { title: '朝代管理', icon: 'Clock' }
+      },
+      {
+        path: 'artists',
+        name: 'ArtistList',
+        component: () => import('@/views/ArtistListView.vue'),
+        meta: { title: '艺术家管理', icon: 'UserFilled' }
       }
     ]
   }

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.DynastyMapper">
+
+    <resultMap id="dynastyResultMap" type="com.relic.entity.Dynasty">
+        <id property="id" column="id"/>
+        <result property="nameZh" column="name_zh"/>
+        <result property="nameEn" column="name_en"/>
+        <result property="startYear" column="start_year"/>
+        <result property="endYear" column="end_year"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="dynastyResultMap">
+        SELECT * FROM dynasties WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="dynastyResultMap">
+        SELECT * FROM dynasties ORDER BY start_year ASC
+    </select>
+
+    <select id="selectByPage" resultMap="dynastyResultMap">
+        SELECT * FROM dynasties
+        <where>
+            <if test="nameZh != null and nameZh != ''">
+                AND name_zh LIKE CONCAT('%', #{nameZh}, '%')
+            </if>
+        </where>
+        ORDER BY start_year ASC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByPage" resultType="long">
+        SELECT COUNT(*) FROM dynasties
+        <where>
+            <if test="nameZh != null and nameZh != ''">
+                AND name_zh LIKE CONCAT('%', #{nameZh}, '%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dynasties (name_zh, name_en, start_year, end_year, description, created_at)
+        VALUES (#{nameZh}, #{nameEn}, #{startYear}, #{endYear}, #{description}, #{createdAt})
+    </insert>
+
+    <update id="update">
+        UPDATE dynasties
+        <set>
+            <if test="nameZh != null">name_zh = #{nameZh},</if>
+            <if test="nameEn != null">name_en = #{nameEn},</if>
+            <if test="startYear != null">start_year = #{startYear},</if>
+            <if test="endYear != null">end_year = #{endYear},</if>
+            <if test="description != null">description = #{description},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM dynasties WHERE id = #{id}
+    </delete>
+
+</mapper>

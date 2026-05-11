@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.MuseumMapper">
+
+    <resultMap id="museumResultMap" type="com.relic.entity.Museum">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="shortName" column="short_name"/>
+        <result property="country" column="country"/>
+        <result property="city" column="city"/>
+        <result property="website" column="website"/>
+        <result property="collectionUrl" column="collection_url"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="museumResultMap">
+        SELECT * FROM museums WHERE id = #{id}
+    </select>
+
+    <select id="selectByPage" resultMap="museumResultMap">
+        SELECT * FROM museums
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="country != null and country != ''">
+                AND country = #{country}
+            </if>
+        </where>
+        ORDER BY created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByPage" resultType="long">
+        SELECT COUNT(*) FROM museums
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="country != null and country != ''">
+                AND country = #{country}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO museums (name, short_name, country, city, website, collection_url, created_at, updated_at)
+        VALUES (#{name}, #{shortName}, #{country}, #{city}, #{website}, #{collectionUrl}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <update id="update">
+        UPDATE museums
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="shortName != null">short_name = #{shortName},</if>
+            <if test="country != null">country = #{country},</if>
+            <if test="city != null">city = #{city},</if>
+            <if test="website != null">website = #{website},</if>
+            <if test="collectionUrl != null">collection_url = #{collectionUrl},</if>
+            updated_at = #{updatedAt}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM museums WHERE id = #{id}
+    </delete>
+
+</mapper>
