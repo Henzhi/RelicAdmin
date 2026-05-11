@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.ArtifactImageMapper">
+
+    <resultMap id="imageResultMap" type="com.relic.entity.ArtifactImage">
+        <id property="id" column="id"/>
+        <result property="artifactId" column="artifact_id"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="imagePath" column="image_path"/>
+        <result property="isPrimary" column="is_primary"/>
+        <result property="sortOrder" column="sort_order"/>
+    </resultMap>
+
+    <select id="selectByArtifactId" resultMap="imageResultMap">
+        SELECT * FROM artifact_images WHERE artifact_id = #{artifactId} ORDER BY is_primary DESC, sort_order ASC
+    </select>
+
+    <select id="selectById" resultMap="imageResultMap">
+        SELECT * FROM artifact_images WHERE id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO artifact_images (artifact_id, image_url, image_path, is_primary, sort_order)
+        VALUES (#{artifactId}, #{imageUrl}, #{imagePath}, #{isPrimary}, #{sortOrder})
+    </insert>
+
+    <update id="update">
+        UPDATE artifact_images
+        <set>
+            <if test="imageUrl != null">image_url = #{imageUrl},</if>
+            <if test="imagePath != null">image_path = #{imagePath},</if>
+            <if test="isPrimary != null">is_primary = #{isPrimary},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM artifact_images WHERE id = #{id}
+    </delete>
+
+    <update id="clearPrimary">
+        UPDATE artifact_images SET is_primary = 0 WHERE artifact_id = #{artifactId}
+    </update>
+
+    <update id="setPrimary">
+        UPDATE artifact_images SET is_primary = 1 WHERE id = #{id}
+    </update>
+
+</mapper>

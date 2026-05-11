@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.ArtifactMapper">
+
+    <resultMap id="artifactResultMap" type="com.relic.entity.Artifact">
+        <id property="id" column="id"/>
+        <result property="objectId" column="object_id"/>
+        <result property="titleZh" column="title_zh"/>
+        <result property="titleEn" column="title_en"/>
+        <result property="timePeriod" column="time_period"/>
+        <result property="dynastyId" column="dynasty_id"/>
+        <result property="type" column="type"/>
+        <result property="material" column="material"/>
+        <result property="description" column="description"/>
+        <result property="dimensions" column="dimensions"/>
+        <result property="museumId" column="museum_id"/>
+        <result property="locationId" column="location_id"/>
+        <result property="detailUrl" column="detail_url"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="imagePath" column="image_path"/>
+        <result property="creditLine" column="credit_line"/>
+        <result property="accessionNumber" column="accession_number"/>
+        <result property="crawlDate" column="crawl_date"/>
+        <result property="imageValidated" column="image_validated"/>
+        <result property="lastUpdated" column="last_updated"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="artifactResultMap">
+        SELECT * FROM artifacts WHERE id = #{id}
+    </select>
+
+    <select id="selectByPage" resultMap="artifactResultMap">
+        SELECT * FROM artifacts
+        <where>
+            <if test="titleZh != null and titleZh != ''">
+                AND title_zh LIKE CONCAT('%', #{titleZh}, '%')
+            </if>
+            <if test="titleEn != null and titleEn != ''">
+                AND title_en LIKE CONCAT('%', #{titleEn}, '%')
+            </if>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+            <if test="dynastyId != null">
+                AND dynasty_id = #{dynastyId}
+            </if>
+            <if test="museumId != null">
+                AND museum_id = #{museumId}
+            </if>
+            <if test="material != null and material != ''">
+                AND material LIKE CONCAT('%', #{material}, '%')
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (title_zh LIKE CONCAT('%', #{keyword}, '%') OR title_en LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        <choose>
+            <when test="sortBy != null and sortOrder != null">
+                ORDER BY ${sortBy} ${sortOrder}
+            </when>
+            <otherwise>
+                ORDER BY created_at DESC
+            </otherwise>
+        </choose>
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByPage" resultType="long">
+        SELECT COUNT(*) FROM artifacts
+        <where>
+            <if test="titleZh != null and titleZh != ''">
+                AND title_zh LIKE CONCAT('%', #{titleZh}, '%')
+            </if>
+            <if test="titleEn != null and titleEn != ''">
+                AND title_en LIKE CONCAT('%', #{titleEn}, '%')
+            </if>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+            <if test="dynastyId != null">
+                AND dynasty_id = #{dynastyId}
+            </if>
+            <if test="museumId != null">
+                AND museum_id = #{museumId}
+            </if>
+            <if test="material != null and material != ''">
+                AND material LIKE CONCAT('%', #{material}, '%')
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (title_zh LIKE CONCAT('%', #{keyword}, '%') OR title_en LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO artifacts (object_id, title_zh, title_en, time_period, dynasty_id,
+                               type, material, description, dimensions, museum_id, location_id,
+                               detail_url, image_url, image_path, credit_line, accession_number,
+                               crawl_date, image_validated, last_updated, created_at)
+        VALUES (#{objectId}, #{titleZh}, #{titleEn}, #{timePeriod}, #{dynastyId},
+                #{type}, #{material}, #{description}, #{dimensions}, #{museumId}, #{locationId},
+                #{detailUrl}, #{imageUrl}, #{imagePath}, #{creditLine}, #{accessionNumber},
+                #{crawlDate}, 0, #{lastUpdated}, #{createdAt})
+    </insert>
+
+    <update id="update">
+        UPDATE artifacts
+        <set>
+            <if test="objectId != null">object_id = #{objectId},</if>
+            <if test="titleZh != null">title_zh = #{titleZh},</if>
+            <if test="titleEn != null">title_en = #{titleEn},</if>
+            <if test="timePeriod != null">time_period = #{timePeriod},</if>
+            <if test="dynastyId != null">dynasty_id = #{dynastyId},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="material != null">material = #{material},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="dimensions != null">dimensions = #{dimensions},</if>
+            <if test="museumId != null">museum_id = #{museumId},</if>
+            <if test="locationId != null">location_id = #{locationId},</if>
+            <if test="detailUrl != null">detail_url = #{detailUrl},</if>
+            <if test="imageUrl != null">image_url = #{imageUrl},</if>
+            <if test="imagePath != null">image_path = #{imagePath},</if>
+            <if test="creditLine != null">credit_line = #{creditLine},</if>
+            <if test="accessionNumber != null">accession_number = #{accessionNumber},</if>
+            <if test="crawlDate != null">crawl_date = #{crawlDate},</if>
+            <if test="imageValidated != null">image_validated = #{imageValidated},</if>
+            last_updated = #{lastUpdated}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM artifacts WHERE id = #{id}
+    </delete>
+
+</mapper>

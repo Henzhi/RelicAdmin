@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.LocationMapper">
+
+    <resultMap id="locationResultMap" type="com.relic.entity.Location">
+        <id property="id" column="id"/>
+        <result property="nameZh" column="name_zh"/>
+        <result property="nameEn" column="name_en"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="type" column="type"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="selectAll" resultMap="locationResultMap">
+        SELECT * FROM locations ORDER BY type, name_zh
+    </select>
+
+    <select id="selectByParentId" resultMap="locationResultMap">
+        SELECT * FROM locations WHERE parent_id = #{parentId} ORDER BY name_zh
+    </select>
+
+    <select id="selectByType" resultMap="locationResultMap">
+        SELECT * FROM locations
+        <where>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+            <if test="parentId != null">
+                AND parent_id = #{parentId}
+            </if>
+        </where>
+        ORDER BY name_zh
+    </select>
+
+    <select id="selectById" resultMap="locationResultMap">
+        SELECT * FROM locations WHERE id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO locations (name_zh, name_en, parent_id, type, created_at)
+        VALUES (#{nameZh}, #{nameEn}, #{parentId}, #{type}, #{createdAt})
+    </insert>
+
+    <update id="update">
+        UPDATE locations
+        <set>
+            <if test="nameZh != null">name_zh = #{nameZh},</if>
+            <if test="nameEn != null">name_en = #{nameEn},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="type != null">type = #{type},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM locations WHERE id = #{id}
+    </delete>
+
+</mapper>

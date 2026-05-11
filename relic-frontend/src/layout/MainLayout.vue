@@ -62,6 +62,14 @@
               <el-icon><UserFilled /></el-icon>
               <span>艺术家管理</span>
             </el-menu-item>
+            <el-menu-item index="/locations">
+              <el-icon><Location /></el-icon>
+              <span>地点管理</span>
+            </el-menu-item>
+            <el-menu-item index="/artifacts">
+              <el-icon><CollectionTag /></el-icon>
+              <span>文物管理</span>
+            </el-menu-item>
           </el-sub-menu>
         </el-menu>
       </el-aside>

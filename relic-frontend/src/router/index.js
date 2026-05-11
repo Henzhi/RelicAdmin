@@ -57,6 +57,24 @@ const routes = [
         name: 'ArtistList',
         component: () => import('@/views/ArtistListView.vue'),
         meta: { title: '艺术家管理', icon: 'UserFilled' }
+      },
+      {
+        path: 'locations',
+        name: 'LocationList',
+        component: () => import('@/views/LocationListView.vue'),
+        meta: { title: '地点管理', icon: 'Location' }
+      },
+      {
+        path: 'artifacts',
+        name: 'ArtifactList',
+        component: () => import('@/views/ArtifactListView.vue'),
+        meta: { title: '文物管理', icon: 'CollectionTag' }
+      },
+      {
+        path: 'artifact-images/:id',
+        name: 'ArtifactImageList',
+        component: () => import('@/views/ArtifactImageView.vue'),
+        meta: { title: '文物图片管理', icon: 'Picture' }
       }
     ]
   }

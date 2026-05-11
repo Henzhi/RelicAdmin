@@ -1,13 +1,19 @@
 package com.relic.converter;
 
+import com.relic.entity.Artifact;
+import com.relic.entity.ArtifactImage;
 import com.relic.entity.Artist;
 import com.relic.entity.Dynasty;
+import com.relic.entity.Location;
 import com.relic.entity.Museum;
 import com.relic.entity.Permission;
 import com.relic.entity.Role;
 import com.relic.entity.User;
+import com.relic.vo.ArtifactImageVO;
+import com.relic.vo.ArtifactVO;
 import com.relic.vo.ArtistVO;
 import com.relic.vo.DynastyVO;
+import com.relic.vo.LocationVO;
 import com.relic.vo.LoginVO;
 import com.relic.vo.MuseumVO;
 import com.relic.vo.PermissionVO;
@@ -106,6 +112,54 @@ public class VoConverter {
                 .wikiUrl(artist.getWikiUrl())
                 .createdAt(artist.getCreatedAt())
                 .updatedAt(artist.getUpdatedAt())
+                .build();
+    }
+
+    public static LocationVO toLocationVO(Location location) {
+        return LocationVO.builder()
+                .id(location.getId())
+                .nameZh(location.getNameZh())
+                .nameEn(location.getNameEn())
+                .type(location.getType())
+                .parentId(location.getParentId())
+                .createdAt(location.getCreatedAt())
+                .build();
+    }
+
+    public static ArtifactVO toArtifactVO(Artifact artifact) {
+        return ArtifactVO.builder()
+                .id(artifact.getId())
+                .objectId(artifact.getObjectId())
+                .titleZh(artifact.getTitleZh())
+                .titleEn(artifact.getTitleEn())
+                .timePeriod(artifact.getTimePeriod())
+                .dynastyId(artifact.getDynastyId())
+                .type(artifact.getType())
+                .material(artifact.getMaterial())
+                .description(artifact.getDescription())
+                .dimensions(artifact.getDimensions())
+                .museumId(artifact.getMuseumId())
+                .locationId(artifact.getLocationId())
+                .detailUrl(artifact.getDetailUrl())
+                .imageUrl(artifact.getImageUrl())
+                .imagePath(artifact.getImagePath())
+                .creditLine(artifact.getCreditLine())
+                .accessionNumber(artifact.getAccessionNumber())
+                .crawlDate(artifact.getCrawlDate())
+                .imageValidated(artifact.getImageValidated())
+                .lastUpdated(artifact.getLastUpdated())
+                .createdAt(artifact.getCreatedAt())
+                .build();
+    }
+
+    public static ArtifactImageVO toArtifactImageVO(ArtifactImage image) {
+        return ArtifactImageVO.builder()
+                .id(image.getId())
+                .artifactId(image.getArtifactId())
+                .imageUrl(image.getImageUrl())
+                .imagePath(image.getImagePath())
+                .isPrimary(image.getIsPrimary())
+                .sortOrder(image.getSortOrder())
                 .build();
     }
 }
