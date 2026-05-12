@@ -20,6 +20,7 @@ public class UserVO {
     private String nickname;
     private String status;
     private String banReason;
+    private String userType;
     private LocalDateTime registeredAt;
     private LocalDateTime lastLogin;
     private String lastIp;

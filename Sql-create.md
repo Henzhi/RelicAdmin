@@ -344,11 +344,10 @@ CREATE TABLE notifications (
     created_at TIMESTAMP COMMENT '创建时间'
 ) COMMENT='消息通知';
 ```
-
-
-```angular2html
+---
+```bash
+angular2html
 USE seitem;
-
 -- 1. 为 roles 表添加 updated_at 字段
 ALTER TABLE roles
     ADD COLUMN updated_at TIMESTAMP NULL COMMENT '更新时间' AFTER created_at;
@@ -554,7 +553,7 @@ INSERT IGNORE INTO violation_types (type_code, type_name, severity_level, defaul
 
 ```
 
-```
+```bash
 -- 关联表添加联合索引
 ALTER TABLE artifact_artist ADD INDEX idx_artifact_artist (artifact_id, artist_id);
 ALTER TABLE artifact_location ADD INDEX idx_artifact_location (artifact_id, location_id);
@@ -578,4 +577,122 @@ ALTER TABLE artifacts ADD INDEX idx_museum_object (museum_id, object_id);
 
 ALTER TABLE audit_records ADD COLUMN source_type VARCHAR(50) COMMENT '来源表名' AFTER content_type;
 
+```
+```bash
+-- 文物类型表
+CREATE TABLE artifact_types (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    name VARCHAR(100) NOT NULL COMMENT '类型名称（如：绘画、瓷器、青铜器、书法、雕塑、玉器等）',
+    description TEXT COMMENT '类型描述',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) COMMENT='文物类型管理表';
+
+-- 创建索引
+CREATE INDEX idx_name ON artifact_types(name);
+
+-- 插入默认数据（可选）
+INSERT INTO artifact_types (name, description) VALUES
+('Painting', '绘画作品，包括国画、油画、水彩等'),
+('Ceramics', '陶瓷器物，包括瓷器、陶器等'),
+('Bronze', '青铜器，包括礼器、兵器、工具等'),
+('Calligraphy', '书法作品，包括碑帖、手卷等'),
+('Sculpture', '雕塑作品，包括石雕、木雕、泥塑等'),
+('Jade', '玉器，包括玉璧、玉佩、玉雕等'),
+('Lacquer', '漆器'),
+('Textile', '纺织品，包括丝绸、刺绣等'),
+('Metalwork', '金属工艺品，包括金银器等'),
+('Enamel', '珐琅器');
+```
+
+```bash
+-- 修改文物表字段允许为空，解决创建文物时必填字段过多的问题
+
+-- 将 image_url 改为允许 NULL（图片后续通过上传功能添加）
+ALTER TABLE artifacts MODIFY COLUMN image_url VARCHAR(500) NULL COMMENT '主图原图URL';
+
+-- 将 detail_url 改为允许 NULL
+ALTER TABLE artifacts MODIFY COLUMN detail_url VARCHAR(500) NULL COMMENT '博物馆详情页URL';
+
+-- 将 crawl_date 改为允许 NULL
+ALTER TABLE artifacts MODIFY COLUMN crawl_date DATE NULL COMMENT '爬取日期';
+
+-- 可选：如果博物馆ID确实必填，保持 NOT NULL，但前端必须强制选择
+-- ALTER TABLE artifacts MODIFY COLUMN museum_id INT UNSIGNED NULL COMMENT '现藏博物馆ID';
+```
+
+```bash
+-- Step 2: 创建独立的 admin_users 表（仅管理员账户使用，与 users 表完全隔离）
+CREATE TABLE IF NOT EXISTS admin_users (
+id INT AUTO_INCREMENT PRIMARY KEY,
+username VARCHAR(50) NOT NULL UNIQUE COMMENT '管理员用户名',
+password_hash VARCHAR(255) NOT NULL COMMENT 'BCrypt加密密码',
+real_name VARCHAR(50) COMMENT '真实姓名',
+email VARCHAR(100) COMMENT '邮箱',
+phone VARCHAR(20) COMMENT '手机号',
+avatar_url VARCHAR(500) COMMENT '头像地址',
+status VARCHAR(20) NOT NULL DEFAULT 'active' COMMENT '状态: active-启用, banned-禁用',
+last_login DATETIME COMMENT '最后登录时间',
+last_ip VARCHAR(50) COMMENT '最后登录IP',
+created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='管理员用户表（独立于前台用户表）';
+
+-- Step 3: 创建 admin_user_role 关联表（管理员与角色的多对多关联）
+CREATE TABLE IF NOT EXISTS admin_user_role (
+id INT AUTO_INCREMENT PRIMARY KEY,
+admin_user_id INT NOT NULL,                     -- 如果 admin_users.id 是有符号 INT 则保持不变
+role_id INT UNSIGNED NOT NULL,                  -- 关键修改：与 roles.id 类型一致
+created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+FOREIGN KEY (admin_user_id) REFERENCES admin_users(id) ON DELETE CASCADE,
+FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+UNIQUE KEY uk_admin_role (admin_user_id, role_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='管理员角色关联表';
+
+ALTER TABLE users ADD COLUMN user_type VARCHAR(20) AFTER ban_reason;
+
+
+CREATE INDEX idx_users_user_type ON users(user_type);
+```
+
+```sql
+ALTER TABLE users
+ADD COLUMN institution varchar(200) NULL COMMENT '用户所属机构';
+```
+
+```sql
+ALTER TABLE museums
+ADD COLUMN latitude decimal(10,7) NULL COMMENT '博物馆纬度',
+ADD COLUMN longitude decimal(10,7) NULL COMMENT '博物馆经度';
+```
+
+```sql
+ALTER TABLE artifacts
+ADD COLUMN provenance text NULL COMMENT '文物流转或来源脉络',
+ADD COLUMN current_status varchar(100) NULL COMMENT '当前展出、保存或数字开放状态';
+```
+
+
+```sql
+CREATE TABLE tags (
+  id int unsigned NOT NULL AUTO_INCREMENT,
+  name varchar(100) NOT NULL,
+  category varchar(50) NULL COMMENT '标签类别',
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_tags_name (name)
+) COMMENT='文物标签表';
+```
+
+```sql
+CREATE TABLE artifact_tags (
+  artifact_id int unsigned NOT NULL,
+  tag_id int unsigned NOT NULL,
+  PRIMARY KEY (artifact_id, tag_id),
+  KEY idx_artifact_tags_tag_id (tag_id)
+) COMMENT='文物与标签关联表';
+```
+
+
+```
 ```

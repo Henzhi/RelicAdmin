@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class CommentLike {
     private Integer userId;
     private Integer commentId;

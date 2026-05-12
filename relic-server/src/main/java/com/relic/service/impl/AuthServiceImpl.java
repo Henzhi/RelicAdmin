@@ -61,6 +61,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPhone(dto.getPhone());
         user.setNickname(dto.getNickname() != null ? dto.getNickname() : dto.getUsername());
         user.setSource(dto.getSource() != null ? dto.getSource() : "web");
+        user.setUserType(dto.getUserType() != null ? dto.getUserType() : "knowledge");
         user.setStatus("active");
         user.setCommentDisabled(0);
         user.setUploadDisabled(0);
@@ -94,6 +95,7 @@ public class AuthServiceImpl implements AuthService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("user_id", userId);
         claims.put("username", username);
+        claims.put("user_type", "knowledge");
         return JwtUtil.createJWT(jwtProperties.getUserSecretKey(), jwtProperties.getUserTtl(), claims);
     }
 }

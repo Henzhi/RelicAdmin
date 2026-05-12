@@ -10,4 +10,5 @@ public class RegisterDTO {
     private String phone;
     private String nickname;
     private String source;
+    private String userType;
 }

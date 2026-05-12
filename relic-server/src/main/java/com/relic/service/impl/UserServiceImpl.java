@@ -33,10 +33,10 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
-    public PageResultVO<UserVO> page(String username, String nickname, String status, int page, int pageSize) {
+    public PageResultVO<UserVO> page(String username, String nickname, String status, String userType, int page, int pageSize) {
         int offset = (page - 1) * pageSize;
-        List<User> entities = userMapper.selectByPage(username, nickname, status, offset, pageSize);
-        long total = userMapper.countByPage(username, nickname, status);
+        List<User> entities = userMapper.selectByPage(username, nickname, status, userType, offset, pageSize);
+        long total = userMapper.countByPage(username, nickname, status, userType);
         List<UserVO> records = entities.stream().map(VoConverter::toUserVO).collect(Collectors.toList());
         return new PageResultVO<>(total, records, page, pageSize);
     }
@@ -72,6 +72,7 @@ public class UserServiceImpl implements UserService {
         user.setPhone(dto.getPhone());
         user.setNickname(dto.getNickname() != null ? dto.getNickname() : dto.getUsername());
         user.setSource(dto.getSource() != null ? dto.getSource() : "web");
+        user.setUserType(dto.getUserType() != null ? dto.getUserType() : "knowledge");
         user.setStatus("active");
         user.setCommentDisabled(0);
         user.setUploadDisabled(0);

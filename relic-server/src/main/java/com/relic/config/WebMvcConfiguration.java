@@ -1,6 +1,8 @@
 package com.relic.config;
 
 import com.relic.interceptor.JwtTokenAdminInterceptor;
+import com.relic.interceptor.JwtTokenKnowledgeInterceptor;
+import com.relic.interceptor.JwtTokenMuseumInterceptor;
 import com.relic.interceptor.JwtTokenUserInterceptor;
 import com.relic.json.JacksonObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -19,10 +21,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
-/**
- * 配置类，注册web层相关组件
- * 注意：不再继承 WebMvcConfigurationSupport，而是实现 WebMvcConfigurer
- */
 @Configuration
 @Slf4j
 public class WebMvcConfiguration implements WebMvcConfigurer {
@@ -30,17 +28,24 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Autowired
     private JwtTokenAdminInterceptor jwtTokenAdminInterceptor;
     @Autowired
+    private JwtTokenKnowledgeInterceptor jwtTokenKnowledgeInterceptor;
+    @Autowired
+    private JwtTokenMuseumInterceptor jwtTokenMuseumInterceptor;
+    @Autowired
     private JwtTokenUserInterceptor jwtTokenUserInterceptor;
 
-    /**
-     * 注册自定义拦截器
-     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         log.info("开始注册自定义拦截器...");
         registry.addInterceptor(jwtTokenAdminInterceptor)
                 .addPathPatterns("/admin/**")
                 .excludePathPatterns("/admin/employee/login");
+        registry.addInterceptor(jwtTokenKnowledgeInterceptor)
+                .addPathPatterns("/knowledge/**")
+                .excludePathPatterns("/knowledge/auth/login", "/knowledge/auth/register");
+        registry.addInterceptor(jwtTokenMuseumInterceptor)
+                .addPathPatterns("/museum/**")
+                .excludePathPatterns("/museum/auth/login", "/museum/auth/register");
         registry.addInterceptor(jwtTokenUserInterceptor)
                 .addPathPatterns("/user/**")
                 .excludePathPatterns("/user/user/login", "/user/shop/status");
@@ -65,6 +70,24 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         return GroupedOpenApi.builder()
                 .group("管理端接口")
                 .packagesToScan("com.relic.controller.admin")
+                .pathsToMatch("/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi knowledgeApi() {
+        return GroupedOpenApi.builder()
+                .group("知识服务端接口")
+                .packagesToScan("com.relic.controller.knowledge")
+                .pathsToMatch("/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi museumApi() {
+        return GroupedOpenApi.builder()
+                .group("掌上博物馆端接口")
+                .packagesToScan("com.relic.controller.museum")
                 .pathsToMatch("/**")
                 .build();
     }

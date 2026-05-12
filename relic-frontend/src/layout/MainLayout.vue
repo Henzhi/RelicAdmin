@@ -36,6 +36,10 @@
             <el-icon><User /></el-icon>
             <span>用户管理</span>
           </el-menu-item>
+          <el-menu-item index="/admin-users">
+            <el-icon><UserFilled /></el-icon>
+            <span>管理员管理</span>
+          </el-menu-item>
           <el-menu-item index="/roles">
             <el-icon><Avatar /></el-icon>
             <span>角色管理</span>
@@ -73,6 +77,10 @@
             <el-menu-item index="/artifact-types">
               <el-icon><Collection /></el-icon>
               <span>文物类型管理</span>
+            </el-menu-item>
+            <el-menu-item index="/favorites">
+              <el-icon><Star /></el-icon>
+              <span>我的收藏</span>
             </el-menu-item>
           </el-sub-menu>
         </el-menu>

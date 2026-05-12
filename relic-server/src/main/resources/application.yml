@@ -62,12 +62,15 @@ knife4j:
 
 relic:
   jwt:
-    # 设置jwt签名加密时使用的秘钥
     admin-secret-key: ZO/5IEc8jY5csLQPhQ2nwkXvEbyIL7v/6AvShE0V5Ic=
-    # 设置jwt过期时间
     admin-ttl: 72000000000
-    # 设置前端传递过来的令牌名称
     admin-token-name: token
+    knowledge-secret-key: QjnEXgrR7DaaP2quggUJrQED2hVCKVHUcKaHRdMGHdU=
+    knowledge-ttl: 72000000000
+    knowledge-token-name: token
+    museum-secret-key: kR8vN2mP5xL9wQ3jF7tY1bD6hA0cE4gI
+    museum-ttl: 72000000000
+    museum-token-name: token
     user-secret-key: QjnEXgrR7DaaP2quggUJrQED2hVCKVHUcKaHRdMGHdU=
     user-ttl: 72000000000
     user-token-name: token

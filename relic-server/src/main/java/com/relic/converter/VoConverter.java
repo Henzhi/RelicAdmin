@@ -28,6 +28,7 @@ public class VoConverter {
                 .username(user.getUsername())
                 .nickname(user.getNickname())
                 .avatarUrl(user.getAvatarUrl())
+                .userType(user.getUserType())
                 .build();
     }
 
@@ -41,6 +42,7 @@ public class VoConverter {
                 .nickname(user.getNickname())
                 .status(user.getStatus())
                 .banReason(user.getBanReason())
+                .userType(user.getUserType())
                 .registeredAt(user.getRegisteredAt())
                 .lastLogin(user.getLastLogin())
                 .lastIp(user.getLastIp())

@@ -37,6 +37,7 @@ public class UserController {
                 .username(userVO.getUsername())
                 .nickname(userVO.getNickname())
                 .avatarUrl(userVO.getAvatarUrl())
+                .userType(userVO.getUserType())
                 .token(token)
                 .build();
         return Result.success(loginVO);

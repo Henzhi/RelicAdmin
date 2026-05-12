@@ -23,8 +23,9 @@ public class AdminUserController {
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String nickname,
-            @RequestParam(required = false) String status) {
-        return Result.success(userService.page(username, nickname, status, page, pageSize));
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String userType) {
+        return Result.success(userService.page(username, nickname, status, userType, page, pageSize));
     }
 
     @GetMapping("/{id}")

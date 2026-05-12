@@ -52,12 +52,20 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
             Long userId = Long.valueOf(claims.get(JwtClaimsConstant.USER_ID).toString());
             log.info("当前用户id：", userId);
             BaseContext.setCurrentId(userId);
-            //3、通过，放行
+            BaseContext.setCurrentUserType(getUserTypeOrDefault(claims));
             return true;
         } catch (Exception ex) {
-            //4、不通过，响应401状态码
             response.setStatus(401);
             return false;
+        }
+    }
+
+    private String getUserTypeOrDefault(Claims claims) {
+        try {
+            String userType = claims.get(JwtClaimsConstant.USER_TYPE, String.class);
+            return userType != null ? userType : "knowledge";
+        } catch (Exception e) {
+            return "knowledge";
         }
     }
 }

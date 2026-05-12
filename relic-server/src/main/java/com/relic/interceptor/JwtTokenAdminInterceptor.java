@@ -51,11 +51,10 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
             Long userId = Long.valueOf(claims.get(JwtClaimsConstant.USER_ID).toString());
             log.info("当前用户id：{}", userId);
             BaseContext.setCurrentId(userId);
-            //3、通过，放行
+            BaseContext.setCurrentUserType("admin");
             return true;
         } catch (Exception ex) {
             log.error("JWT校验失败：{}", ex.getMessage());
-            //4、不通过，响应401状态码
             response.setStatus(401);
             return false;
         }

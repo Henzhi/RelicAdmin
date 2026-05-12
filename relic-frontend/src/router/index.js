@@ -29,6 +29,12 @@ const routes = [
         meta: { title: '用户管理', icon: 'User' }
       },
       {
+        path: 'admin-users',
+        name: 'AdminUserList',
+        component: () => import('@/views/AdminUserListView.vue'),
+        meta: { title: '管理员管理', icon: 'UserFilled' }
+      },
+      {
         path: 'roles',
         name: 'RoleList',
         component: () => import('@/views/RoleListView.vue'),
@@ -81,6 +87,12 @@ const routes = [
         name: 'ArtifactTypeList',
         component: () => import('@/views/ArtifactTypeListView.vue'),
         meta: { title: '文物类型管理', icon: 'Collection' }
+      },
+      {
+        path: 'favorites',
+        name: 'UserFavoriteList',
+        component: () => import('@/views/UserFavoriteListView.vue'),
+        meta: { title: '我的收藏', icon: 'Star' }
       }
     ]
   }
