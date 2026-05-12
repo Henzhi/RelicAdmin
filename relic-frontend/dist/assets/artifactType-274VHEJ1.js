@@ -1,0 +1,1 @@
+import{h as e}from"./index-C1xjJrUM.js";function i(t){return e.get("/artifact-type/page",{params:t})}function c(){return e.get("/artifact-type/list")}function p(t){return e.post("/artifact-type",t)}function f(t,a){return e.put("/artifact-type/"+t,a)}function n(t){return e.delete("/artifact-type/"+t)}export{i as a,p as c,n as d,c as g,f as u};

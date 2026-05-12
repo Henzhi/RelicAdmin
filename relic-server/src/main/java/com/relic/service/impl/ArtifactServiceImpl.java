@@ -19,6 +19,7 @@ import com.relic.vo.ArtifactImageVO;
 import com.relic.vo.ArtifactVO;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ArtifactServiceImpl implements ArtifactService {
@@ -131,6 +133,28 @@ public class ArtifactServiceImpl implements ArtifactService {
 
     @Override
     public void create(ArtifactCreateDTO dto) {
+        if (dto.getTitleZh() == null || dto.getTitleZh().isEmpty()) {
+            throw new IllegalArgumentException("文物中文名不能为空");
+        }
+        if (dto.getType() == null || dto.getType().isEmpty()) {
+            throw new IllegalArgumentException("文物类型不能为空");
+        }
+        if (dto.getMuseumId() == null) {
+            throw new IllegalArgumentException("所属博物馆不能为空");
+        }
+        // 为 NOT NULL 字段设置默认值
+        if (dto.getDetailUrl() == null || dto.getDetailUrl().isEmpty()) {
+            dto.setDetailUrl("");
+        }
+        if (dto.getImageUrl() == null || dto.getImageUrl().isEmpty()) {
+            dto.setImageUrl("");
+        }
+        if (dto.getCrawlDate() == null) {
+            dto.setCrawlDate(java.time.LocalDate.now());
+        }
+        log.info("Creating artifact: titleZh={}, type={}, museumId={}, detailUrl={}, imageUrl={}, crawlDate={}",
+                dto.getTitleZh(), dto.getType(), dto.getMuseumId(),
+                dto.getDetailUrl(), dto.getImageUrl(), dto.getCrawlDate());
         Artifact artifact = new Artifact();
         artifact.setObjectId(dto.getObjectId());
         artifact.setTitleZh(dto.getTitleZh());

@@ -12,12 +12,7 @@
         <el-input v-model="searchForm.titleZh" placeholder="中文名" clearable style="width: 160px" @keyup.enter="handleSearch" />
         <el-input v-model="searchForm.titleEn" placeholder="英文名" clearable style="width: 160px" @keyup.enter="handleSearch" />
         <el-select v-model="searchForm.type" placeholder="类型" clearable style="width: 130px">
-          <el-option label="绘画" value="Painting" />
-          <el-option label="瓷器" value="Ceramics" />
-          <el-option label="青铜器" value="Bronze" />
-          <el-option label="书法" value="Calligraphy" />
-          <el-option label="雕塑" value="Sculpture" />
-          <el-option label="玉器" value="Jade" />
+          <el-option v-for="t in artifactTypeList" :key="t.id" :label="t.name" :value="t.name" />
         </el-select>
         <el-input v-model="searchForm.material" placeholder="材质" clearable style="width: 130px" @keyup.enter="handleSearch" />
         <el-select v-model="searchForm.dynastyId" placeholder="朝代" clearable style="width: 150px">
@@ -38,7 +33,7 @@
         <el-table-column prop="material" label="材质" width="120" show-overflow-tooltip />
         <el-table-column prop="timePeriod" label="年代" width="100" />
         <el-table-column prop="museumName" label="所属博物馆" width="120" show-overflow-tooltip />
-        <el-table-column prop="imageValidated" label="图片校验" width="90">
+        <el-table-column label="图片校验" width="90">
           <template #default="{ row }">
             <el-tag :type="row.imageValidated === 1 ? 'success' : 'danger'" size="small">{{ row.imageValidated === 1 ? '已校验' : '未校验' }}</el-tag>
           </template>
@@ -86,12 +81,7 @@
           <el-col :span="12">
             <el-form-item label="类型" prop="type">
               <el-select v-model="formData.type" placeholder="请选择类型" style="width: 100%">
-                <el-option label="绘画" value="Painting" />
-                <el-option label="瓷器" value="Ceramics" />
-                <el-option label="青铜器" value="Bronze" />
-                <el-option label="书法" value="Calligraphy" />
-                <el-option label="雕塑" value="Sculpture" />
-                <el-option label="玉器" value="Jade" />
+                <el-option v-for="t in artifactTypeList" :key="t.id" :label="t.name" :value="t.name" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -120,8 +110,18 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="地点" prop="locationId">
-              <el-input-number v-model="formData.locationId" placeholder="地点ID" :min="0" style="width: 100%" />
+            <el-form-item label="城市" prop="locationId">
+              <el-select-v2
+                v-model="formData.locationId"
+                :options="cityOptions"
+                placeholder="搜索并选择城市"
+                clearable
+                filterable
+                remote
+                :remote-method="searchCities"
+                :loading="cityLoading"
+                style="width: 100%"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -154,11 +154,6 @@
               <el-input v-model="formData.detailUrl" placeholder="请输入详情URL" />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
-            <el-form-item label="图片URL" prop="imageUrl">
-              <el-input v-model="formData.imageUrl" placeholder="请输入图片URL" />
-            </el-form-item>
-          </el-col>
           <el-col :span="24">
             <el-form-item label="描述" prop="description">
               <el-input v-model="formData.description" type="textarea" :rows="3" placeholder="请输入文物描述" />
@@ -182,12 +177,17 @@ import { Plus, Search, Refresh, Edit, Delete, Picture } from '@element-plus/icon
 import { getArtifactPage, createArtifact, updateArtifact, deleteArtifact } from '@/api/artifact'
 import { getDynastyList } from '@/api/dynasty'
 import { getMuseumPage } from '@/api/museum'
+import { getArtifactTypeList } from '@/api/artifactType'
+import { getLocationList } from '@/api/location'
 
 const router = useRouter()
 const loading = ref(false)
 const tableData = ref([])
 const dynastyList = ref([])
 const museumList = ref([])
+const artifactTypeList = ref([])
+const cityOptions = ref([])
+const cityLoading = ref(false)
 const pagination = reactive({ page: 1, pageSize: 10, total: 0 })
 const searchForm = reactive({
   titleZh: '', titleEn: '', type: '', material: '', dynastyId: null, museumId: null
@@ -203,17 +203,19 @@ const formData = reactive({
   titleZh: '', titleEn: '', type: '', material: '', timePeriod: '',
   dynastyId: null, museumId: null, locationId: null,
   objectId: '', accessionNumber: '', creditLine: '', dimensions: '',
-  crawlDate: null, detailUrl: '', imageUrl: '', description: ''
+  crawlDate: null, detailUrl: '', description: ''
 })
 const formRules = {
   titleZh: [{ required: true, message: '请输入中文名', trigger: 'blur' }],
-  type: [{ required: true, message: '请选择类型', trigger: 'change' }]
+  type: [{ required: true, message: '请选择类型', trigger: 'change' }],
+  museumId: [{ required: true, message: '请选择博物馆', trigger: 'change' }]
 }
 
 onMounted(() => {
   fetchData()
   loadDynasties()
   loadMuseums()
+  loadArtifactTypes()
 })
 
 async function loadDynasties() {
@@ -225,6 +227,34 @@ async function loadMuseums() {
     const res = await getMuseumPage({ page: 1, pageSize: 100 })
     museumList.value = res.data.records
   } catch (e) {}
+}
+
+async function loadArtifactTypes() {
+  try {
+    const res = await getArtifactTypeList()
+    artifactTypeList.value = res.data
+  } catch (e) {}
+}
+
+async function searchCities(query) {
+  if (!query || query.length < 1) {
+    cityOptions.value = []
+    return
+  }
+  cityLoading.value = true
+  try {
+    const res = await getLocationList({ type: 'city' })
+    const data = res.data || []
+    const filtered = data.filter(item => item.nameZh && item.nameZh.includes(query))
+    cityOptions.value = filtered.map(item => ({
+      label: item.nameZh,
+      value: item.id
+    }))
+  } catch (e) {
+    cityOptions.value = []
+  } finally {
+    cityLoading.value = false
+  }
 }
 
 async function fetchData() {
@@ -273,9 +303,11 @@ function handleEdit(row) {
     timePeriod: row.timePeriod || '', dynastyId: row.dynastyId, museumId: row.museumId,
     locationId: row.locationId, objectId: row.objectId || '', accessionNumber: row.accessionNumber || '',
     creditLine: row.creditLine || '', dimensions: row.dimensions || '',
-    crawlDate: row.crawlDate, detailUrl: row.detailUrl || '', imageUrl: row.imageUrl || '',
-    description: row.description || ''
+    crawlDate: row.crawlDate, detailUrl: row.detailUrl || '', description: row.description || ''
   })
+  if (row.locationId) {
+    cityOptions.value = [{ label: row.locationName || '', value: row.locationId }]
+  }
   dialogVisible.value = true
 }
 
@@ -284,8 +316,9 @@ function resetForm() {
     titleZh: '', titleEn: '', type: '', material: '', timePeriod: '',
     dynastyId: null, museumId: null, locationId: null,
     objectId: '', accessionNumber: '', creditLine: '', dimensions: '',
-    crawlDate: null, detailUrl: '', imageUrl: '', description: ''
+    crawlDate: null, detailUrl: '', description: ''
   })
+  cityOptions.value = []
   formRef.value?.resetFields()
 }
 
@@ -295,7 +328,18 @@ async function handleSubmit() {
   submitLoading.value = true
   try {
     const payload = { ...formData }
+    // 处理空值：将 0 或空字符串转为 null
     if (!payload.crawlDate) payload.crawlDate = null
+    if (!payload.museumId || payload.museumId === 0 || payload.museumId === '') {
+      payload.museumId = null
+    }
+    if (!payload.dynastyId || payload.dynastyId === 0 || payload.dynastyId === '') {
+      payload.dynastyId = null
+    }
+    if (!payload.locationId || payload.locationId === 0 || payload.locationId === '') {
+      payload.locationId = null
+    }
+    console.log('Submit payload:', payload)
     if (isEdit.value) {
       await updateArtifact(editId.value, payload)
       ElMessage.success('更新成功')
@@ -306,7 +350,8 @@ async function handleSubmit() {
     dialogVisible.value = false
     fetchData()
   } catch (e) {
-    ElMessage.error(e.response?.data?.message || '操作失败')
+    console.error('Submit error:', e)
+    ElMessage.error(e.response?.data?.message || e.message || '操作失败')
   } finally {
     submitLoading.value = false
   }

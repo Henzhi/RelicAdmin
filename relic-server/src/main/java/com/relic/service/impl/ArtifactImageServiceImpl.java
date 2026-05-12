@@ -2,8 +2,10 @@ package com.relic.service.impl;
 
 import com.relic.converter.VoConverter;
 import com.relic.dto.ArtifactImageCreateDTO;
+import com.relic.entity.Artifact;
 import com.relic.entity.ArtifactImage;
 import com.relic.mapper.ArtifactImageMapper;
+import com.relic.mapper.ArtifactMapper;
 import com.relic.service.ArtifactImageService;
 import com.relic.utils.AliOssUtil;
 import com.relic.vo.ArtifactImageVO;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 public class ArtifactImageServiceImpl implements ArtifactImageService {
 
     private final ArtifactImageMapper artifactImageMapper;
+    private final ArtifactMapper artifactMapper;
     private final AliOssUtil aliOssUtil;
 
     @Override
@@ -33,6 +36,7 @@ public class ArtifactImageServiceImpl implements ArtifactImageService {
     }
 
     @Override
+    @Transactional
     public void create(Integer artifactId, ArtifactImageCreateDTO dto) {
         ArtifactImage image = new ArtifactImage();
         image.setArtifactId(artifactId);
@@ -41,6 +45,12 @@ public class ArtifactImageServiceImpl implements ArtifactImageService {
         image.setIsPrimary(dto.getIsPrimary() != null ? dto.getIsPrimary() : 0);
         image.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
         artifactImageMapper.insert(image);
+
+        if (image.getIsPrimary() == 1) {
+            artifactImageMapper.clearPrimary(artifactId);
+            artifactImageMapper.setPrimary(image.getId());
+            updateArtifactImageUrl(artifactId, dto.getImageUrl());
+        }
     }
 
     @Override
@@ -52,13 +62,11 @@ public class ArtifactImageServiceImpl implements ArtifactImageService {
             String objectName = "artifact/" + artifactId + "/" + UUID.randomUUID() + ext;
             byte[] bytes = file.getBytes();
             String imageUrl = aliOssUtil.upload(bytes, objectName);
-            ArtifactImage image = new ArtifactImage();
-            image.setArtifactId(artifactId);
-            image.setImageUrl(imageUrl);
-            image.setIsPrimary(0);
-            image.setSortOrder(0);
-            artifactImageMapper.insert(image);
-            return VoConverter.toArtifactImageVO(image);
+
+            // 仅返回URL，不写入数据库（由调用方在点击"确定"后统一保存）
+            ArtifactImageVO vo = new ArtifactImageVO();
+            vo.setImageUrl(imageUrl);
+            return vo;
         } catch (IOException e) {
             log.error("OSS上传失败", e);
             throw new RuntimeException("图片上传失败: " + e.getMessage());
@@ -66,6 +74,7 @@ public class ArtifactImageServiceImpl implements ArtifactImageService {
     }
 
     @Override
+    @Transactional
     public void update(Integer artifactId, Integer imageId, ArtifactImageCreateDTO dto) {
         ArtifactImage image = new ArtifactImage();
         image.setId(imageId);
@@ -74,6 +83,12 @@ public class ArtifactImageServiceImpl implements ArtifactImageService {
         image.setIsPrimary(dto.getIsPrimary());
         image.setSortOrder(dto.getSortOrder());
         artifactImageMapper.update(image);
+
+        if (dto.getIsPrimary() != null && dto.getIsPrimary() == 1) {
+            artifactImageMapper.clearPrimary(artifactId);
+            artifactImageMapper.setPrimary(imageId);
+            updateArtifactImageUrl(artifactId, dto.getImageUrl());
+        }
     }
 
     @Override
@@ -86,5 +101,18 @@ public class ArtifactImageServiceImpl implements ArtifactImageService {
     public void setPrimary(Integer artifactId, Integer imageId) {
         artifactImageMapper.clearPrimary(artifactId);
         artifactImageMapper.setPrimary(imageId);
+
+        ArtifactImage image = artifactImageMapper.selectById(imageId);
+        if (image != null && image.getImageUrl() != null) {
+            updateArtifactImageUrl(artifactId, image.getImageUrl());
+        }
+    }
+
+    private void updateArtifactImageUrl(Integer artifactId, String imageUrl) {
+        Artifact artifact = new Artifact();
+        artifact.setId(artifactId);
+        artifact.setImageUrl(imageUrl);
+        artifact.setLastUpdated(java.time.LocalDateTime.now());
+        artifactMapper.update(artifact);
     }
 }

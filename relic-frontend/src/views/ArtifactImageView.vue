@@ -42,9 +42,6 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px" :close-on-click-modal="false">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="90px">
-        <el-form-item label="图片URL" prop="imageUrl" v-if="false">
-          <el-input v-model="formData.imageUrl" placeholder="请输入图片URL" />
-        </el-form-item>
         <el-form-item label="上传图片" prop="imageUrl">
           <div v-if="formData.imageUrl" class="upload-preview">
             <el-image :src="formData.imageUrl" style="width: 200px; height: 150px" fit="cover" />
@@ -69,9 +66,6 @@
             </template>
           </el-upload>
           <el-progress v-if="uploadPercent > 0 && uploadPercent < 100" :percentage="uploadPercent" />
-        </el-form-item>
-        <el-form-item label="本地路径" prop="imagePath" v-if="false">
-          <el-input v-model="formData.imagePath" placeholder="请输入本地路径" />
         </el-form-item>
         <el-form-item label="是否主图" prop="isPrimary">
           <el-switch v-model="formData.isPrimary" :active-value="1" :inactive-value="0" />
@@ -113,7 +107,7 @@ const formData = reactive({
 const uploadRef = ref(null)
 const uploadLoading = ref(false)
 const uploadPercent = ref(0)
-const uploadAction = computed(() => '/admin/artifact/' + artifactId.value + '/upload')
+const uploadAction = computed(() => '/admin/artifact/' + artifactId.value + '/images/upload')
 const uploadHeaders = computed(() => ({ token: localStorage.getItem('admin_token') || '' }))
 const uploadAccept = '.jpg,.jpeg,.png,.webp,.gif'
 
@@ -137,10 +131,18 @@ function onUploadSuccess(response) {
   }
 }
 
-function onUploadError() {
+function onUploadError(error, file) {
   uploadLoading.value = false
   uploadPercent.value = 0
-  ElMessage.error('图片上传失败，请检查网络或文件大小')
+  let msg = '图片上传失败'
+  if (error && error.status === 413) {
+    msg = '文件大小超出限制，请确保文件小于 10MB'
+  } else if (error && error.status === 404) {
+    msg = '上传接口不存在，请检查服务是否正常'
+  } else if (error && error.message) {
+    msg = '上传失败: ' + error.message
+  }
+  ElMessage.error(msg)
 }
 
 onMounted(() => { fetchData() })

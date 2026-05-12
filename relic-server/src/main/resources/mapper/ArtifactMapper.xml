@@ -94,14 +94,47 @@
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO artifacts (object_id, title_zh, title_en, time_period, dynasty_id,
-                               type, material, description, dimensions, museum_id, location_id,
-                               detail_url, image_url, image_path, credit_line, accession_number,
-                               crawl_date, image_validated, last_updated, created_at)
-        VALUES (#{objectId}, #{titleZh}, #{titleEn}, #{timePeriod}, #{dynastyId},
-                #{type}, #{material}, #{description}, #{dimensions}, #{museumId}, #{locationId},
-                #{detailUrl}, #{imageUrl}, #{imagePath}, #{creditLine}, #{accessionNumber},
-                #{crawlDate}, 0, #{lastUpdated}, #{createdAt})
+        INSERT INTO artifacts
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="objectId != null">object_id,</if>
+            <if test="titleZh != null">title_zh,</if>
+            <if test="titleEn != null">title_en,</if>
+            <if test="timePeriod != null">time_period,</if>
+            <if test="dynastyId != null">dynasty_id,</if>
+            <if test="type != null">type,</if>
+            <if test="material != null">material,</if>
+            <if test="description != null">description,</if>
+            <if test="dimensions != null">dimensions,</if>
+            <if test="museumId != null">museum_id,</if>
+            <if test="locationId != null">location_id,</if>
+            <if test="detailUrl != null">detail_url,</if>
+            <if test="imageUrl != null">image_url,</if>
+            <if test="imagePath != null">image_path,</if>
+            <if test="creditLine != null">credit_line,</if>
+            <if test="accessionNumber != null">accession_number,</if>
+            <if test="crawlDate != null">crawl_date,</if>
+            image_validated, last_updated, created_at
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="objectId != null">#{objectId},</if>
+            <if test="titleZh != null">#{titleZh},</if>
+            <if test="titleEn != null">#{titleEn},</if>
+            <if test="timePeriod != null">#{timePeriod},</if>
+            <if test="dynastyId != null">#{dynastyId},</if>
+            <if test="type != null">#{type},</if>
+            <if test="material != null">#{material},</if>
+            <if test="description != null">#{description},</if>
+            <if test="dimensions != null">#{dimensions},</if>
+            <if test="museumId != null">#{museumId},</if>
+            <if test="locationId != null">#{locationId},</if>
+            <if test="detailUrl != null">#{detailUrl},</if>
+            <if test="imageUrl != null">#{imageUrl},</if>
+            <if test="imagePath != null">#{imagePath},</if>
+            <if test="creditLine != null">#{creditLine},</if>
+            <if test="accessionNumber != null">#{accessionNumber},</if>
+            <if test="crawlDate != null">#{crawlDate},</if>
+            0, #{lastUpdated}, #{createdAt}
+        </trim>
     </insert>
 
     <update id="update">

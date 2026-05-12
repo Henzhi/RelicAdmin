@@ -1,0 +1,1 @@
+import{h as e}from"./index-C1xjJrUM.js";function s(u){return e.get("/museum/page",{params:u})}function n(u){return e.post("/museum",u)}function r(u,t){return e.put("/museum/"+u,t)}function a(u){return e.delete("/museum/"+u)}export{n as c,a as d,s as g,r as u};
