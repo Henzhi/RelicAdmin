@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.AppealRecordMapper">
+
+    <insert id="insert">
+        INSERT INTO appeal_records (penalty_id, user_id, appeal_reason, evidence, status, created_at)
+        VALUES (#{penaltyId}, #{userId}, #{appealReason}, #{evidence}, 'pending', NOW())
+    </insert>
+
+    <select id="selectByUserId" resultType="map">
+        SELECT ar.id, ar.penalty_id AS penaltyId, ar.user_id AS userId,
+               ar.appeal_reason AS appealReason, ar.evidence,
+               ar.status, ar.review_result AS reviewResult,
+               ar.reviewer_id AS reviewerId, ar.review_time AS reviewTime,
+               ar.review_remark AS reviewRemark, ar.created_at AS createdAt,
+               pr.penalty_type AS penaltyType, pr.reason AS penaltyReason
+        FROM appeal_records ar
+        LEFT JOIN penalty_records pr ON ar.penalty_id = pr.id
+        WHERE ar.user_id = #{userId}
+        ORDER BY ar.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(*) FROM appeal_records WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectAdminPage" resultType="map">
+        SELECT ar.id, ar.penalty_id AS penaltyId, ar.user_id AS userId,
+               ar.appeal_reason AS appealReason, ar.evidence,
+               ar.status, ar.review_result AS reviewResult,
+               ar.reviewer_id AS reviewerId, ar.review_time AS reviewTime,
+               ar.review_remark AS reviewRemark, ar.created_at AS createdAt,
+               u.username,
+               pr.penalty_type AS penaltyType, pr.reason AS penaltyReason,
+               au.username AS reviewerName
+        FROM appeal_records ar
+        LEFT JOIN users u ON ar.user_id = u.id
+        LEFT JOIN penalty_records pr ON ar.penalty_id = pr.id
+        LEFT JOIN admin_users au ON ar.reviewer_id = au.id
+        <where>
+            <if test="status != null and status != ''">
+                AND ar.status = #{status}
+            </if>
+        </where>
+        ORDER BY ar.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countAdminPage" resultType="long">
+        SELECT COUNT(*) FROM appeal_records ar
+        <where>
+            <if test="status != null and status != ''">
+                AND ar.status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateReview">
+        UPDATE appeal_records
+        SET status = #{status},
+            review_result = #{reviewResult},
+            reviewer_id = #{reviewerId},
+            review_time = NOW(),
+            review_remark = #{reviewRemark}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

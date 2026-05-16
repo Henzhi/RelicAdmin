@@ -141,6 +141,24 @@ const routes = [
         name: 'UserBehaviorLogAdmin',
         component: () => import('@/views/UserBehaviorLogAdminView.vue'),
         meta: { title: '行为日志', icon: 'Document' }
+      },
+      {
+        path: 'audit',
+        name: 'AuditAdmin',
+        component: () => import('@/views/AuditAdminView.vue'),
+        meta: { title: '审核管理', icon: 'Checked' }
+      },
+      {
+        path: 'penalty',
+        name: 'PenaltyAdmin',
+        component: () => import('@/views/PenaltyAdminView.vue'),
+        meta: { title: '违规处罚', icon: 'WarningFilled' }
+      },
+      {
+        path: 'appeal',
+        name: 'AppealAdmin',
+        component: () => import('@/views/AppealAdminView.vue'),
+        meta: { title: '申诉管理', icon: 'Comment' }
       }
     ]
   }

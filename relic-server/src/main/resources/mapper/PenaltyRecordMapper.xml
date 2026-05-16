@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.PenaltyRecordMapper">
+
+    <insert id="insert">
+        INSERT INTO penalty_records (user_id, penalty_type, reason, operator_id, penalty_time, expire_time, status, remark, created_at)
+        VALUES (#{userId}, #{penaltyType}, #{reason}, #{operatorId}, NOW(),
+                <if test="expireTime != null and expireTime != ''">#{expireTime}</if>
+                <if test="expireTime == null or expireTime == ''">NULL</if>,
+                1,
+                #{remark},
+                NOW())
+    </insert>
+
+    <select id="selectByPage" resultType="map">
+        SELECT pr.id, pr.user_id AS userId, pr.penalty_type AS penaltyType,
+               pr.reason, pr.operator_id AS operatorId,
+               pr.penalty_time AS penaltyTime, pr.expire_time AS expireTime,
+               pr.status, pr.remark, pr.created_at AS createdAt,
+               u.username AS username,
+               ou.username AS operatorName
+        FROM penalty_records pr
+        LEFT JOIN users u ON pr.user_id = u.id
+        LEFT JOIN admin_users ou ON pr.operator_id = ou.id
+        <where>
+            <if test="userId != null">AND pr.user_id = #{userId}</if>
+            <if test="penaltyType != null and penaltyType != ''">AND pr.penalty_type = #{penaltyType}</if>
+            <if test="status != null">AND pr.status = #{status}</if>
+        </where>
+        ORDER BY pr.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByPage" resultType="long">
+        SELECT COUNT(*) FROM penalty_records pr
+        <where>
+            <if test="userId != null">AND pr.user_id = #{userId}</if>
+            <if test="penaltyType != null and penaltyType != ''">AND pr.penalty_type = #{penaltyType}</if>
+            <if test="status != null">AND pr.status = #{status}</if>
+        </where>
+    </select>
+
+    <update id="updateRevoke">
+        UPDATE penalty_records SET status = 0, remark = CONCAT(IFNULL(remark, ''), ' | 解除备注: ', #{remark})
+        WHERE id = #{id}
+    </update>
+
+</mapper>

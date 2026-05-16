@@ -345,7 +345,7 @@ CREATE TABLE notifications (
 ) COMMENT='消息通知';
 ```
 ---
-```bash
+```sql
 angular2html
 USE seitem;
 -- 1. 为 roles 表添加 updated_at 字段
@@ -553,7 +553,7 @@ INSERT IGNORE INTO violation_types (type_code, type_name, severity_level, defaul
 
 ```
 
-```bash
+```sql
 -- 关联表添加联合索引
 ALTER TABLE artifact_artist ADD INDEX idx_artifact_artist (artifact_id, artist_id);
 ALTER TABLE artifact_location ADD INDEX idx_artifact_location (artifact_id, location_id);
@@ -578,7 +578,7 @@ ALTER TABLE artifacts ADD INDEX idx_museum_object (museum_id, object_id);
 ALTER TABLE audit_records ADD COLUMN source_type VARCHAR(50) COMMENT '来源表名' AFTER content_type;
 
 ```
-```bash
+```sql
 -- 文物类型表
 CREATE TABLE artifact_types (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
@@ -605,7 +605,7 @@ INSERT INTO artifact_types (name, description) VALUES
 ('Enamel', '珐琅器');
 ```
 
-```bash
+```sql
 -- 修改文物表字段允许为空，解决创建文物时必填字段过多的问题
 
 -- 将 image_url 改为允许 NULL（图片后续通过上传功能添加）
@@ -621,7 +621,7 @@ ALTER TABLE artifacts MODIFY COLUMN crawl_date DATE NULL COMMENT '爬取日期';
 -- ALTER TABLE artifacts MODIFY COLUMN museum_id INT UNSIGNED NULL COMMENT '现藏博物馆ID';
 ```
 
-```bash
+```sql
 -- Step 2: 创建独立的 admin_users 表（仅管理员账户使用，与 users 表完全隔离）
 CREATE TABLE IF NOT EXISTS admin_users (
 id INT AUTO_INCREMENT PRIMARY KEY,

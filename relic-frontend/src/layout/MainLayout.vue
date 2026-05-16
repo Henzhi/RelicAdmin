@@ -118,6 +118,25 @@
               <span>行为日志</span>
             </el-menu-item>
           </el-sub-menu>
+
+          <el-sub-menu index="security">
+            <template #title>
+              <el-icon><Warning /></el-icon>
+              <span>内容安全</span>
+            </template>
+            <el-menu-item index="/audit">
+              <el-icon><Checked /></el-icon>
+              <span>审核管理</span>
+            </el-menu-item>
+            <el-menu-item index="/penalty">
+              <el-icon><WarningFilled /></el-icon>
+              <span>违规处罚</span>
+            </el-menu-item>
+            <el-menu-item index="/appeal">
+              <el-icon><Comment /></el-icon>
+              <span>申诉管理</span>
+            </el-menu-item>
+          </el-sub-menu>
         </el-menu>
       </el-aside>
       <el-main class="layout-main">

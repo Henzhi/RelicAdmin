@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.ViolationTypeMapper">
+
+    <select id="selectAll" resultType="map">
+        SELECT id, type_code AS typeCode, type_name AS typeName,
+               severity_level AS severityLevel, default_penalty AS defaultPenalty,
+               description, status, created_at AS createdAt, updated_at AS updatedAt
+        FROM violation_types
+        WHERE status = 1
+        ORDER BY severity_level ASC
+    </select>
+
+</mapper>
