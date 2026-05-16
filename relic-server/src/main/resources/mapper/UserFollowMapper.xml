@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.UserFollowMapper">
+
+    <select id="selectByPage" resultType="map">
+        SELECT uf.follower_id, uf.followee_id, uf.created_at,
+               fu.username AS followerName, fu.avatar_url AS followerAvatar,
+               eu.username AS followeeName, eu.avatar_url AS followeeAvatar
+        FROM user_follows uf
+        LEFT JOIN users fu ON uf.follower_id = fu.id
+        LEFT JOIN users eu ON uf.followee_id = eu.id
+        <where>
+            <if test="followerId != null">AND uf.follower_id = #{followerId}</if>
+            <if test="followeeId != null">AND uf.followee_id = #{followeeId}</if>
+            <if test="username != null and username != ''">
+                AND (fu.username LIKE CONCAT('%', #{username}, '%')
+                     OR eu.username LIKE CONCAT('%', #{username}, '%'))
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND uf.created_at >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND uf.created_at &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY uf.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByPage" resultType="long">
+        SELECT COUNT(*) FROM user_follows uf
+        LEFT JOIN users fu ON uf.follower_id = fu.id
+        LEFT JOIN users eu ON uf.followee_id = eu.id
+        <where>
+            <if test="followerId != null">AND uf.follower_id = #{followerId}</if>
+            <if test="followeeId != null">AND uf.followee_id = #{followeeId}</if>
+            <if test="username != null and username != ''">
+                AND (fu.username LIKE CONCAT('%', #{username}, '%')
+                     OR eu.username LIKE CONCAT('%', #{username}, '%'))
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND uf.created_at >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND uf.created_at &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+</mapper>

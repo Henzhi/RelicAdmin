@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface UserFavoriteMapper {
@@ -17,4 +18,14 @@ public interface UserFavoriteMapper {
                                        @Param("offset") Integer offset,
                                        @Param("limit") Integer limit);
     int countByUserId(@Param("userId") Integer userId, @Param("groupName") String groupName);
+    List<Map<String, Object>> selectAllByPage(@Param("username") String username,
+                                              @Param("artifactName") String artifactName,
+                                              @Param("startTime") String startTime,
+                                              @Param("endTime") String endTime,
+                                              @Param("offset") int offset,
+                                              @Param("limit") int limit);
+    long countAll(@Param("username") String username,
+                  @Param("artifactName") String artifactName,
+                  @Param("startTime") String startTime,
+                  @Param("endTime") String endTime);
 }

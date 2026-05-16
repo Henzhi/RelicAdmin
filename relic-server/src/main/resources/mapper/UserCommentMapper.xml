@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.UserCommentMapper">
+
+    <select id="selectById" resultType="com.relic.entity.UserComment">
+        SELECT * FROM user_comments WHERE id = #{id}
+    </select>
+
+    <select id="selectByPage" resultType="map">
+        SELECT uc.id, uc.user_id, uc.artifact_id, uc.parent_id, uc.content,
+               uc.like_count AS likeCount, uc.status, uc.audit_by AS auditBy, uc.audit_time AS auditTime,
+               uc.reject_reason AS rejectReason, uc.created_at,
+               u.username, u.avatar_url AS userAvatar,
+               a.title_zh AS artifactName
+        FROM user_comments uc
+        LEFT JOIN users u ON uc.user_id = u.id
+        LEFT JOIN artifacts a ON uc.artifact_id = a.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND uc.content LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="userId != null">AND uc.user_id = #{userId}</if>
+            <if test="username != null and username != ''">
+                AND u.username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="artifactId != null">AND uc.artifact_id = #{artifactId}</if>
+            <if test="status != null and status != ''">AND uc.status = #{status}</if>
+            <if test="startTime != null and startTime != ''">
+                AND uc.created_at >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND uc.created_at &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY uc.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByPage" resultType="long">
+        SELECT COUNT(*) FROM user_comments uc
+        LEFT JOIN users u ON uc.user_id = u.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND uc.content LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="userId != null">AND uc.user_id = #{userId}</if>
+            <if test="username != null and username != ''">
+                AND u.username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="artifactId != null">AND uc.artifact_id = #{artifactId}</if>
+            <if test="status != null and status != ''">AND uc.status = #{status}</if>
+            <if test="startTime != null and startTime != ''">
+                AND uc.created_at >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND uc.created_at &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+</mapper>

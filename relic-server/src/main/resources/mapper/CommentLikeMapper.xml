@@ -3,27 +3,60 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.relic.mapper.CommentLikeMapper">
 
-    <resultMap id="commentLikeResultMap" type="com.relic.entity.CommentLike">
-        <result property="userId" column="user_id"/>
-        <result property="commentId" column="comment_id"/>
-        <result property="likedAt" column="liked_at"/>
-    </resultMap>
-
     <insert id="insert">
-        INSERT INTO comment_likes (user_id, comment_id, liked_at)
-        VALUES (#{userId}, #{commentId}, #{likedAt})
+        INSERT INTO comment_likes (user_id, comment_id, liked_at) VALUES (#{userId}, #{commentId}, #{likedAt})
     </insert>
 
     <delete id="delete">
         DELETE FROM comment_likes WHERE user_id = #{userId} AND comment_id = #{commentId}
     </delete>
 
-    <select id="selectByUserAndComment" resultMap="commentLikeResultMap">
+    <select id="selectByUserAndComment" resultType="com.relic.entity.CommentLike">
         SELECT * FROM comment_likes WHERE user_id = #{userId} AND comment_id = #{commentId}
     </select>
 
     <select id="countByCommentId" resultType="long">
         SELECT COUNT(*) FROM comment_likes WHERE comment_id = #{commentId}
+    </select>
+
+    <select id="selectAllByPage" resultType="map">
+        SELECT cl.user_id, cl.comment_id, cl.liked_at AS likedAt,
+               u.username, u.avatar_url AS userAvatar,
+               uc.content AS commentContent
+        FROM comment_likes cl
+        LEFT JOIN users u ON cl.user_id = u.id
+        LEFT JOIN user_comments uc ON cl.comment_id = uc.id
+        <where>
+            <if test="userId != null">AND cl.user_id = #{userId}</if>
+            <if test="username != null and username != ''">
+                AND u.username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND cl.liked_at >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND cl.liked_at &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY cl.liked_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM comment_likes cl
+        LEFT JOIN users u ON cl.user_id = u.id
+        <where>
+            <if test="userId != null">AND cl.user_id = #{userId}</if>
+            <if test="username != null and username != ''">
+                AND u.username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND cl.liked_at >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND cl.liked_at &lt;= #{endTime}
+            </if>
+        </where>
     </select>
 
 </mapper>

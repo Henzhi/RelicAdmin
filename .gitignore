@@ -1,6 +1,6 @@
 # 忽略 node_modules 目录（前端依赖，不需要提交）
 node_modules/
-
+dist/
 # 忽略 IDE / 工具生成的目录
 .trae/
 .vscode/

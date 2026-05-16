@@ -92,7 +92,55 @@ const routes = [
         path: 'favorites',
         name: 'UserFavoriteList',
         component: () => import('@/views/UserFavoriteListView.vue'),
-        meta: { title: '我的收藏', icon: 'Star' }
+        meta: { title: '用户收藏(旧)', icon: 'Star' }
+      },
+      {
+        path: 'user-behavior/favorites',
+        name: 'UserFavoriteAdmin',
+        component: () => import('@/views/UserFavoriteAdminView.vue'),
+        meta: { title: '用户收藏', icon: 'Star' }
+      },
+      {
+        path: 'user-behavior/likes',
+        name: 'UserLikeAdmin',
+        component: () => import('@/views/UserLikeAdminView.vue'),
+        meta: { title: '用户喜欢与点赞', icon: 'Pointer' }
+      },
+      {
+        path: 'user-behavior/posts',
+        name: 'UserPostAdmin',
+        component: () => import('@/views/UserPostAdminView.vue'),
+        meta: { title: '用户动态', icon: 'ChatLineSquare' }
+      },
+      {
+        path: 'user-behavior/comments',
+        name: 'UserCommentAdmin',
+        component: () => import('@/views/UserCommentAdminView.vue'),
+        meta: { title: '评论模块', icon: 'ChatDotSquare' }
+      },
+      {
+        path: 'user-behavior/follows',
+        name: 'UserFollowAdmin',
+        component: () => import('@/views/UserFollowAdminView.vue'),
+        meta: { title: '用户关注', icon: 'Connection' }
+      },
+      {
+        path: 'user-behavior/uploads',
+        name: 'UserUploadAdmin',
+        component: () => import('@/views/UserUploadAdminView.vue'),
+        meta: { title: '用户上传', icon: 'Upload' }
+      },
+      {
+        path: 'user-behavior/browse-history',
+        name: 'UserBrowseHistoryAdmin',
+        component: () => import('@/views/UserBrowseHistoryAdminView.vue'),
+        meta: { title: '浏览历史', icon: 'Timer' }
+      },
+      {
+        path: 'user-behavior/behavior-logs',
+        name: 'UserBehaviorLogAdmin',
+        component: () => import('@/views/UserBehaviorLogAdminView.vue'),
+        meta: { title: '行为日志', icon: 'Document' }
       }
     ]
   }

@@ -3,27 +3,60 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.relic.mapper.ArtifactLikeMapper">
 
-    <resultMap id="artifactLikeResultMap" type="com.relic.entity.ArtifactLike">
-        <result property="userId" column="user_id"/>
-        <result property="artifactId" column="artifact_id"/>
-        <result property="likedAt" column="liked_at"/>
-    </resultMap>
-
     <insert id="insert">
-        INSERT INTO artifact_likes (user_id, artifact_id, liked_at)
-        VALUES (#{userId}, #{artifactId}, #{likedAt})
+        INSERT INTO artifact_likes (user_id, artifact_id, liked_at) VALUES (#{userId}, #{artifactId}, #{likedAt})
     </insert>
 
     <delete id="delete">
         DELETE FROM artifact_likes WHERE user_id = #{userId} AND artifact_id = #{artifactId}
     </delete>
 
-    <select id="selectByUserAndArtifact" resultMap="artifactLikeResultMap">
+    <select id="selectByUserAndArtifact" resultType="com.relic.entity.ArtifactLike">
         SELECT * FROM artifact_likes WHERE user_id = #{userId} AND artifact_id = #{artifactId}
     </select>
 
     <select id="countByArtifactId" resultType="long">
         SELECT COUNT(*) FROM artifact_likes WHERE artifact_id = #{artifactId}
+    </select>
+
+    <select id="selectAllByPage" resultType="map">
+        SELECT al.user_id, al.artifact_id, al.liked_at AS likedAt,
+               u.username, u.avatar_url AS userAvatar,
+               a.title_zh AS artifactName, a.image_url AS artifactImage
+        FROM artifact_likes al
+        LEFT JOIN users u ON al.user_id = u.id
+        LEFT JOIN artifacts a ON al.artifact_id = a.id
+        <where>
+            <if test="userId != null">AND al.user_id = #{userId}</if>
+            <if test="username != null and username != ''">
+                AND u.username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND al.liked_at >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND al.liked_at &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY al.liked_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM artifact_likes al
+        LEFT JOIN users u ON al.user_id = u.id
+        <where>
+            <if test="userId != null">AND al.user_id = #{userId}</if>
+            <if test="username != null and username != ''">
+                AND u.username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND al.liked_at >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND al.liked_at &lt;= #{endTime}
+            </if>
+        </where>
     </select>
 
 </mapper>

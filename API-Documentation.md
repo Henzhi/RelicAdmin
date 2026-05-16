@@ -2766,6 +2766,119 @@ curl -X POST http://localhost:8080/admin/employee/login \
 
 ***
 
+## 18. 用户行为记录（Admin端）
+
+管理端统一查询全平台用户的行为数据，包括收藏、喜欢、点赞、动态、评论、关注、上传、浏览历史和行为日志。
+
+所有接口路径前缀：`/admin/user-behavior`
+认证方式：Admin Token（请求头 `token`）
+
+### 18.1 用户收藏列表
+
+**GET** `/admin/user-behavior/favorites/page`
+
+| 参数         | 类型     | 必填 | 说明     |
+| ---------- | ------ | -- | ------ |
+| page       | int    | 否  | 页码，默认1 |
+| pageSize   | int    | 否  | 每页条数   |
+| username   | String | 否  | 用户模糊搜索 |
+| artifactName | String | 否  | 文物模糊搜索 |
+
+**响应字段**: `username`(用户名), `artifact_name`(文物名称), `group_name`(分组), `created_at`(收藏时间)
+
+### 18.2 文物喜欢列表
+
+**GET** `/admin/user-behavior/artifact-likes/page`
+
+| 参数       | 类型      | 必填 | 说明     |
+| -------- | ------- | -- | ------ |
+| page     | int     | 否  | 页码     |
+| pageSize | int     | 否  | 每页条数   |
+| userId   | Integer | 否  | 用户ID筛选 |
+
+**响应字段**: `username`(用户名), `artifact_name`(文物名称), `liked_at`(喜欢时间)
+
+### 18.3 动态点赞列表
+
+**GET** `/admin/user-behavior/post-likes/page`
+
+**响应字段**: `username`(用户名), `post_title`(动态标题), `liked_at`(点赞时间)
+
+### 18.4 评论点赞列表
+
+**GET** `/admin/user-behavior/comment-likes/page`
+
+**响应字段**: `username`(用户名), `comment_content`(评论内容), `liked_at`(点赞时间)
+
+### 18.5 用户动态列表
+
+**GET** `/admin/user-behavior/posts/page`
+
+| 参数       | 类型      | 必填 | 说明                    |
+| -------- | ------- | -- | --------------------- |
+| title    | String  | 否  | 标题模糊搜索                |
+| userId   | Integer | 否  | 用户ID筛选                |
+| status   | String  | 否  | 状态筛选: published/auditing/rejected |
+
+**响应字段**: `用户名/标题/内容/文物名称/点赞数/评论数/状态/发布时间`
+
+### 18.6 评论列表
+
+**GET** `/admin/user-behavior/comments/page`
+
+| 参数         | 类型      | 必填 | 说明     |
+| ---------- | ------- | -- | ------ |
+| keyword    | String  | 否  | 内容关键词  |
+| userId     | Integer | 否  | 用户ID   |
+| artifactId | Integer | 否  | 文物ID   |
+| status     | String  | 否  | 状态筛选   |
+
+### 18.7 用户关注列表
+
+**GET** `/admin/user-behavior/follows/page`
+
+| 参数         | 类型      | 必填 | 说明     |
+| ---------- | ------- | -- | ------ |
+| followerId | Integer | 否  | 关注者ID  |
+| followeeId | Integer | 否  | 被关注者ID |
+
+**响应字段**: `follower_name`(关注者), `followee_name`(被关注者), `created_at`(关注时间)
+
+### 18.8 用户上传列表
+
+**GET** `/admin/user-behavior/uploads/page`
+
+| 参数        | 类型      | 必填 | 说明                   |
+| --------- | ------- | -- | -------------------- |
+| userId    | Integer | 否  | 用户ID                 |
+| mediaType | String  | 否  | 媒体类型: image/video/audio |
+| status    | String  | 否  | 状态: approved/pending/rejected |
+
+### 18.9 浏览历史列表
+
+**GET** `/admin/user-behavior/browse-history/page`
+
+| 参数         | 类型      | 必填 | 说明   |
+| ---------- | ------- | -- | ---- |
+| userId     | Integer | 否  | 用户ID |
+| artifactId | Integer | 否  | 文物ID |
+
+**响应字段**: `username`(用户名), `artifact_name`(文物名称), `browse_time`(浏览时间)
+
+### 18.10 行为日志列表
+
+**GET** `/admin/user-behavior/behavior-logs/page`
+
+| 参数           | 类型      | 必填 | 说明                                      |
+| ------------ | ------- | -- | --------------------------------------- |
+| userId       | Integer | 否  | 用户ID                                    |
+| behaviorType | String  | 否  | 行为类型: login/browse/search/favorite/like/comment |
+| keyword      | String  | 否  | 关键词（搜索目标描述和详情）                          |
+
+**响应字段**: `username`(用户名), `behavior_type`(行为类型), `target_type`(目标类型), `target_desc`(目标描述), `ip`(IP), `device`(设备), `detail`(详情), `created_at`(操作时间)
+
+***
+
 ## 20. 审核管理模块
 
 > 所有接口需   Admin Token  。
@@ -3845,6 +3958,16 @@ curl -X POST http://localhost:8080/admin/employee/login \
 | 57 | 点赞  | `/user/like/comment/{id}`              | POST   | User  |
 | 58 | 点赞  | `/user/like/post/{id}`                 | POST   | User  |
 | 59 | 评论  | `/user/comment`                        | POST   | User  |
+| 60 | 用户收藏 | `/admin/user-behavior/favorites/page`  | GET    | Admin |
+| 61 | 用户喜欢 | `/admin/user-behavior/artifact-likes/page` | GET | Admin |
+| 62 | 用户点赞 | `/admin/user-behavior/post-likes/page` | GET    | Admin |
+| 63 | 评论点赞 | `/admin/user-behavior/comment-likes/page` | GET | Admin |
+| 64 | 用户动态 | `/admin/user-behavior/posts/page`      | GET    | Admin |
+| 65 | 评论模块 | `/admin/user-behavior/comments/page`   | GET    | Admin |
+| 66 | 用户关注 | `/admin/user-behavior/follows/page`    | GET    | Admin |
+| 67 | 用户上传 | `/admin/user-behavior/uploads/page`    | GET    | Admin |
+| 68 | 浏览历史 | `/admin/user-behavior/browse-history/page` | GET | Admin |
+| 69 | 行为日志 | `/admin/user-behavior/behavior-logs/page` | GET | Admin |
 | 60 | 评论  | `/user/comment/list/{artifactId}`      | GET    | User  |
 | 61 | 评论  | `/user/comment/{commentId}`            | DELETE | User  |
 | 62 | 评论  | `/admin/comment/{id}/audit`            | PUT    | Admin |
@@ -3997,6 +4120,12 @@ controller
 | 文物   | `artifacts`                                    | `artifact_images`、`artifact_artist`、`artifact_location` |
 | 收藏   | `user_favorites`                               | `artifacts`                                             |
 | 点赞   | `artifact_likes`、`comment_likes`、`post_likes`  | -                                                       |
+| 动态   | `user_posts`                                   | `artifacts`                                             |
+| 评论   | `user_comments`                                | `artifacts`                                             |
+| 关注   | `user_follows`                                 | `users`                                                 |
+| 上传   | `user_uploads`                                 | `artifacts`                                             |
+| 浏览历史 | `user_browse_history`                          | `artifacts`                                             |
+| 行为日志 | `user_behavior`                                | -                                                       |
 | 评论   | `user_comments`                                | `users`、`artifacts`                                     |
 | 动态   | `user_posts`                                   | `users`、`artifacts`、`museums`                           |
 | 关注   | `user_follows`                                 | `users`                                                 |

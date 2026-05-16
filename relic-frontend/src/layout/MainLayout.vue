@@ -78,9 +78,44 @@
               <el-icon><Collection /></el-icon>
               <span>文物类型管理</span>
             </el-menu-item>
-            <el-menu-item index="/favorites">
+          </el-sub-menu>
+
+          <el-sub-menu index="user-behavior">
+            <template #title>
+              <el-icon><Monitor /></el-icon>
+              <span>用户行为记录</span>
+            </template>
+            <el-menu-item index="/user-behavior/favorites">
               <el-icon><Star /></el-icon>
-              <span>我的收藏</span>
+              <span>用户收藏</span>
+            </el-menu-item>
+            <el-menu-item index="/user-behavior/likes">
+              <el-icon><Pointer /></el-icon>
+              <span>用户喜欢与点赞</span>
+            </el-menu-item>
+            <el-menu-item index="/user-behavior/posts">
+              <el-icon><ChatLineSquare /></el-icon>
+              <span>用户动态</span>
+            </el-menu-item>
+            <el-menu-item index="/user-behavior/comments">
+              <el-icon><ChatDotSquare /></el-icon>
+              <span>评论模块</span>
+            </el-menu-item>
+            <el-menu-item index="/user-behavior/follows">
+              <el-icon><Connection /></el-icon>
+              <span>用户关注</span>
+            </el-menu-item>
+            <el-menu-item index="/user-behavior/uploads">
+              <el-icon><Upload /></el-icon>
+              <span>用户上传</span>
+            </el-menu-item>
+            <el-menu-item index="/user-behavior/browse-history">
+              <el-icon><Timer /></el-icon>
+              <span>浏览历史</span>
+            </el-menu-item>
+            <el-menu-item index="/user-behavior/behavior-logs">
+              <el-icon><Document /></el-icon>
+              <span>行为日志</span>
             </el-menu-item>
           </el-sub-menu>
         </el-menu>

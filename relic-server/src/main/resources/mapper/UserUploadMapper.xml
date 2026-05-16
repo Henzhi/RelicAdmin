@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.UserUploadMapper">
+
+    <select id="selectByPage" resultType="map">
+        SELECT uu.id, uu.user_id, uu.artifact_id, uu.media_type AS mediaType, uu.file_url AS fileUrl,
+               uu.caption, uu.location_taken AS locationTaken, uu.status, uu.like_count AS likeCount,
+               uu.audit_by AS auditBy, uu.audit_time AS auditTime, uu.reject_reason AS rejectReason, uu.created_at,
+               u.username, u.avatar_url AS userAvatar,
+               a.title_zh AS artifactName
+        FROM user_uploads uu
+        LEFT JOIN users u ON uu.user_id = u.id
+        LEFT JOIN artifacts a ON uu.artifact_id = a.id
+        <where>
+            <if test="userId != null">AND uu.user_id = #{userId}</if>
+            <if test="username != null and username != ''">
+                AND u.username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="mediaType != null and mediaType != ''">AND uu.media_type = #{mediaType}</if>
+            <if test="status != null and status != ''">AND uu.status = #{status}</if>
+            <if test="startTime != null and startTime != ''">
+                AND uu.created_at >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND uu.created_at &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY uu.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByPage" resultType="long">
+        SELECT COUNT(*) FROM user_uploads uu
+        LEFT JOIN users u ON uu.user_id = u.id
+        <where>
+            <if test="userId != null">AND uu.user_id = #{userId}</if>
+            <if test="username != null and username != ''">
+                AND u.username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="mediaType != null and mediaType != ''">AND uu.media_type = #{mediaType}</if>
+            <if test="status != null and status != ''">AND uu.status = #{status}</if>
+            <if test="startTime != null and startTime != ''">
+                AND uu.created_at >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND uu.created_at &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+</mapper>
