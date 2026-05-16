@@ -9,7 +9,66 @@
                description, status, created_at AS createdAt, updated_at AS updatedAt
         FROM violation_types
         WHERE status = 1
-        ORDER BY severity_level ASC
+        ORDER BY severity_level ASC, id ASC
     </select>
+
+    <select id="selectByPage" resultType="map">
+        SELECT id, type_code AS typeCode, type_name AS typeName,
+               severity_level AS severityLevel, default_penalty AS defaultPenalty,
+               description, status, created_at AS createdAt, updated_at AS updatedAt
+        FROM violation_types
+        <where>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY severity_level ASC, id ASC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByPage" resultType="long">
+        SELECT COUNT(*) FROM violation_types
+        <where>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectById" resultType="map">
+        SELECT id, type_code AS typeCode, type_name AS typeName,
+               severity_level AS severityLevel, default_penalty AS defaultPenalty,
+               description, status, created_at AS createdAt, updated_at AS updatedAt
+        FROM violation_types
+        WHERE id = #{id}
+    </select>
+
+    <select id="checkTypeCodeExists" resultType="int">
+        SELECT COUNT(*) FROM violation_types WHERE type_code = #{typeCode}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO violation_types (type_code, type_name, severity_level, default_penalty, description, status, created_at)
+        VALUES (#{typeCode}, #{typeName}, #{severityLevel}, #{defaultPenalty}, #{description}, 1, NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE violation_types
+        SET type_name = #{typeName},
+            severity_level = #{severityLevel},
+            default_penalty = #{defaultPenalty},
+            description = #{description},
+            status = #{status},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE violation_types SET status = #{status}, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM violation_types WHERE id = #{id}
+    </delete>
 
 </mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.AuditStrategyMapper">
+
+    <select id="selectAll" resultType="map">
+        SELECT id, content_type AS contentType, auto_mode AS autoMode,
+               enable_sensitive_check AS enableSensitiveCheck,
+               enable_image_check AS enableImageCheck,
+               risk_threshold AS riskThreshold, status,
+               created_at AS createdAt, updated_at AS updatedAt
+        FROM audit_strategies
+        ORDER BY id
+    </select>
+
+    <select id="selectByContentType" resultType="map">
+        SELECT id, content_type AS contentType, auto_mode AS autoMode,
+               enable_sensitive_check AS enableSensitiveCheck,
+               enable_image_check AS enableImageCheck,
+               risk_threshold AS riskThreshold, status
+        FROM audit_strategies
+        WHERE content_type = #{contentType} AND status = 1
+    </select>
+
+    <insert id="insertDefault">
+        INSERT INTO audit_strategies (content_type, auto_mode, enable_sensitive_check, enable_image_check, risk_threshold, status, created_at)
+        VALUES (#{contentType}, #{autoMode}, #{enableSensitiveCheck}, #{enableImageCheck}, #{riskThreshold}, 1, NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE audit_strategies
+        SET auto_mode = #{autoMode},
+            enable_sensitive_check = #{enableSensitiveCheck},
+            enable_image_check = #{enableImageCheck},
+            risk_threshold = #{riskThreshold},
+            status = #{status},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+</mapper>

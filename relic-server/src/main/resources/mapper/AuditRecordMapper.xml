@@ -5,6 +5,7 @@
 
     <select id="selectByPage" resultType="map">
         SELECT ar.id, ar.content_id AS contentId, ar.content_type AS contentType,
+               ar.source_type AS sourceType,
                ar.content, ar.submitter_id AS submitterId,
                ar.auto_audit_result AS autoAuditResult, ar.manual_audit_result AS manualAuditResult,
                ar.auditor_id AS auditorId, ar.audit_time AS auditTime,
@@ -18,6 +19,9 @@
             </if>
             <if test="manualAuditResult != null and manualAuditResult != ''">
                 AND ar.manual_audit_result = #{manualAuditResult}
+            </if>
+            <if test="sourceType != null and sourceType != ''">
+                AND ar.source_type = #{sourceType}
             </if>
         </where>
         ORDER BY ar.created_at DESC
@@ -33,6 +37,9 @@
             <if test="manualAuditResult != null and manualAuditResult != ''">
                 AND ar.manual_audit_result = #{manualAuditResult}
             </if>
+            <if test="sourceType != null and sourceType != ''">
+                AND ar.source_type = #{sourceType}
+            </if>
         </where>
     </select>
 
@@ -44,5 +51,59 @@
             reject_reason = #{rejectReason}
         WHERE id = #{id}
     </update>
+
+    <update id="batchUpdateResult">
+        UPDATE audit_records
+        SET manual_audit_result = #{manualAuditResult},
+            auditor_id = #{auditorId},
+            audit_time = NOW(),
+            reject_reason = #{rejectReason}
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="updateByContentId">
+        UPDATE audit_records
+        SET auto_audit_result = #{manualAuditResult},
+            reject_reason = #{rejectReason}
+        WHERE content_id = #{contentId}
+    </update>
+
+    <select id="selectStats" resultType="map">
+        SELECT
+            COUNT(*) AS totalCount,
+            SUM(CASE WHEN manual_audit_result = 'approved' THEN 1 ELSE 0 END) AS approvedCount,
+            SUM(CASE WHEN manual_audit_result = 'rejected' THEN 1 ELSE 0 END) AS rejectedCount,
+            SUM(CASE WHEN manual_audit_result = 'pending' THEN 1 ELSE 0 END) AS pendingCount,
+            SUM(CASE WHEN auto_audit_result = 'rejected' THEN 1 ELSE 0 END) AS autoRejectedCount
+        FROM audit_records
+        WHERE 1=1
+        <if test="startDate != null and startDate != ''">
+            AND created_at >= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND created_at &lt;= #{endDate}
+        </if>
+    </select>
+
+    <select id="selectAuditorStats" resultType="map">
+        SELECT au.username AS auditorName, ar.auditor_id AS auditorId,
+               COUNT(*) AS auditCount,
+               SUM(CASE WHEN ar.manual_audit_result = 'approved' THEN 1 ELSE 0 END) AS approvedCount,
+               SUM(CASE WHEN ar.manual_audit_result = 'rejected' THEN 1 ELSE 0 END) AS rejectedCount
+        FROM audit_records ar
+        LEFT JOIN admin_users au ON ar.auditor_id = au.id
+        WHERE ar.auditor_id IS NOT NULL
+        <if test="startDate != null and startDate != ''">
+            AND ar.audit_time >= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND ar.audit_time &lt;= #{endDate}
+        </if>
+        GROUP BY ar.auditor_id, au.username
+        ORDER BY auditCount DESC
+    </select>
 
 </mapper>

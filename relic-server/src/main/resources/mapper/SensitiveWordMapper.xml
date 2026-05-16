@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.SensitiveWordMapper">
+
+    <select id="selectByPage" resultType="map">
+        SELECT id, word, category, status, created_at AS createdAt, updated_at AS updatedAt
+        FROM sensitive_words
+        <where>
+            <if test="word != null and word != ''">
+                AND word LIKE CONCAT('%', #{word}, '%')
+            </if>
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByPage" resultType="long">
+        SELECT COUNT(*) FROM sensitive_words
+        <where>
+            <if test="word != null and word != ''">
+                AND word LIKE CONCAT('%', #{word}, '%')
+            </if>
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert">
+        INSERT INTO sensitive_words (word, category, status, created_at) VALUES (#{word}, #{category}, 1, NOW())
+    </insert>
+
+    <select id="checkExists" resultType="int">
+        SELECT COUNT(*) FROM sensitive_words WHERE word = #{word}
+    </select>
+
+    <update id="update">
+        UPDATE sensitive_words SET word = #{word}, category = #{category}, status = #{status}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE sensitive_words SET status = #{status}, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM sensitive_words WHERE id = #{id}
+    </delete>
+
+    <insert id="batchInsert">
+        INSERT INTO sensitive_words (word, category, status, created_at)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.word}, #{item.category}, 1, NOW())
+        </foreach>
+    </insert>
+
+    <select id="selectAllEnabledWords" resultType="string">
+        SELECT word FROM sensitive_words WHERE status = 1
+    </select>
+
+</mapper>

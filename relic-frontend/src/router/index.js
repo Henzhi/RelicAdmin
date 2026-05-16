@@ -165,6 +165,30 @@ const routes = [
         name: 'AnnouncementAdmin',
         component: () => import('@/views/AnnouncementAdminView.vue'),
         meta: { title: '公告管理', icon: 'Bell' }
+      },
+      {
+        path: 'sensitive-word',
+        name: 'SensitiveWordAdmin',
+        component: () => import('@/views/SensitiveWordAdminView.vue'),
+        meta: { title: '敏感词库', icon: 'Edit' }
+      },
+      {
+        path: 'audit-strategy',
+        name: 'AuditStrategyAdmin',
+        component: () => import('@/views/AuditStrategyAdminView.vue'),
+        meta: { title: '审核策略', icon: 'Setting' }
+      },
+      {
+        path: 'audit-stats',
+        name: 'AuditStats',
+        component: () => import('@/views/AuditStatsView.vue'),
+        meta: { title: '审核统计', icon: 'DataAnalysis' }
+      },
+      {
+        path: 'violation-type',
+        name: 'ViolationTypeAdmin',
+        component: () => import('@/views/ViolationTypeAdminView.vue'),
+        meta: { title: '违规类型', icon: 'Warning' }
       }
     ]
   }

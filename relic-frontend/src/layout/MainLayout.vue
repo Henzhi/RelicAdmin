@@ -140,6 +140,18 @@
               <el-icon><Bell /></el-icon>
               <span>公告管理</span>
             </el-menu-item>
+            <el-menu-item index="/sensitive-word">
+              <el-icon><Edit /></el-icon>
+              <span>敏感词库</span>
+            </el-menu-item>
+            <el-menu-item index="/audit-strategy">
+              <el-icon><Setting /></el-icon>
+              <span>审核策略</span>
+            </el-menu-item>
+            <el-menu-item index="/violation-type">
+              <el-icon><CircleClose /></el-icon>
+              <span>违规类型</span>
+            </el-menu-item>
           </el-sub-menu>
         </el-menu>
       </el-aside>
