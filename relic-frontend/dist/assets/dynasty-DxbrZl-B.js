@@ -1,1 +1,0 @@
-import{h as n}from"./index-CcA7_cAx.js";function y(t){return n.get("/dynasty/page",{params:t})}function s(){return n.get("/dynasty/list")}function r(t){return n.post("/dynasty",t)}function u(t,a){return n.put("/dynasty/"+t,a)}function d(t){return n.delete("/dynasty/"+t)}export{s as a,r as c,d,y as g,u};

@@ -17,6 +17,4 @@ public interface UserFavoriteMapper {
                                        @Param("offset") Integer offset,
                                        @Param("limit") Integer limit);
     int countByUserId(@Param("userId") Integer userId, @Param("groupName") String groupName);
-    List<UserFavorite> selectAllByPage(@Param("userId") Integer userId, @Param("offset") int offset, @Param("limit") int limit);
-    long countAllByPage(@Param("userId") Integer userId);
 }

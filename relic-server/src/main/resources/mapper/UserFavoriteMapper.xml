@@ -47,24 +47,4 @@
         </if>
     </select>
 
-    <select id="selectAllByPage" resultMap="favoriteResultMap">
-        SELECT * FROM user_favorites
-        <where>
-            <if test="userId != null">
-                AND user_id = #{userId}
-            </if>
-        </where>
-        ORDER BY created_at DESC
-        LIMIT #{offset}, #{limit}
-    </select>
-
-    <select id="countAllByPage" resultType="long">
-        SELECT COUNT(*) FROM user_favorites
-        <where>
-            <if test="userId != null">
-                AND user_id = #{userId}
-            </if>
-        </where>
-    </select>
-
 </mapper>

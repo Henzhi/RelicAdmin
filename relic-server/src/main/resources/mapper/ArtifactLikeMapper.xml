@@ -26,12 +26,4 @@
         SELECT COUNT(*) FROM artifact_likes WHERE artifact_id = #{artifactId}
     </select>
 
-    <select id="selectByPage" resultMap="artifactLikeResultMap">
-        SELECT * FROM artifact_likes ORDER BY liked_at DESC LIMIT #{offset}, #{limit}
-    </select>
-
-    <select id="countAll" resultType="long">
-        SELECT COUNT(*) FROM artifact_likes
-    </select>
-
 </mapper>
