@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.CommentLikeMapper">
+
+    <resultMap id="commentLikeResultMap" type="com.relic.entity.CommentLike">
+        <result property="userId" column="user_id"/>
+        <result property="commentId" column="comment_id"/>
+        <result property="likedAt" column="liked_at"/>
+    </resultMap>
+
+    <insert id="insert">
+        INSERT INTO comment_likes (user_id, comment_id, liked_at)
+        VALUES (#{userId}, #{commentId}, #{likedAt})
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM comment_likes WHERE user_id = #{userId} AND comment_id = #{commentId}
+    </delete>
+
+    <select id="selectByUserAndComment" resultMap="commentLikeResultMap">
+        SELECT * FROM comment_likes WHERE user_id = #{userId} AND comment_id = #{commentId}
+    </select>
+
+    <select id="countByCommentId" resultType="long">
+        SELECT COUNT(*) FROM comment_likes WHERE comment_id = #{commentId}
+    </select>
+
+</mapper>

@@ -47,6 +47,36 @@ const routes = [
         meta: { title: '权限管理', icon: 'Lock' }
       },
       {
+        path: 'admin-comments',
+        name: 'CommentList',
+        component: () => import('@/views/CommentListView.vue'),
+        meta: { title: '评论管理', icon: 'ChatLineSquare' }
+      },
+      {
+        path: 'admin-posts',
+        name: 'PostList',
+        component: () => import('@/views/PostListView.vue'),
+        meta: { title: '用户动态', icon: 'Postcard' }
+      },
+      {
+        path: 'admin-follows',
+        name: 'FollowList',
+        component: () => import('@/views/FollowListView.vue'),
+        meta: { title: '用户关注', icon: 'Connection' }
+      },
+      {
+        path: 'admin-likes',
+        name: 'LikeList',
+        component: () => import('@/views/LikeListView.vue'),
+        meta: { title: '用户点赞', icon: 'Star' }
+      },
+      {
+        path: 'admin-favorites',
+        name: 'FavoriteList',
+        component: () => import('@/views/FavoriteListView.vue'),
+        meta: { title: '用户收藏', icon: 'StarFilled' }
+      },
+      {
         path: 'museums',
         name: 'MuseumList',
         component: () => import('@/views/MuseumListView.vue'),
@@ -87,12 +117,6 @@ const routes = [
         name: 'ArtifactTypeList',
         component: () => import('@/views/ArtifactTypeListView.vue'),
         meta: { title: '文物类型管理', icon: 'Collection' }
-      },
-      {
-        path: 'favorites',
-        name: 'UserFavoriteList',
-        component: () => import('@/views/UserFavoriteListView.vue'),
-        meta: { title: '我的收藏', icon: 'Star' }
       }
     ]
   }

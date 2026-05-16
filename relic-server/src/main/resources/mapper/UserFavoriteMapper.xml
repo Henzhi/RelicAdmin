@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.UserFavoriteMapper">
+
+    <resultMap id="favoriteResultMap" type="com.relic.entity.UserFavorite">
+        <result property="userId" column="user_id"/>
+        <result property="artifactId" column="artifact_id"/>
+        <result property="groupName" column="group_name"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="insert">
+        INSERT INTO user_favorites (user_id, artifact_id, group_name, created_at)
+        VALUES (#{userId}, #{artifactId}, #{groupName}, #{createdAt})
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM user_favorites WHERE user_id = #{userId} AND artifact_id = #{artifactId}
+    </delete>
+
+    <select id="selectByUserAndArtifact" resultMap="favoriteResultMap">
+        SELECT * FROM user_favorites WHERE user_id = #{userId} AND artifact_id = #{artifactId}
+    </select>
+
+    <select id="selectByUserId" resultType="com.relic.vo.FavoriteVO">
+        SELECT f.artifact_id AS artifactId,
+               a.title_zh AS titleZh,
+               a.title_en AS titleEn,
+               a.image_url AS imageUrl,
+               f.group_name AS groupName,
+               f.created_at AS createdAt
+        FROM user_favorites f
+        LEFT JOIN artifacts a ON f.artifact_id = a.id
+        WHERE f.user_id = #{userId}
+        <if test="groupName != null and groupName != ''">
+            AND f.group_name = #{groupName}
+        </if>
+        ORDER BY f.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(*) FROM user_favorites WHERE user_id = #{userId}
+        <if test="groupName != null and groupName != ''">
+            AND group_name = #{groupName}
+        </if>
+    </select>
+
+    <select id="selectAllByPage" resultMap="favoriteResultMap">
+        SELECT * FROM user_favorites
+        <where>
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+        </where>
+        ORDER BY created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countAllByPage" resultType="long">
+        SELECT COUNT(*) FROM user_favorites
+        <where>
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+        </where>
+    </select>
+
+</mapper>

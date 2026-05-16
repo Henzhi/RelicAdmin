@@ -32,6 +32,7 @@
             <el-icon><Odometer /></el-icon>
             <span>仪表盘</span>
           </el-menu-item>
+
           <el-menu-item index="/users">
             <el-icon><User /></el-icon>
             <span>用户管理</span>
@@ -48,6 +49,33 @@
             <el-icon><Lock /></el-icon>
             <span>权限管理</span>
           </el-menu-item>
+
+          <el-sub-menu index="user-behavior">
+            <template #title>
+              <el-icon><Histogram /></el-icon>
+              <span>用户行为记录</span>
+            </template>
+            <el-menu-item index="/admin-favorites">
+              <el-icon><StarFilled /></el-icon>
+              <span>用户收藏</span>
+            </el-menu-item>
+            <el-menu-item index="/admin-likes">
+              <el-icon><Star /></el-icon>
+              <span>用户点赞</span>
+            </el-menu-item>
+            <el-menu-item index="/admin-comments">
+              <el-icon><ChatLineSquare /></el-icon>
+              <span>评论管理</span>
+            </el-menu-item>
+            <el-menu-item index="/admin-posts">
+              <el-icon><Postcard /></el-icon>
+              <span>用户动态</span>
+            </el-menu-item>
+            <el-menu-item index="/admin-follows">
+              <el-icon><Connection /></el-icon>
+              <span>用户关注</span>
+            </el-menu-item>
+          </el-sub-menu>
 
           <el-sub-menu index="content">
             <template #title>
@@ -77,10 +105,6 @@
             <el-menu-item index="/artifact-types">
               <el-icon><Collection /></el-icon>
               <span>文物类型管理</span>
-            </el-menu-item>
-            <el-menu-item index="/favorites">
-              <el-icon><Star /></el-icon>
-              <span>我的收藏</span>
             </el-menu-item>
           </el-sub-menu>
         </el-menu>
