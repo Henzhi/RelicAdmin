@@ -159,6 +159,12 @@ const routes = [
         name: 'AppealAdmin',
         component: () => import('@/views/AppealAdminView.vue'),
         meta: { title: '申诉管理', icon: 'Comment' }
+      },
+      {
+        path: 'announcement',
+        name: 'AnnouncementAdmin',
+        component: () => import('@/views/AnnouncementAdminView.vue'),
+        meta: { title: '公告管理', icon: 'Bell' }
       }
     ]
   }

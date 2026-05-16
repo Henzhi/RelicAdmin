@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.AnnouncementMapper">
+
+    <select id="selectAdminPage" resultType="map">
+        SELECT a.id, a.title, a.content, a.position, a.target_audience AS targetAudience,
+               a.start_time AS startTime, a.end_time AS endTime,
+               a.status, a.created_by AS createdBy, a.view_count AS viewCount,
+               a.created_at AS createdAt, a.updated_at AS updatedAt,
+               au.username AS createdByName
+        FROM announcements a
+        LEFT JOIN admin_users au ON a.created_by = au.id
+        <where>
+            <if test="status != null">AND a.status = #{status}</if>
+        </where>
+        ORDER BY a.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countAdminPage" resultType="long">
+        SELECT COUNT(*) FROM announcements a
+        <where>
+            <if test="status != null">AND a.status = #{status}</if>
+        </where>
+    </select>
+
+    <select id="selectActiveList" resultType="map">
+        SELECT a.id, a.title, a.content, a.position, a.target_audience AS targetAudience,
+               a.start_time AS startTime, a.end_time AS endTime,
+               a.status, a.view_count AS viewCount,
+               a.created_at AS createdAt, a.updated_at AS updatedAt
+        FROM announcements a
+        WHERE a.status = 1
+          AND (a.start_time IS NULL OR a.start_time &lt;= NOW())
+          AND (a.end_time IS NULL OR a.end_time &gt;= NOW())
+        <if test="position != null and position != ''">
+            AND (a.position = #{position} OR a.position = 'global')
+        </if>
+        ORDER BY a.created_at DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO announcements (title, content, position, target_audience, start_time, end_time, status, created_by, created_at)
+        VALUES (#{title}, #{content}, #{position}, #{targetAudience},
+                <if test="startTime != null and startTime != ''">#{startTime}</if>
+                <if test="startTime == null or startTime == ''">NULL</if>,
+                <if test="endTime != null and endTime != ''">#{endTime}</if>
+                <if test="endTime == null or endTime == ''">NULL</if>,
+                #{status}, #{createdBy}, NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE announcements
+        SET title = #{title},
+            content = #{content},
+            position = #{position},
+            target_audience = #{targetAudience},
+            start_time = <if test="startTime != null and startTime != ''">#{startTime}</if><if test="startTime == null or startTime == ''">NULL</if>,
+            end_time = <if test="endTime != null and endTime != ''">#{endTime}</if><if test="endTime == null or endTime == ''">NULL</if>,
+            status = #{status},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE announcements SET status = #{status}, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM announcements WHERE id = #{id}
+    </delete>
+
+</mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.NotificationMapper">
+
+    <select id="selectByUserId" resultType="map">
+        SELECT id, user_id AS userId, type, title, content,
+               is_read AS isRead, extra_data AS extraData, created_at AS createdAt
+        FROM notifications
+        WHERE user_id = #{userId}
+        <if test="isRead != null">AND is_read = #{isRead}</if>
+        ORDER BY created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(*) FROM notifications
+        WHERE user_id = #{userId}
+        <if test="isRead != null">AND is_read = #{isRead}</if>
+    </select>
+
+    <update id="markReadByIds">
+        UPDATE notifications SET is_read = 1
+        WHERE user_id = #{userId}
+        AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="markAllRead">
+        UPDATE notifications SET is_read = 1 WHERE user_id = #{userId} AND is_read = 0
+    </update>
+
+    <select id="countUnread" resultType="long">
+        SELECT COUNT(*) FROM notifications WHERE user_id = #{userId} AND is_read = 0
+    </select>
+
+    <insert id="insert">
+        INSERT INTO notifications (user_id, type, title, content, is_read, extra_data, created_at)
+        VALUES (#{userId}, #{type}, #{title}, #{content}, 0, #{extraData}, NOW())
+    </insert>
+
+</mapper>

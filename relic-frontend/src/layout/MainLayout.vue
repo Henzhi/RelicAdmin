@@ -136,6 +136,10 @@
               <el-icon><Comment /></el-icon>
               <span>申诉管理</span>
             </el-menu-item>
+            <el-menu-item index="/announcement">
+              <el-icon><Bell /></el-icon>
+              <span>公告管理</span>
+            </el-menu-item>
           </el-sub-menu>
         </el-menu>
       </el-aside>
