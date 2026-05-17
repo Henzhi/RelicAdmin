@@ -153,6 +153,24 @@
               <span>违规类型</span>
             </el-menu-item>
           </el-sub-menu>
+          <el-sub-menu index="system">
+            <template #title>
+              <el-icon><Tools /></el-icon>
+              <span>系统管理</span>
+            </template>
+            <el-menu-item index="/backup">
+              <el-icon><FolderOpened /></el-icon>
+              <span>备份管理</span>
+            </el-menu-item>
+            <el-menu-item index="/backup-strategy">
+              <el-icon><Coin /></el-icon>
+              <span>备份策略</span>
+            </el-menu-item>
+            <el-menu-item index="/backup-restore-logs">
+              <el-icon><Clock /></el-icon>
+              <span>恢复日志</span>
+            </el-menu-item>
+          </el-sub-menu>
         </el-menu>
       </el-aside>
       <el-main class="layout-main">

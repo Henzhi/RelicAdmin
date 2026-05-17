@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.RestoreRecordMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="com.relic.dto.RestoreRecordCreateDTO">
+        INSERT INTO restore_records (backup_id, backup_name, operator_id, status, remark, created_at)
+        VALUES (#{backupId}, #{backupName}, #{operatorId}, #{status}, #{remark}, NOW())
+    </insert>
+
+    <select id="selectByPage" resultType="map">
+        SELECT rr.id, rr.backup_id AS backupId, rr.backup_name AS backupName,
+               rr.operator_id AS operatorId, rr.status, rr.remark, rr.created_at AS createdAt,
+               (SELECT au.username FROM admin_users au WHERE au.id = rr.operator_id) AS operatorName
+        FROM restore_records rr
+        <where>
+            <if test="status != null">
+                AND rr.status = #{status}
+            </if>
+        </where>
+        ORDER BY rr.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByPage" resultType="long">
+        SELECT COUNT(*) FROM restore_records
+        <where>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateStatus">
+        UPDATE restore_records
+        SET status = #{status}, remark = #{remark}
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectById" resultType="map">
+        SELECT id, backup_id AS backupId, backup_name AS backupName,
+               operator_id AS operatorId, status, remark, created_at AS createdAt
+        FROM restore_records WHERE id = #{id}
+    </select>
+
+</mapper>

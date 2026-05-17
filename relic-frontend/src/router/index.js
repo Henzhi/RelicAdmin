@@ -189,6 +189,24 @@ const routes = [
         name: 'ViolationTypeAdmin',
         component: () => import('@/views/ViolationTypeAdminView.vue'),
         meta: { title: '违规类型', icon: 'Warning' }
+      },
+      {
+        path: 'backup',
+        name: 'BackupAdmin',
+        component: () => import('@/views/BackupAdminView.vue'),
+        meta: { title: '备份管理', icon: 'FolderOpened' }
+      },
+      {
+        path: 'backup-strategy',
+        name: 'BackupStrategy',
+        component: () => import('@/views/BackupStrategyAdminView.vue'),
+        meta: { title: '备份策略', icon: 'Coin' }
+      },
+      {
+        path: 'backup-restore-logs',
+        name: 'RestoreRecordAdmin',
+        component: () => import('@/views/RestoreRecordAdminView.vue'),
+        meta: { title: '恢复日志', icon: 'Clock' }
       }
     ]
   }
