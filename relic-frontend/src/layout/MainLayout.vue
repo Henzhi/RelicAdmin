@@ -13,6 +13,7 @@
           </span>
           <template #dropdown>
             <el-dropdown-menu>
+              <el-dropdown-item command="profile">个人中心</el-dropdown-item>
               <el-dropdown-item command="logout">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -31,6 +32,10 @@
           <el-menu-item index="/dashboard">
             <el-icon><Odometer /></el-icon>
             <span>仪表盘</span>
+          </el-menu-item>
+          <el-menu-item index="/profile">
+            <el-icon><User /></el-icon>
+            <span>个人中心</span>
           </el-menu-item>
           <el-menu-item index="/users">
             <el-icon><User /></el-icon>
@@ -205,7 +210,9 @@ const auth = useAuthStore()
 const activeMenu = computed(() => route.path)
 
 function handleCommand(command) {
-  if (command === 'logout') {
+  if (command === 'profile') {
+    router.push('/profile')
+  } else if (command === 'logout') {
     ElMessageBox.confirm('确定要退出登录吗？', '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',

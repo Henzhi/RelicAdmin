@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.StatisticsMapper">
+
+    <select id="selectDashboardOverview" resultType="map">
+        SELECT
+            (SELECT COUNT(*) FROM users) AS total_users,
+            (SELECT COUNT(*) FROM user_browse_history
+             WHERE DATE(browse_time) = CURDATE()) AS today_browse_count,
+            (SELECT COUNT(*) FROM artifacts) AS total_artifacts,
+            (SELECT COUNT(*) FROM museums) AS total_museums,
+            (SELECT COUNT(*) FROM user_comments) AS total_comments,
+            (SELECT COUNT(*) FROM audit_records
+             WHERE manual_audit_result = 'pending') AS pending_audits,
+            (SELECT COUNT(*) FROM user_uploads) AS total_uploads,
+            (SELECT COUNT(*) FROM user_posts) AS total_posts
+    </select>
+
+    <select id="countOnlineUsers" resultType="long">
+        SELECT COUNT(*) FROM (
+            SELECT user_id AS uid FROM user_browse_history
+            WHERE browse_time >= DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
+            UNION
+            SELECT operator_id AS uid FROM backup_records
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE) AND operator_id IS NOT NULL
+        ) t
+    </select>
+
+    <select id="countTodayNewUsers" resultType="long">
+        SELECT COUNT(*) FROM users
+        WHERE DATE(registered_at) = CURDATE()
+    </select>
+
+    <select id="countTodayContent" resultType="long">
+        SELECT (
+            (SELECT COUNT(*) FROM user_comments WHERE DATE(created_at) = CURDATE()) +
+            (SELECT COUNT(*) FROM user_uploads WHERE DATE(created_at) = CURDATE()) +
+            (SELECT COUNT(*) FROM user_posts WHERE DATE(created_at) = CURDATE())
+        )
+    </select>
+
+    <select id="countAuditBacklog" resultType="long">
+        SELECT COUNT(*) FROM audit_records
+        WHERE manual_audit_result = 'pending'
+    </select>
+
+    <select id="selectUserTrend" resultType="map">
+        WITH RECURSIVE dates AS (
+            SELECT DATE_SUB(CURDATE(), INTERVAL #{days} DAY) AS d
+            UNION ALL
+            SELECT DATE_ADD(d, INTERVAL 1 DAY) FROM dates WHERE d &lt; CURDATE()
+        )
+        SELECT
+            dates.d AS date,
+            COALESCE(u.cnt, 0) AS count
+        FROM dates
+        LEFT JOIN (
+            SELECT DATE(created_at) AS d, COUNT(*) AS cnt
+            FROM users
+            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+            GROUP BY DATE(created_at)
+        ) u ON dates.d = u.d
+        ORDER BY dates.d
+    </select>
+
+    <select id="selectArtifactByMuseum" resultType="map">
+        SELECT a.museum_id AS museumId, m.name AS museumName, COUNT(*) AS count
+        FROM artifacts a
+        LEFT JOIN museums m ON a.museum_id = m.id
+        GROUP BY a.museum_id, m.name
+        ORDER BY count DESC
+        LIMIT 20
+    </select>
+
+    <select id="selectArtifactByType" resultType="map">
+        SELECT type AS name, COUNT(*) AS count
+        FROM artifacts
+        WHERE type IS NOT NULL AND type != ''
+        GROUP BY type
+        ORDER BY count DESC
+    </select>
+
+    <select id="selectArtifactByDynasty" resultType="map">
+        SELECT d.name_zh AS name, COUNT(*) AS count
+        FROM artifacts a
+        LEFT JOIN dynasties d ON a.dynasty_id = d.id
+        WHERE a.dynasty_id IS NOT NULL
+        GROUP BY a.dynasty_id, d.name_zh
+        ORDER BY count DESC
+    </select>
+
+    <select id="selectVisitTrend" resultType="map">
+        WITH RECURSIVE dates AS (
+            SELECT DATE_SUB(CURDATE(), INTERVAL #{days} DAY) AS d
+            UNION ALL
+            SELECT DATE_ADD(d, INTERVAL 1 DAY) FROM dates WHERE d &lt; CURDATE()
+        )
+        SELECT
+            dates.d AS date,
+            COALESCE(v.cnt, 0) AS count
+        FROM dates
+        LEFT JOIN (
+            SELECT DATE(browse_time) AS d, COUNT(*) AS cnt
+            FROM user_browse_history
+            WHERE browse_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+            GROUP BY DATE(browse_time)
+        ) v ON dates.d = v.d
+        ORDER BY dates.d
+    </select>
+
+    <select id="selectDataGrowth" resultType="map">
+        WITH RECURSIVE dates AS (
+            SELECT DATE_SUB(CURDATE(), INTERVAL #{days} DAY) AS d
+            UNION ALL
+            SELECT DATE_ADD(d, INTERVAL 1 DAY) FROM dates WHERE d &lt; CURDATE()
+        )
+        SELECT
+            dates.d AS date,
+            COALESCE(v.cnt, 0) AS visits,
+            COALESCE(u.cnt, 0) AS newUsers,
+            COALESCE(c.cnt, 0) AS contentCounts,
+            COALESCE(a.cnt, 0) AS newArtifacts
+        FROM dates
+        LEFT JOIN (
+            SELECT DATE(browse_time) AS d, COUNT(*) AS cnt
+            FROM user_browse_history
+            WHERE browse_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+            GROUP BY DATE(browse_time)
+        ) v ON dates.d = v.d
+        LEFT JOIN (
+            SELECT DATE(created_at) AS d, COUNT(*) AS cnt
+            FROM users
+            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+            GROUP BY DATE(created_at)
+        ) u ON dates.d = u.d
+        LEFT JOIN (
+            SELECT d, COUNT(*) AS cnt FROM (
+                SELECT DATE(created_at) AS d FROM user_comments WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+                UNION ALL
+                SELECT DATE(created_at) AS d FROM user_uploads WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+                UNION ALL
+                SELECT DATE(created_at) AS d FROM user_posts WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+            ) t GROUP BY d
+        ) c ON dates.d = c.d
+        LEFT JOIN (
+            SELECT DATE(created_at) AS d, COUNT(*) AS cnt
+            FROM artifacts
+            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+            GROUP BY DATE(created_at)
+        ) a ON dates.d = a.d
+        ORDER BY dates.d
+    </select>
+
+    <select id="selectActiveAlerts" resultType="map">
+        SELECT id, alert_type AS alertType, severity, title, message, source,
+               status, created_at AS createdAt
+        FROM system_alerts
+        WHERE status = 'active'
+        ORDER BY
+            CASE severity WHEN 'critical' THEN 0 WHEN 'warning' THEN 1 ELSE 2 END,
+            created_at DESC
+        LIMIT 10
+    </select>
+
+    <select id="selectAlertPage" resultType="map">
+        SELECT id, alert_type AS alertType, severity, title, message, source,
+               status, resolved_by AS resolvedBy, resolved_at AS resolvedAt,
+               resolve_remark AS resolveRemark, created_at AS createdAt
+        FROM system_alerts
+        <where>
+            <if test="alertType != null and alertType != ''">
+                AND alert_type = #{alertType}
+            </if>
+            <if test="severity != null and severity != ''">
+                AND severity = #{severity}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countAlerts" resultType="long">
+        SELECT COUNT(*) FROM system_alerts
+        <where>
+            <if test="alertType != null and alertType != ''">
+                AND alert_type = #{alertType}
+            </if>
+            <if test="severity != null and severity != ''">
+                AND severity = #{severity}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <update id="resolveAlert">
+        UPDATE system_alerts
+        SET status = 'resolved',
+            resolved_by = #{resolvedBy},
+            resolved_at = NOW(),
+            resolve_remark = #{resolveRemark}
+        WHERE id = #{id}
+    </update>
+
+    <insert id="insertAlert">
+        INSERT INTO system_alerts (alert_type, severity, title, message, source, status, created_at)
+        VALUES (#{alertType}, #{severity}, #{title}, #{message}, #{source}, 'active', NOW())
+    </insert>
+
+</mapper>

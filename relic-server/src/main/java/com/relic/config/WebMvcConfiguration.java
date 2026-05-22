@@ -61,7 +61,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                         .title("Relic项目接口文档")
                         .version("2.0")
                         .description("Relic项目接口文档 - Spring Boot 3 + Knife4j 4.x")
-                        .contact(new Contact().name("Your Name").url("").email(""))
+                        .contact(new Contact().name("Mahh").url("").email("mahh315@163.com"))
                         .license(new License().name("Apache 2.0").url("http://springdoc.org")));
     }
 

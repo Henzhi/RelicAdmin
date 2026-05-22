@@ -1,18 +1,23 @@
 package com.relic.controller.admin;
 
+import com.relic.context.BaseContext;
 import com.relic.dto.AdminUserCreateDTO;
 import com.relic.dto.AdminUserUpdateDTO;
 import com.relic.dto.PasswordChangeDTO;
 import com.relic.dto.RoleAssignDTO;
 import com.relic.result.Result;
 import com.relic.service.AdminUserService;
+import com.relic.utils.AliOssUtil;
 import com.relic.vo.AdminUserVO;
 import com.relic.vo.PageResultVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/admin/admin-user")
@@ -21,6 +26,7 @@ import java.util.Map;
 public class AdminAccountController {
 
     private final AdminUserService adminUserService;
+    private final AliOssUtil aliOssUtil;
 
     @GetMapping("/page")
     public Result<PageResultVO<AdminUserVO>> page(
@@ -82,6 +88,31 @@ public class AdminAccountController {
     public Result<Void> resetPassword(@PathVariable Integer id, @RequestBody Map<String, String> body) {
         adminUserService.resetPassword(id, body.get("newPassword"));
         return Result.success();
+    }
+
+    @PutMapping("/current/profile")
+    public Result<Void> updateCurrentProfile(@RequestBody AdminUserUpdateDTO dto) {
+        Long currentId = BaseContext.getCurrentId();
+        adminUserService.update(currentId.intValue(), dto);
+        return Result.success();
+    }
+
+    @PutMapping("/current/password")
+    public Result<Void> updateCurrentPassword(@RequestBody PasswordChangeDTO dto) {
+        Long currentId = BaseContext.getCurrentId();
+        adminUserService.updatePassword(currentId.intValue(), dto.getOldPassword(), dto.getNewPassword());
+        return Result.success();
+    }
+
+    @PostMapping("/current/avatar")
+    public Result<String> uploadAvatar(@RequestParam("file") MultipartFile file) throws IOException {
+        Long currentId = BaseContext.getCurrentId();
+        String originalFilename = file.getOriginalFilename();
+        String ext = originalFilename != null && originalFilename.contains(".")
+                ? originalFilename.substring(originalFilename.lastIndexOf(".")) : ".jpg";
+        String objectName = "avatar/" + currentId + "/" + UUID.randomUUID() + ext;
+        String avatarUrl = aliOssUtil.upload(file.getBytes(), objectName);
+        return Result.success(avatarUrl);
     }
 
     @DeleteMapping("/batch")
