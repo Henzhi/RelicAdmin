@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.SystemConfigMapper">
+
+    <select id="selectByPage" resultType="map">
+        SELECT id, config_key AS configKey, config_name AS configName,
+               config_value AS configValue, config_type AS configType,
+               config_group AS configGroup, description, sort_order AS sortOrder,
+               editable, status, created_at AS createdAt, updated_at AS updatedAt
+        FROM system_configs
+        <where>
+            <if test="configGroup != null and configGroup != ''">
+                AND config_group = #{configGroup}
+            </if>
+        </where>
+        ORDER BY config_group, sort_order ASC, id ASC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByPage" resultType="long">
+        SELECT COUNT(*) FROM system_configs
+        <where>
+            <if test="configGroup != null and configGroup != ''">
+                AND config_group = #{configGroup}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectById" resultType="map">
+        SELECT id, config_key AS configKey, config_name AS configName,
+               config_value AS configValue, config_type AS configType,
+               config_group AS configGroup, description, sort_order AS sortOrder,
+               editable, status, created_at AS createdAt, updated_at AS updatedAt
+        FROM system_configs WHERE id = #{id}
+    </select>
+
+    <select id="selectByKey" resultType="map">
+        SELECT id, config_key AS configKey, config_name AS configName,
+               config_value AS configValue, config_type AS configType,
+               config_group AS configGroup, description, sort_order AS sortOrder,
+               editable, status, created_at AS createdAt, updated_at AS updatedAt
+        FROM system_configs WHERE config_key = #{configKey}
+    </select>
+
+    <select id="selectByGroup" resultType="map">
+        SELECT id, config_key AS configKey, config_name AS configName,
+               config_value AS configValue, config_type AS configType,
+               config_group AS configGroup, description, sort_order AS sortOrder,
+               editable, status, created_at AS createdAt, updated_at AS updatedAt
+        FROM system_configs WHERE config_group = #{configGroup} AND status = 1
+        ORDER BY sort_order ASC
+    </select>
+
+    <select id="checkConfigKeyExists" resultType="int">
+        SELECT COUNT(*) FROM system_configs WHERE config_key = #{configKey}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO system_configs (config_key, config_name, config_value, config_type,
+                                     config_group, description, sort_order, status, created_at)
+        VALUES (#{configKey}, #{configName}, #{configValue}, #{configType},
+                #{configGroup}, #{description}, #{sortOrder}, 1, NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE system_configs
+        SET config_name = #{configName}, config_value = #{configValue}, config_type = #{configType},
+            config_group = #{configGroup}, description = #{description}, sort_order = #{sortOrder},
+            status = #{status}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateValue">
+        UPDATE system_configs SET config_value = #{configValue}, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM system_configs WHERE id = #{id}
+    </delete>
+
+</mapper>

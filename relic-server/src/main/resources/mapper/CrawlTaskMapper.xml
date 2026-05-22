@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.CrawlTaskMapper">
+
+    <select id="selectByPage" resultType="map">
+        SELECT id, task_name AS taskName, task_code AS taskCode,
+               source_url AS sourceUrl, source_type AS sourceType,
+               crawl_rule AS crawlRule, priority, cron_expression AS cronExpression,
+               max_retry AS maxRetry, retry_delay AS retryDelay, timeout_seconds AS timeoutSeconds,
+               status, last_run_time AS lastRunTime, next_run_time AS nextRunTime,
+               total_runs AS totalRuns, success_runs AS successRuns, fail_runs AS failRuns,
+               description, enabled, created_by AS createdBy, created_at AS createdAt, updated_at AS updatedAt
+        FROM crawl_tasks
+        <where>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="priority != null">
+                AND priority = #{priority}
+            </if>
+        </where>
+        ORDER BY FIELD(priority, 10, 5, 1), id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByPage" resultType="long">
+        SELECT COUNT(*) FROM crawl_tasks
+        <where>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="priority != null">
+                AND priority = #{priority}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectById" resultType="map">
+        SELECT id, task_name AS taskName, task_code AS taskCode,
+               source_url AS sourceUrl, source_type AS sourceType,
+               crawl_rule AS crawlRule, priority, cron_expression AS cronExpression,
+               max_retry AS maxRetry, retry_delay AS retryDelay, timeout_seconds AS timeoutSeconds,
+               status, last_run_time AS lastRunTime, next_run_time AS nextRunTime,
+               total_runs AS totalRuns, success_runs AS successRuns, fail_runs AS failRuns,
+               description, enabled, created_by AS createdBy, created_at AS createdAt, updated_at AS updatedAt
+        FROM crawl_tasks WHERE id = #{id}
+    </select>
+
+    <select id="checkTaskCodeExists" resultType="int">
+        SELECT COUNT(*) FROM crawl_tasks WHERE task_code = #{taskCode}
+    </select>
+
+    <select id="selectEnabledScheduled" resultType="map">
+        SELECT id, task_name AS taskName, task_code AS taskCode,
+               source_url AS sourceUrl, source_type AS sourceType,
+               crawl_rule AS crawlRule, priority, cron_expression AS cronExpression,
+               max_retry AS maxRetry, retry_delay AS retryDelay, timeout_seconds AS timeoutSeconds,
+               status, last_run_time AS lastRunTime, next_run_time AS nextRunTime,
+               total_runs AS totalRuns, success_runs AS successRuns, fail_runs AS failRuns,
+               description, enabled
+        FROM crawl_tasks
+        WHERE enabled = 1 AND cron_expression IS NOT NULL AND cron_expression != ''
+    </select>
+
+    <insert id="insert">
+        INSERT INTO crawl_tasks (task_name, task_code, source_url, source_type, crawl_rule,
+                                 priority, cron_expression, max_retry, retry_delay, timeout_seconds,
+                                 description, enabled, created_by, created_at)
+        VALUES (#{taskName}, #{taskCode}, #{sourceUrl}, #{sourceType}, #{crawlRule},
+                #{priority}, #{cronExpression}, #{maxRetry}, #{retryDelay}, #{timeoutSeconds},
+                #{description}, #{enabled}, #{createdBy}, NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE crawl_tasks
+        SET task_name = #{taskName}, source_url = #{sourceUrl}, source_type = #{sourceType},
+            crawl_rule = #{crawlRule}, priority = #{priority}, cron_expression = #{cronExpression},
+            max_retry = #{maxRetry}, retry_delay = #{retryDelay}, timeout_seconds = #{timeoutSeconds},
+            description = #{description}, enabled = #{enabled}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE crawl_tasks SET status = #{status}, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <update id="updateRunStats">
+        UPDATE crawl_tasks
+        SET status = #{status}, last_run_time = #{lastRunTime}, next_run_time = #{nextRunTime},
+            total_runs = total_runs + 1,
+            <if test="status == 'completed'">success_runs = success_runs + 1,</if>
+            <if test="status == 'failed'">fail_runs = fail_runs + 1,</if>
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM crawl_tasks WHERE id = #{id}
+    </delete>
+
+</mapper>

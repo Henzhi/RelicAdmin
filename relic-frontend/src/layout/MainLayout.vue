@@ -158,6 +158,10 @@
               <el-icon><Tools /></el-icon>
               <span>系统管理</span>
             </template>
+            <el-menu-item index="/crawl-task">
+              <el-icon><Monitor /></el-icon>
+              <span>爬取任务</span>
+            </el-menu-item>
             <el-menu-item index="/backup">
               <el-icon><FolderOpened /></el-icon>
               <span>备份管理</span>
@@ -169,6 +173,10 @@
             <el-menu-item index="/backup-restore-logs">
               <el-icon><Clock /></el-icon>
               <span>恢复日志</span>
+            </el-menu-item>
+            <el-menu-item index="/system-config">
+              <el-icon><Setting /></el-icon>
+              <span>系统配置</span>
             </el-menu-item>
           </el-sub-menu>
         </el-menu>

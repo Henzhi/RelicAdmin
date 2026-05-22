@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.CrawlTaskLogMapper">
+
+    <select id="selectByPage" resultType="map">
+        SELECT cl.id, cl.task_id AS taskId, cl.task_name AS taskName,
+               cl.start_time AS startTime, cl.end_time AS endTime,
+               cl.status, cl.crawled_count AS crawledCount,
+               cl.error_message AS errorMessage, cl.retry_count AS retryCount,
+               cl.executor_id AS executorId, cl.created_at AS createdAt
+        FROM crawl_task_logs cl
+        <where>
+            <if test="taskId != null">
+                AND cl.task_id = #{taskId}
+            </if>
+            <if test="status != null and status != ''">
+                AND cl.status = #{status}
+            </if>
+        </where>
+        ORDER BY cl.id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByPage" resultType="long">
+        SELECT COUNT(*) FROM crawl_task_logs
+        <where>
+            <if test="taskId != null">
+                AND task_id = #{taskId}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectRecentByTaskId" resultType="map">
+        SELECT cl.id, cl.task_id AS taskId, cl.task_name AS taskName,
+               cl.start_time AS startTime, cl.end_time AS endTime,
+               cl.status, cl.crawled_count AS crawledCount,
+               cl.error_message AS errorMessage, cl.retry_count AS retryCount,
+               cl.executor_id AS executorId, cl.created_at AS createdAt
+        FROM crawl_task_logs cl
+        WHERE cl.task_id = #{taskId}
+        ORDER BY cl.id DESC
+        LIMIT #{limit}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO crawl_task_logs (task_id, task_name, start_time, status, crawled_count,
+                                      error_message, retry_count, executor_id)
+        VALUES (#{taskId}, #{taskName}, #{startTime}, #{status}, #{crawledCount},
+                #{errorMessage}, #{retryCount}, #{executorId})
+    </insert>
+
+    <update id="updateResult">
+        UPDATE crawl_task_logs
+        SET end_time = #{endTime}, status = #{status},
+            crawled_count = #{crawledCount}, error_message = #{errorMessage}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

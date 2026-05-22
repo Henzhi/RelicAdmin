@@ -11,12 +11,25 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class CrawlTask {
     private Integer id;
-    private Integer museumId;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private String taskName;
+    private String taskCode;
+    private String sourceUrl;
+    private String sourceType;
+    private String crawlRule;
+    private Integer priority;
+    private String cronExpression;
+    private Integer maxRetry;
+    private Integer retryDelay;
+    private Integer timeoutSeconds;
     private String status;
-    private Integer itemsCrawled;
-    private Integer itemsNew;
-    private Integer itemsUpdated;
-    private String errorMessage;
+    private LocalDateTime lastRunTime;
+    private LocalDateTime nextRunTime;
+    private Integer totalRuns;
+    private Integer successRuns;
+    private Integer failRuns;
+    private String description;
+    private Integer enabled;
+    private Integer createdBy;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
