@@ -133,7 +133,12 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getCurrentAdmin, updateAdminUser, updateAdminPassword } from '@/api/adminUser'
+import { getCurrentAdmin, updateCurrentProfile, updateCurrentPassword } from '@/api/adminUser'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
+
+const auth = useAuthStore()
+const router = useRouter()
 
 const profile = ref({})
 const editing = ref(false)
@@ -222,6 +227,12 @@ async function loadProfile() {
     form.email = res.data.email || ''
     form.phone = res.data.phone || ''
     form.avatarUrl = res.data.avatarUrl || ''
+    auth.userInfo = {
+      id: res.data.id,
+      username: res.data.username,
+      nickname: res.data.realName || res.data.username
+    }
+    localStorage.setItem('admin_user', JSON.stringify(auth.userInfo))
   } catch (e) {
     ElMessage.error('加载个人信息失败')
   }
@@ -245,7 +256,7 @@ async function handleSave() {
   if (!valid) return
   saving.value = true
   try {
-    await updateAdminUser(profile.value.id, {
+    await updateCurrentProfile({
       realName: form.realName,
       email: form.email,
       phone: form.phone,
@@ -273,12 +284,16 @@ async function handleChangePassword() {
   if (!valid) return
   changingPwd.value = true
   try {
-    await updateAdminPassword(profile.value.id, {
+    await updateCurrentPassword({
       oldPassword: passwordForm.oldPassword,
       newPassword: passwordForm.newPassword
     })
     ElMessage.success('密码修改成功，请重新登录')
     resetPasswordForm()
+    setTimeout(() => {
+      auth.logout()
+      router.push('/login')
+    }, 1500)
   } catch (e) {
     ElMessage.error('密码修改失败，请检查原密码是否正确')
   } finally {

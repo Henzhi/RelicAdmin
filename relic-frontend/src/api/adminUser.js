@@ -43,3 +43,19 @@ export function updateAdminPassword(id, data) {
 export function resetAdminPassword(id, newPassword) {
   return adminApi.put(`/admin-user/${id}/password/reset`, { newPassword })
 }
+
+export function updateCurrentProfile(data) {
+  return adminApi.put('/admin-user/current/profile', data)
+}
+
+export function updateCurrentPassword(data) {
+  return adminApi.put('/admin-user/current/password', data)
+}
+
+export function uploadCurrentAvatar(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return adminApi.post('/admin-user/current/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}

@@ -221,6 +221,12 @@ const routes = [
         meta: { title: '系统配置', icon: 'Setting' }
       },
       {
+        path: 'profile',
+        name: 'Profile',
+        component: () => import('@/views/ProfileView.vue'),
+        meta: { title: '个人中心', icon: 'User' }
+      },
+      {
         path: 'logs',
         name: 'LogAdmin',
         component: () => import('@/views/LogAdminView.vue'),
