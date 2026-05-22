@@ -1,5 +1,6 @@
 package com.relic.controller.admin;
 
+import com.relic.annotation.OperationLog;
 import com.relic.dto.ViolationTypeCreateDTO;
 import com.relic.dto.ViolationTypeUpdateDTO;
 import com.relic.result.Result;
@@ -28,24 +29,28 @@ public class ViolationTypeAdminController {
     }
 
     @PostMapping
+    @OperationLog(operationType = "INSERT", targetType = "ViolationType")
     public Result<Void> create(@RequestBody ViolationTypeCreateDTO dto) {
         violationTypeService.create(dto);
         return Result.success();
     }
 
     @PutMapping("/{id}")
+    @OperationLog(operationType = "UPDATE", targetType = "ViolationType")
     public Result<Void> update(@PathVariable Integer id, @RequestBody ViolationTypeUpdateDTO dto) {
         violationTypeService.update(id, dto);
         return Result.success();
     }
 
     @PutMapping("/{id}/status")
+    @OperationLog(operationType = "UPDATE", targetType = "ViolationType")
     public Result<Void> updateStatus(@PathVariable Integer id, @RequestBody Map<String, Integer> body) {
         violationTypeService.updateStatus(id, body.get("status"));
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
+    @OperationLog(operationType = "DELETE", targetType = "ViolationType")
     public Result<Void> delete(@PathVariable Integer id) {
         violationTypeService.delete(id);
         return Result.success();

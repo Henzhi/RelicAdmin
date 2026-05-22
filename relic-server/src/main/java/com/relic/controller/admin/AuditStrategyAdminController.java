@@ -1,5 +1,6 @@
 package com.relic.controller.admin;
 
+import com.relic.annotation.OperationLog;
 import com.relic.dto.AuditStrategyUpdateDTO;
 import com.relic.result.Result;
 import com.relic.service.AuditStrategyService;
@@ -24,6 +25,7 @@ public class AuditStrategyAdminController {
     }
 
     @PutMapping("/{id}")
+    @OperationLog(operationType = "UPDATE", targetType = "AuditStrategy")
     public Result<Void> update(@PathVariable Integer id, @RequestBody AuditStrategyUpdateDTO dto) {
         auditStrategyService.updateStrategy(id, dto);
         return Result.success();

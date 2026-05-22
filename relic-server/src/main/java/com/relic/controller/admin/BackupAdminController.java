@@ -1,5 +1,6 @@
 package com.relic.controller.admin;
 
+import com.relic.annotation.OperationLog;
 import com.relic.dto.BackupCreateDTO;
 import com.relic.dto.BackupStrategyUpdateDTO;
 import com.relic.dto.RestoreConfirmDTO;
@@ -43,6 +44,7 @@ public class BackupAdminController {
     }
 
     @PostMapping("/create")
+    @OperationLog(operationType = "INSERT", targetType = "Backup")
     public Result<Map<String, Object>> create(@RequestBody BackupCreateDTO dto) {
         return Result.success(backupService.createBackup(dto));
     }
@@ -79,6 +81,7 @@ public class BackupAdminController {
     }
 
     @DeleteMapping("/{id}")
+    @OperationLog(operationType = "DELETE", targetType = "Backup")
     public Result<Void> delete(@PathVariable Long id) {
         backupService.deleteBackup(id);
         return Result.success();
@@ -90,6 +93,7 @@ public class BackupAdminController {
     }
 
     @PutMapping("/strategy/{id}")
+    @OperationLog(operationType = "UPDATE", targetType = "Backup")
     public Result<Void> updateStrategy(@PathVariable Integer id, @RequestBody BackupStrategyUpdateDTO dto) {
         backupStrategyService.updateStrategy(id, dto);
         return Result.success();
@@ -114,6 +118,7 @@ public class BackupAdminController {
     }
 
     @PostMapping("/restore")
+    @OperationLog(operationType = "UPDATE", targetType = "Restore")
     public Result<Map<String, Object>> restore(@RequestBody RestoreConfirmDTO dto) {
         return Result.success(restoreService.restore(dto.getBackupId(), dto));
     }

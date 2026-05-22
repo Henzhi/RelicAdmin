@@ -178,6 +178,10 @@
               <el-icon><Setting /></el-icon>
               <span>系统配置</span>
             </el-menu-item>
+            <el-menu-item index="/logs">
+              <el-icon><Document /></el-icon>
+              <span>日志管理</span>
+            </el-menu-item>
           </el-sub-menu>
         </el-menu>
       </el-aside>

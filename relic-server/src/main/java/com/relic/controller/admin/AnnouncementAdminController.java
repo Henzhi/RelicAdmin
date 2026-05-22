@@ -1,5 +1,6 @@
 package com.relic.controller.admin;
 
+import com.relic.annotation.OperationLog;
 import com.relic.dto.AnnouncementCreateDTO;
 import com.relic.result.Result;
 import com.relic.service.AnnouncementService;
@@ -27,24 +28,28 @@ public class AnnouncementAdminController {
     }
 
     @PostMapping
+    @OperationLog(operationType = "INSERT", targetType = "Announcement")
     public Result<Void> create(@RequestBody AnnouncementCreateDTO dto) {
         announcementService.create(dto);
         return Result.success();
     }
 
     @PutMapping("/{id}")
+    @OperationLog(operationType = "UPDATE", targetType = "Announcement")
     public Result<Void> update(@PathVariable Long id, @RequestBody AnnouncementCreateDTO dto) {
         announcementService.update(id, dto);
         return Result.success();
     }
 
     @PutMapping("/{id}/offline")
+    @OperationLog(operationType = "UPDATE", targetType = "Announcement")
     public Result<Void> offline(@PathVariable Long id) {
         announcementService.offline(id);
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
+    @OperationLog(operationType = "DELETE", targetType = "Announcement")
     public Result<Void> delete(@PathVariable Long id) {
         announcementService.delete(id);
         return Result.success();

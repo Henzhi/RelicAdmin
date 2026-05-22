@@ -219,6 +219,12 @@ const routes = [
         name: 'SystemConfigAdmin',
         component: () => import('@/views/SystemConfigAdminView.vue'),
         meta: { title: '系统配置', icon: 'Setting' }
+      },
+      {
+        path: 'logs',
+        name: 'LogAdmin',
+        component: () => import('@/views/LogAdminView.vue'),
+        meta: { title: '日志管理', icon: 'Document' }
       }
     ]
   }

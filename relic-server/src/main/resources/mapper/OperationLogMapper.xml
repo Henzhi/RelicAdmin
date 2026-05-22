@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.relic.mapper.OperationLogMapper">
+
+    <sql id="whereClause">
+        <where>
+            <if test="userId != null">
+                AND ol.user_id = #{userId}
+            </if>
+            <if test="operationType != null and operationType != ''">
+                AND ol.operation_type = #{operationType}
+            </if>
+            <if test="targetType != null and targetType != ''">
+                AND ol.target_type = #{targetType}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (ol.target_type LIKE CONCAT('%', #{keyword}, '%')
+                     OR ol.target_id LIKE CONCAT('%', #{keyword}, '%')
+                     OR ol.new_value LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND ol.created_at &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND ol.created_at &lt;= #{endTime}
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectByPage" resultType="map">
+        SELECT ol.id, ol.user_id AS userId, ol.operation_type AS operationType,
+               ol.target_type AS targetType, ol.target_id AS targetId,
+               ol.old_value AS oldValue, ol.new_value AS newValue,
+               ol.ip, ol.user_agent AS userAgent, ol.created_at AS createdAt,
+               (SELECT au.username FROM admin_users au WHERE au.id = ol.user_id) AS operatorName
+        FROM operation_logs ol
+        <include refid="whereClause"/>
+        ORDER BY ol.id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByPage" resultType="long">
+        SELECT COUNT(*) FROM operation_logs ol
+        <include refid="whereClause"/>
+    </select>
+
+    <select id="selectAllForExport" resultType="map">
+        SELECT ol.id, ol.user_id AS userId, ol.operation_type AS operationType,
+               ol.target_type AS targetType, ol.target_id AS targetId,
+               ol.old_value AS oldValue, ol.new_value AS newValue,
+               ol.ip, ol.user_agent AS userAgent, ol.created_at AS createdAt,
+               (SELECT au.username FROM admin_users au WHERE au.id = ol.user_id) AS operatorName
+        FROM operation_logs ol
+        <include refid="whereClause"/>
+        ORDER BY ol.id DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO operation_logs (user_id, operation_type, target_type, target_id,
+                                     old_value, new_value, ip, user_agent, created_at)
+        VALUES (#{userId}, #{operationType}, #{targetType}, #{targetId},
+                #{oldValue}, #{newValue}, #{ip}, #{userAgent}, NOW())
+    </insert>
+
+</mapper>

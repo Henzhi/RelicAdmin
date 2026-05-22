@@ -1,5 +1,6 @@
 package com.relic.controller.admin;
 
+import com.relic.annotation.OperationLog;
 import com.relic.dto.DatasourceConfigCreateDTO;
 import com.relic.dto.DatasourceConfigUpdateDTO;
 import com.relic.dto.SystemConfigCreateDTO;
@@ -41,24 +42,28 @@ public class SystemConfigAdminController {
     }
 
     @PostMapping
+    @OperationLog(operationType = "INSERT", targetType = "SystemConfig")
     public Result<Void> create(@RequestBody SystemConfigCreateDTO dto) {
         systemConfigService.create(dto);
         return Result.success();
     }
 
     @PutMapping("/{id}")
+    @OperationLog(operationType = "UPDATE", targetType = "SystemConfig")
     public Result<Void> update(@PathVariable Integer id, @RequestBody SystemConfigUpdateDTO dto) {
         systemConfigService.update(id, dto);
         return Result.success();
     }
 
     @PutMapping("/{id}/value")
+    @OperationLog(operationType = "UPDATE", targetType = "SystemConfig")
     public Result<Void> updateValue(@PathVariable Integer id, @RequestBody Map<String, String> body) {
         systemConfigService.updateValue(id, body.get("configValue"));
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
+    @OperationLog(operationType = "DELETE", targetType = "SystemConfig")
     public Result<Void> delete(@PathVariable Integer id) {
         systemConfigService.delete(id);
         return Result.success();
@@ -79,24 +84,28 @@ public class SystemConfigAdminController {
     }
 
     @PostMapping("/datasource")
+    @OperationLog(operationType = "INSERT", targetType = "SystemConfig")
     public Result<Void> createDatasource(@RequestBody DatasourceConfigCreateDTO dto) {
         systemConfigService.createDatasource(dto);
         return Result.success();
     }
 
     @PutMapping("/datasource/{id}")
+    @OperationLog(operationType = "UPDATE", targetType = "SystemConfig")
     public Result<Void> updateDatasource(@PathVariable Integer id, @RequestBody DatasourceConfigUpdateDTO dto) {
         systemConfigService.updateDatasource(id, dto);
         return Result.success();
     }
 
     @PostMapping("/datasource/{id}/test")
+    @OperationLog(operationType = "UPDATE", targetType = "SystemConfig")
     public Result<String> testConnection(@PathVariable Integer id) {
         systemConfigService.testConnection(id);
         return Result.success("连接测试成功");
     }
 
     @DeleteMapping("/datasource/{id}")
+    @OperationLog(operationType = "DELETE", targetType = "SystemConfig")
     public Result<Void> deleteDatasource(@PathVariable Integer id) {
         systemConfigService.deleteDatasource(id);
         return Result.success();
@@ -108,6 +117,7 @@ public class SystemConfigAdminController {
     }
 
     @PutMapping("/feature-toggles/{id}/toggle")
+    @OperationLog(operationType = "UPDATE", targetType = "SystemConfig")
     public Result<Void> toggleFeature(@PathVariable Integer id, @RequestBody Map<String, String> body) {
         systemConfigService.updateValue(id, body.get("configValue"));
         return Result.success();

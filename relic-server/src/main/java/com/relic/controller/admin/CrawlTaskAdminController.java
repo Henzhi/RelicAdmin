@@ -1,5 +1,6 @@
 package com.relic.controller.admin;
 
+import com.relic.annotation.OperationLog;
 import com.relic.dto.CrawlTaskCreateDTO;
 import com.relic.dto.CrawlTaskUpdateDTO;
 import com.relic.result.Result;
@@ -34,6 +35,7 @@ public class CrawlTaskAdminController {
     }
 
     @PostMapping
+    @OperationLog(operationType = "INSERT", targetType = "CrawlTask")
     public Result<Void> create(@RequestBody CrawlTaskCreateDTO dto,
                                @RequestAttribute(value = "userId", required = false) Integer userId) {
         crawlTaskService.create(dto, userId);
@@ -41,12 +43,14 @@ public class CrawlTaskAdminController {
     }
 
     @PutMapping("/{id}")
+    @OperationLog(operationType = "UPDATE", targetType = "CrawlTask")
     public Result<Void> update(@PathVariable Integer id, @RequestBody CrawlTaskUpdateDTO dto) {
         crawlTaskService.update(id, dto);
         return Result.success();
     }
 
     @PostMapping("/{id}/execute")
+    @OperationLog(operationType = "UPDATE", targetType = "CrawlTask")
     public Result<String> execute(@PathVariable Integer id,
                                   @RequestAttribute(value = "userId", required = false) Integer userId) {
         crawlTaskService.execute(id, userId);
@@ -54,18 +58,21 @@ public class CrawlTaskAdminController {
     }
 
     @PostMapping("/{id}/pause")
+    @OperationLog(operationType = "UPDATE", targetType = "CrawlTask")
     public Result<Void> pause(@PathVariable Integer id) {
         crawlTaskService.pause(id);
         return Result.success();
     }
 
     @PostMapping("/{id}/resume")
+    @OperationLog(operationType = "UPDATE", targetType = "CrawlTask")
     public Result<Void> resume(@PathVariable Integer id) {
         crawlTaskService.resume(id);
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
+    @OperationLog(operationType = "DELETE", targetType = "CrawlTask")
     public Result<Void> delete(@PathVariable Integer id) {
         crawlTaskService.delete(id);
         return Result.success();

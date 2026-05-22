@@ -1,5 +1,6 @@
 package com.relic.controller.admin;
 
+import com.relic.annotation.OperationLog;
 import com.relic.dto.SensitiveWordCreateDTO;
 import com.relic.dto.SensitiveWordUpdateDTO;
 import com.relic.result.Result;
@@ -30,30 +31,35 @@ public class SensitiveWordAdminController {
     }
 
     @PostMapping
+    @OperationLog(operationType = "INSERT", targetType = "SensitiveWord")
     public Result<Void> create(@RequestBody SensitiveWordCreateDTO dto) {
         sensitiveWordService.create(dto);
         return Result.success();
     }
 
     @PostMapping("/import")
+    @OperationLog(operationType = "INSERT", targetType = "SensitiveWord")
     public Result<Void> batchImport(@RequestBody Map<String, String> body) {
         sensitiveWordService.batchImport(body.get("content"));
         return Result.success();
     }
 
     @PutMapping("/{id}")
+    @OperationLog(operationType = "UPDATE", targetType = "SensitiveWord")
     public Result<Void> update(@PathVariable Long id, @RequestBody SensitiveWordUpdateDTO dto) {
         sensitiveWordService.update(id, dto);
         return Result.success();
     }
 
     @PutMapping("/{id}/status")
+    @OperationLog(operationType = "UPDATE", targetType = "SensitiveWord")
     public Result<Void> updateStatus(@PathVariable Long id, @RequestBody Map<String, Integer> body) {
         sensitiveWordService.updateStatus(id, body.get("status"));
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
+    @OperationLog(operationType = "DELETE", targetType = "SensitiveWord")
     public Result<Void> delete(@PathVariable Long id) {
         sensitiveWordService.delete(id);
         return Result.success();
