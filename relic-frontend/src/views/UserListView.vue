@@ -47,7 +47,7 @@
         <el-table-column prop="lastLogin" label="最后登录" width="160" />
         <el-table-column label="操作" min-width="340" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" @click="handleAssignRoles(row)">分配角色</el-button>
+<!--            <el-button size="small" @click="handleAssignRoles(row)">分配角色</el-button>-->
 
             <el-popconfirm title="确定要切换评论权限吗？" @confirm="handleToggleComment(row)">
               <template #reference>
