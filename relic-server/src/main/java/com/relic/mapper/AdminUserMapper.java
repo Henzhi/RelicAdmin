@@ -1,6 +1,7 @@
 package com.relic.mapper;
 
 import com.relic.entity.AdminUser;
+import com.relic.vo.AdminUserVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -10,8 +11,8 @@ import java.util.List;
 public interface AdminUserMapper {
     AdminUser selectById(@Param("id") Integer id);
     AdminUser selectByUsername(@Param("username") String username);
-    List<AdminUser> selectByPage(@Param("username") String username, @Param("realName") String realName,
-                                 @Param("status") String status, @Param("offset") int offset, @Param("limit") int limit);
+    List<AdminUserVO> selectByPage(@Param("username") String username, @Param("realName") String realName,
+                                   @Param("status") String status, @Param("offset") int offset, @Param("limit") int limit);
     long countByPage(@Param("username") String username, @Param("realName") String realName, @Param("status") String status);
     int insert(AdminUser adminUser);
     int update(AdminUser adminUser);

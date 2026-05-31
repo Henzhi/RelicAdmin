@@ -12,6 +12,7 @@ import com.relic.vo.AdminUserVO;
 import com.relic.vo.PageResultVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/admin/admin-user")
 @RequiredArgsConstructor
@@ -35,7 +37,9 @@ public class AdminAccountController {
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String realName,
             @RequestParam(required = false) String status) {
-        return Result.success(adminUserService.page(username, realName, status, page, pageSize));
+        PageResultVO<AdminUserVO> pageResultVO = adminUserService.page(username, realName, status, page, pageSize);
+        log.info("{}",pageResultVO);
+        return Result.success(pageResultVO);
     }
 
     @GetMapping("/{id}")
