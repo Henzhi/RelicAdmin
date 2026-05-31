@@ -153,7 +153,7 @@ RelicAdmin 是一个面向文化机构和博物馆的全栈文物数字化管理
 ### 1. 克隆项目
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Henzhi/RelicAdmin.git
 cd RelicAdmin
 ```
 
@@ -167,18 +167,9 @@ CREATE DATABASE IF NOT EXISTS relic_admin DEFAULT CHARACTER SET utf8mb4 COLLATE 
 
 #### 2.2 执行迁移脚本
 
-按顺序执行 `relic-server/src/main/resources/db/migration/` 目录下的 SQL 脚本：
+执行根目录下的 `seitem.sql` 脚本：
 
-```bash
-# 执行顺序
-V1__admin_user_system.sql       # 管理员账户体系 + 角色种子数据
-V2__audit_strategies.sql        # 审核策略配置表
-V3__backup_system.sql           # 备份策略与记录表
-V4__crawl_task_module.sql       # 爬取任务模块
-V5__system_config_module.sql    # 系统配置模块
-V6__field_fix_and_feature_toggle.sql  # 字段修复与功能开关
-V7__monitoring_dashboard.sql    # 监控仪表盘
-```
+
 
 > **注意**：V1 脚本会创建默认超级管理员账号：
 > - 用户名：`admin`
@@ -194,7 +185,7 @@ relic:
     driver-class-name: com.mysql.cj.jdbc.Driver
     host: localhost          # 数据库地址
     port: 3306               # 数据库端口
-    database: relic_admin    # 数据库名
+    database: seitem    # 数据库名
     username: root           # 数据库用户名
     password: your_password  # 数据库密码
 
@@ -309,6 +300,7 @@ RelicAdmin/
 ├── API-Documentation.md             # 详细 API 接口文档
 ├── pom.xml                          # Maven 父 POM（依赖版本管理）
 └── README.md                        # 本文件
+└── seitem.sql                       数据库迁移脚本
 ```
 
 ---
@@ -629,9 +621,8 @@ test: 补充 PenaltyService 单元测试
 
 ## 联系方式
 
-- **项目负责人**：[填写姓名]
-- **邮箱**：[填写邮箱]
-- **问题反馈**：[GitHub Issues](<repository-url>/issues)
+- **项目负责人**：[mahh]
+- **邮箱**：[mahh315@163.com]
 
 ---
 
