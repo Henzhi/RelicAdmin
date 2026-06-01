@@ -23,4 +23,6 @@ public class AdminUserVO {
     private String lastIp;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    //角色id
+    private Integer roleId;
 }
