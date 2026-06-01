@@ -51,11 +51,12 @@ public class AdminUserController {
         return Result.success();
     }
 
-    @PutMapping("/{userId}/roles")
-    public Result<Void> assignRoles(@PathVariable Integer userId, @RequestBody RoleAssignDTO dto) {
-        userService.assignRoles(userId, dto.getRoleIds());
-        return Result.success();
-    }
+    //用户不应该有管理员角色分配（弃用）
+//    @PutMapping("/{userId}/roles")
+//    public Result<Void> assignRoles(@PathVariable Integer userId, @RequestBody RoleAssignDTO dto) {
+//        userService.assignRoles(userId, dto.getRoleId());
+//        return Result.success();
+//    }
 
     @PutMapping("/comment-disable/{userId}")
     public Result<Void> disableComment(@PathVariable Integer userId, @RequestBody CommentUploadDisableDTO dto) {

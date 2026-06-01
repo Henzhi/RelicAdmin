@@ -107,17 +107,18 @@ public class UserServiceImpl implements UserService {
         userMapper.updateStatus(userId, dto.getStatus(), dto.getBanReason());
     }
 
-    @Override
-    @Transactional
-    public void assignRoles(Integer userId, Integer[] roleIds) {
-        userRoleMapper.deleteByUserId(userId);
-        if (roleIds != null && roleIds.length > 0) {
-            String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-            for (Integer roleId : roleIds) {
-                userRoleMapper.insert(userId, roleId, 1, now);
-            }
-        }
-    }
+//    @Override
+//    @Transactional
+//    public void assignRoles(Integer userId, Integer roleId) {
+//        userRoleMapper.deleteByUserId(userId);
+//        if (roleId != null) {
+//            String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+//            userRoleMapper.insert(userId, roleId, 1, now);
+//            for (Integer roleId : roleIds) {
+//                userRoleMapper.insert(userId, roleId, 1, now);
+//            }
+//        }
+//    }
 
     @Override
     public void disableComment(Integer userId, Integer commentDisabled) {

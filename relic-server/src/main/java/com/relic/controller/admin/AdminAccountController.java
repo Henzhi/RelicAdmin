@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.management.relation.InvalidRoleValueException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
@@ -38,7 +39,7 @@ public class AdminAccountController {
             @RequestParam(required = false) String realName,
             @RequestParam(required = false) String status) {
         PageResultVO<AdminUserVO> pageResultVO = adminUserService.page(username, realName, status, page, pageSize);
-//        log.info("{}",pageResultVO);
+        log.info("{}",pageResultVO);
         return Result.success(pageResultVO);
     }
 
@@ -77,8 +78,8 @@ public class AdminAccountController {
     }
 
     @PutMapping("/{adminUserId}/roles")
-    public Result<Void> assignRoles(@PathVariable Integer adminUserId, @RequestBody RoleAssignDTO dto) {
-        adminUserService.assignRoles(adminUserId, dto.getRoleIds());
+    public Result<Void> assignRoles(@PathVariable Integer adminUserId, @RequestBody RoleAssignDTO dto) throws InvalidRoleValueException {
+        adminUserService.assignRoles(adminUserId, dto.getRoleId());
         return Result.success();
     }
 

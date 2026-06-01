@@ -47,7 +47,8 @@
         <el-table-column prop="lastLogin" label="最后登录" width="160" />
         <el-table-column label="操作" min-width="340" fixed="right">
           <template #default="{ row }">
-<!--            <el-button size="small" @click="handleAssignRoles(row)">分配角色</el-button>-->
+            <!-- 弃用：用户不能分配管理员角色 -->
+           <!-- <el-button size="small" @click="handleAssignRoles(row)">分配角色</el-button> -->
 
             <el-popconfirm title="确定要切换评论权限吗？" @confirm="handleToggleComment(row)">
               <template #reference>
@@ -134,8 +135,8 @@
         <el-button type="primary" :loading="createSubmitting" @click="handleCreate">确 定</el-button>
       </template>
     </el-dialog>
-
-    <el-dialog v-model="roleDialogVisible" title="分配角色" width="480px">
+    <!-- 弃用 -->
+    <!-- <el-dialog v-model="roleDialogVisible" title="分配角色" width="480px">
       <div v-if="roleLoading" style="text-align:center;padding:40px">
         <el-icon class="is-loading" :size="32"><Loading /></el-icon>
         <p>加载中...</p>
@@ -155,14 +156,14 @@
         <el-button @click="roleDialogVisible = false">取消</el-button>
         <el-button type="primary" :loading="roleSubmitLoading" @click="confirmAssignRoles">确定</el-button>
       </template>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getUserPage, createUser, deleteUser, banUser, assignUserRoles, disableComment, disableUpload } from '../api/user'
+import { getUserPage, createUser, deleteUser, banUser, disableComment, disableUpload } from '../api/user'
 import { getRoleList } from '../api/role'
 
 const loading = ref(false)
@@ -339,41 +340,42 @@ async function handleBan(row) {
   }
 }
 
-const roleDialogVisible = ref(false)
-const roleLoading = ref(false)
-const roleSubmitLoading = ref(false)
-const allRoles = ref([])
-const selectedRoleIds = ref([])
-let currentUserId = null
+// const roleDialogVisible = ref(false)
+// const roleLoading = ref(false)
+// const roleSubmitLoading = ref(false)
+// const allRoles = ref([])
+// const selectedRoleIds = ref([])
+// let currentUserId = null
 
-async function handleAssignRoles(row) {
-  currentUserId = row.id
-  roleDialogVisible.value = true
-  roleLoading.value = true
-  try {
-    const res = await getRoleList()
-    allRoles.value = res.data
-    selectedRoleIds.value = []
-  } catch {
-    ElMessage.error('加载角色列表失败')
-    roleDialogVisible.value = false
-  } finally {
-    roleLoading.value = false
-  }
-}
+//弃用
+// async function handleAssignRoles(row) {
+//   currentUserId = row.id
+//   roleDialogVisible.value = true
+//   roleLoading.value = true
+//   try {
+//     const res = await getRoleList()
+//     allRoles.value = res.data
+//     selectedRoleIds.value = []
+//   } catch {
+//     ElMessage.error('加载角色列表失败')
+//     roleDialogVisible.value = false
+//   } finally {
+//     roleLoading.value = false
+//   }
+// }
 
-async function confirmAssignRoles() {
-  roleSubmitLoading.value = true
-  try {
-    await assignUserRoles(currentUserId, { roleIds: selectedRoleIds.value })
-    ElMessage.success('角色分配成功')
-    roleDialogVisible.value = false
-  } catch {
-    ElMessage.error('角色分配失败')
-  } finally {
-    roleSubmitLoading.value = false
-  }
-}
+// async function confirmAssignRoles() {
+//   roleSubmitLoading.value = true
+//   try {
+//     await assignUserRoles(currentUserId, { roleIds: selectedRoleIds.value })
+//     ElMessage.success('角色分配成功')
+//     roleDialogVisible.value = false
+//   } catch {
+//     ElMessage.error('角色分配失败')
+//   } finally {
+//     roleSubmitLoading.value = false
+//   }
+// }
 
 onMounted(() => {
   fetchData()

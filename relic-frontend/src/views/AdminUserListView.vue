@@ -34,6 +34,11 @@
       <el-table :data="tableData" v-loading="loading" stripe border row-key="id">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="username" label="用户名" width="120" />
+        <el-table-column label="头像" width="120">
+          <template #default="{row}">
+            <el-image style="width: 100px; height: 100px" :src="handleAvatar(row.avatarUrl)"/>
+          </template>
+        </el-table-column>
         <el-table-column prop="realName" label="真实姓名" width="120" />
         <el-table-column prop="email" label="邮箱" width="180" />
         <el-table-column prop="phone" label="手机" width="130" />
@@ -50,10 +55,11 @@
         <el-table-column prop="lastLogin" label="最后登录" width="160" />
         <el-table-column prop="lastIp" label="最后IP" width="130" />
         <el-table-column prop="createdAt" label="创建时间" width="160" />
-        <el-table-column label="操作" min-width="300" fixed="right">
+        <el-table-column prop="updatedAt" label="更新时间" width="160" />
+        <el-table-column label="操作" min-width="350" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" @click="handleEdit(row)">编辑</el-button>
-            <el-button size="small" @click="handleAssignRoles(row)">分配角色</el-button>
+            <el-button :type="'success'" size="small" @click="handleEdit(row)">编辑</el-button>
+            <el-button :type="'primary'" size="small" @click="handleAssignRoles(row)">分配角色</el-button>
 
             <el-popconfirm v-if="row.status === 'active'" title="确定要禁用该管理员吗？" @confirm="handleChangeStatus(row, 'banned')">
               <template #reference>
@@ -114,9 +120,13 @@
           <el-input v-model="createForm.phone" placeholder="请输入手机号" maxlength="20" />
         </el-form-item>
         <el-form-item v-if="!isEdit" label="分配角色">
-          <el-select v-model="createForm.roleIds" multiple placeholder="选择角色（可选）" style="width:100%">
+          <el-radio-group v-model="createForm.roleId" text-color="#fff" fill="#6c6cff">
+            <el-radio-button v-for="role in allRoles" :key="role.id" :label="role.displayName" :value="role.id" />
+          </el-radio-group>
+          <!-- 多选方案（已废弃） -->
+          <!-- <el-select v-model="createForm.roleIds" multiple placeholder="选择角色（可选）" style="width:100%">
             <el-option v-for="role in allRoles" :key="role.id" :label="role.displayName" :value="role.id" />
-          </el-select>
+          </el-select> -->
         </el-form-item>
       </el-form>
       <template #footer>
@@ -131,14 +141,27 @@
         <p>加载中...</p>
       </div>
       <template v-else>
-        <el-checkbox-group v-model="selectedRoleIds">
+        <el-form-item v-if="!isEdit">
+          <!-- <el-radio-group v-model="selectedRoleId" text-color="#fff" fill="#6c6cff">
+            <el-radio-button v-for="role in allRoles" :key="role.id" :label="role.displayName" :value="role.id" />
+          </el-radio-group> -->
+          <el-radio-group v-model="selectedRoleId">
+            <el-radio v-for="role in allRoles" :key="role.id" :label="role.displayName" :value="role.id">
+                {{ role.displayName || role.name }}
+                <span style="color:#909399;font-size:12px;margin-left:8px">{{ role.description }}</span>
+            </el-radio>
+          </el-radio-group>
+        </el-form-item>
+        
+         <!-- 多选方案（已废弃） -->
+        <!-- <el-checkbox-group v-model="selectedRoleId">
           <div v-for="role in allRoles" :key="role.id" style="margin-bottom:12px">
             <el-checkbox :label="role.id" :value="role.id">
               {{ role.displayName || role.name }}
               <span style="color:#909399;font-size:12px;margin-left:8px">{{ role.description }}</span>
             </el-checkbox>
           </div>
-        </el-checkbox-group>
+        </el-checkbox-group> -->
         <el-empty v-if="allRoles.length === 0" description="暂无角色数据" />
       </template>
       <template #footer>
@@ -201,6 +224,7 @@ const tableData = ref([])
 const pagination = reactive({ page: 1, pageSize: 10, total: 0 })
 const filter = reactive({ username: '', realName: '', status: '' })
 
+//异步查询管理员信息
 async function fetchData() {
   loading.value = true
   try {
@@ -238,6 +262,11 @@ function resetFilter() {
   handleSearch()
 }
 
+function handleAvatar(avatarUrl){
+  return avatarUrl!==null&&avatarUrl!=''?avatarUrl:'https://seitem.oss-cn-beijing.aliyuncs.com/avatar/16/185f47ad-6198-4b73-90c5-e361f2238274.png';
+}
+
+//角色类型对应的tag类型，改变颜色用
 function roleType(roleId) {
   switch(roleId){
     case 1: return "danger";
@@ -246,6 +275,7 @@ function roleType(roleId) {
   }
 }
 
+//不同角色对应展示的名字
 function roleLabel(roleId) {
   switch(roleId){
     case 1: return "超级审核员";
@@ -273,7 +303,7 @@ const createForm = reactive({
   realName: '',
   email: '',
   phone: '',
-  roleIds: []
+  roleId: 1
 })
 const createRules = {
   username: [
@@ -326,7 +356,7 @@ async function handleSubmit() {
       realName: createForm.realName || undefined,
       email: createForm.email || undefined,
       phone: createForm.phone || undefined,
-      roleIds: createForm.roleIds.length > 0 ? createForm.roleIds : undefined
+      roleId: createForm.roleId || undefined
     }
     if (!isEdit.value) {
       data.password = createForm.password
@@ -373,7 +403,7 @@ const roleDialogVisible = ref(false)
 const roleLoading = ref(false)
 const roleSubmitLoading = ref(false)
 const allRoles = ref([])
-const selectedRoleIds = ref([])
+const selectedRoleId = ref(1)
 let currentAdminUserId = null
 
 async function loadRoles() {
@@ -389,7 +419,6 @@ async function handleAssignRoles(row) {
   currentAdminUserId = row.id
   roleDialogVisible.value = true
   roleLoading.value = true
-  selectedRoleIds.value = []
   try {
     await loadRoles()
   } catch {
@@ -402,9 +431,11 @@ async function handleAssignRoles(row) {
 async function confirmAssignRoles() {
   roleSubmitLoading.value = true
   try {
-    await assignAdminRoles(currentAdminUserId, { roleIds: selectedRoleIds.value })
+    await assignAdminRoles(currentAdminUserId, { roleId: selectedRoleId.value })
     ElMessage.success('角色分配成功')
     roleDialogVisible.value = false
+    //重新查询管理员信息
+    fetchData()
   } catch {
     ElMessage.error('角色分配失败')
   } finally {

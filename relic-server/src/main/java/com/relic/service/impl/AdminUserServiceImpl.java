@@ -6,6 +6,7 @@ import com.relic.dto.AdminUserUpdateDTO;
 import com.relic.entity.AdminUser;
 import com.relic.exception.AccountNotFoundException;
 import com.relic.exception.PasswordErrorException;
+import com.relic.exception.RoleNotFoundException;
 import com.relic.mapper.AdminUserMapper;
 import com.relic.mapper.AdminUserRoleMapper;
 import com.relic.service.AdminUserService;
@@ -16,11 +17,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.management.relation.InvalidRoleValueException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -75,12 +76,13 @@ public class AdminUserServiceImpl implements AdminUserService {
         adminUser.setCreatedAt(now);
         adminUser.setUpdatedAt(now);
         adminUserMapper.insert(adminUser);
-
-        if (dto.getRoleIds() != null && dto.getRoleIds().length > 0) {
+        //改用单选
+        if (dto.getRoleId() != null) {
             String nowStr = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-            for (Integer roleId : dto.getRoleIds()) {
-                adminUserRoleMapper.insert(adminUser.getId(), roleId, nowStr);
-            }
+            adminUserRoleMapper.insert(adminUser.getId(), dto.getRoleId(), nowStr);
+//            for (Integer roleId : dto.getRoleIds()) {
+//                adminUserRoleMapper.insert(adminUser.getId(), roleId, nowStr);
+//            }
         }
     }
 
@@ -119,13 +121,17 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     @Transactional
-    public void assignRoles(Integer adminUserId, Integer[] roleIds) {
+    public void assignRoles(Integer adminUserId, Integer roleId) throws InvalidRoleValueException {
         adminUserRoleMapper.deleteByAdminUserId(adminUserId);
-        if (roleIds != null && roleIds.length > 0) {
+        if (roleId != null) {
             String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-            for (Integer roleId : roleIds) {
-                adminUserRoleMapper.insert(adminUserId, roleId, now);
-            }
+            adminUserRoleMapper.insert(adminUserId, roleId, now);
+            //弃用多选
+//            for (Integer roleId : roleIds) {
+//                adminUserRoleMapper.insert(adminUserId, roleId, now);
+//            }
+        }else{
+            throw new InvalidRoleValueException("无效的角色值");
         }
     }
 
