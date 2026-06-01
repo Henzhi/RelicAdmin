@@ -37,6 +37,11 @@
         <el-table-column prop="realName" label="真实姓名" width="120" />
         <el-table-column prop="email" label="邮箱" width="180" />
         <el-table-column prop="phone" label="手机" width="130" />
+        <el-table-column label="角色" width="110">
+          <template #default="{ row }">
+            <el-tag :type="roleType(row.roleId)" size="small">{{ roleLabel(row.roleId) }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="状态" width="90">
           <template #default="{ row }">
             <el-tag :type="statusType(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
@@ -231,6 +236,22 @@ function resetFilter() {
   filter.realName = ''
   filter.status = ''
   handleSearch()
+}
+
+function roleType(roleId) {
+  switch(roleId){
+    case 1: return "danger";
+    case 4: return "success";
+    case 5: return "warning";
+  }
+}
+
+function roleLabel(roleId) {
+  switch(roleId){
+    case 1: return "超级审核员";
+    case 4: return "内容审核员";
+    case 5: return "数据管理员";
+  }
 }
 
 function statusType(status) {
