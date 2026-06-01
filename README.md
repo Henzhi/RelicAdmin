@@ -24,8 +24,6 @@
 - [使用指南](#使用指南)
 - [部署说明](#部署说明)
 - [贡献指南](#贡献指南)
-- [许可证](#许可证)
-- [联系方式](#联系方式)
 
 ---
 
@@ -162,7 +160,7 @@ cd RelicAdmin
 #### 2.1 创建数据库
 
 ```sql
-CREATE DATABASE IF NOT EXISTS relic_admin DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS seitem DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 #### 2.2 执行迁移脚本
@@ -213,7 +211,6 @@ mvn spring-boot:run -pl relic-server
 ```
 
 启动成功后访问：
-- 应用主页：`http://localhost:8080/`
 - API 文档（Knife4j）：`http://localhost:8080/doc.html`
 
 ### 5. 启动前端
@@ -578,9 +575,7 @@ server {
 ### 分支策略
 
 - `main` — 稳定发布分支
-- `develop` — 开发主分支
-- `feature/xxx` — 功能开发分支
-- `fix/xxx` — Bug 修复分支
+- `xxx` — 功能完善分支
 
 ### 提交规范
 
@@ -613,18 +608,6 @@ test: 补充 PenaltyService 单元测试
 
 ---
 
-## 许可证
-
-本项目基于 [MIT License](LICENSE) 开源。
-
----
-
-## 联系方式
-
-- **项目负责人**：[mahh]
-- **邮箱**：[mahh315@163.com]
-
----
 
 ## 附录
 
