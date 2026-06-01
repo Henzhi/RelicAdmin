@@ -39,7 +39,8 @@ public class AdminAccountController {
             @RequestParam(required = false) String realName,
             @RequestParam(required = false) String status) {
         PageResultVO<AdminUserVO> pageResultVO = adminUserService.page(username, realName, status, page, pageSize);
-        log.info("{}",pageResultVO);
+//        log.info("{}",pageResultVO);
+        log.info("当前操作人Id：{}",BaseContext.getCurrentId());
         return Result.success(pageResultVO);
     }
 

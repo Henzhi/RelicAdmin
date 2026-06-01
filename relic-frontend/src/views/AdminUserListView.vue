@@ -141,10 +141,11 @@
         <p>加载中...</p>
       </div>
       <template v-else>
-        <el-form-item v-if="!isEdit">
+        <el-form-item label="分配角色">
           <!-- <el-radio-group v-model="selectedRoleId" text-color="#fff" fill="#6c6cff">
             <el-radio-button v-for="role in allRoles" :key="role.id" :label="role.displayName" :value="role.id" />
           </el-radio-group> -->
+          <!-- 采用下面的单选显示方案 -->
           <el-radio-group v-model="selectedRoleId">
             <el-radio v-for="role in allRoles" :key="role.id" :label="role.displayName" :value="role.id">
                 {{ role.displayName || role.name }}
@@ -419,6 +420,8 @@ async function handleAssignRoles(row) {
   currentAdminUserId = row.id
   roleDialogVisible.value = true
   roleLoading.value = true
+  //默认选中超级管理员
+  selectedRoleId.value = 1
   try {
     await loadRoles()
   } catch {
@@ -426,6 +429,7 @@ async function handleAssignRoles(row) {
   } finally {
     roleLoading.value = false
   }
+  console.log(allRoles)
 }
 
 async function confirmAssignRoles() {
@@ -523,7 +527,7 @@ const selfPasswordRules = {
     }
   ]
 }
-
+//组件挂载成功后马上拉取数据
 onMounted(() => {
   fetchData()
 })

@@ -1,12 +1,15 @@
 package com.relic.service.impl;
 
+import com.relic.constant.MessageConstant;
+import com.relic.constant.RoleConstant;
 import com.relic.context.BaseContext;
 import com.relic.dto.AdminUserCreateDTO;
 import com.relic.dto.AdminUserUpdateDTO;
 import com.relic.entity.AdminUser;
+import com.relic.entity.AdminUserRole;
 import com.relic.exception.AccountNotFoundException;
+import com.relic.exception.InsufficientPermissionsException;
 import com.relic.exception.PasswordErrorException;
-import com.relic.exception.RoleNotFoundException;
 import com.relic.mapper.AdminUserMapper;
 import com.relic.mapper.AdminUserRoleMapper;
 import com.relic.service.AdminUserService;
@@ -61,6 +64,12 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional
     public void create(AdminUserCreateDTO dto) {
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //权限验证
+        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+            //不是超级管理员不允许创建管理员
+            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        }
         AdminUser existing = adminUserMapper.selectByUsername(dto.getUsername());
         if (existing != null) {
             throw new RuntimeException("管理员账号已存在");
@@ -88,6 +97,12 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public void update(Integer id, AdminUserUpdateDTO dto) {
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //权限验证
+        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+            //不是超级管理员不允许更新管理员信息
+            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        }
         AdminUser adminUser = new AdminUser();
         adminUser.setId(id);
         adminUser.setRealName(dto.getRealName());
@@ -101,6 +116,12 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional
     public void delete(Integer id) {
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //权限验证
+        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+            //不是超级管理员不允许删除管理员
+            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        }
         adminUserRoleMapper.deleteByAdminUserId(id);
         adminUserMapper.deleteById(id);
     }
@@ -108,6 +129,12 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional
     public void batchDelete(Integer[] ids) {
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //权限验证
+        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+            //不是超级管理员不允许删除管理员
+            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        }
         for (Integer id : ids) {
             adminUserRoleMapper.deleteByAdminUserId(id);
         }
@@ -116,12 +143,24 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public void updateStatus(Integer id, String status) {
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //权限验证
+        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+            //不是超级管理员不允许更新状态
+            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        }
         adminUserMapper.updateStatus(id, status);
     }
 
     @Override
     @Transactional
     public void assignRoles(Integer adminUserId, Integer roleId) throws InvalidRoleValueException {
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //权限验证
+        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+            //不是超级管理员不允许分配角色
+            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        }
         adminUserRoleMapper.deleteByAdminUserId(adminUserId);
         if (roleId != null) {
             String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
@@ -137,6 +176,12 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public void updatePassword(Integer id, String oldPassword, String newPassword) {
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //权限验证
+        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+            //不是超级管理员不允许更新其他管理员密码
+            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        }
         AdminUser adminUser = adminUserMapper.selectById(id);
         if (adminUser == null) {
             throw new AccountNotFoundException("管理员账号不存在");
@@ -149,6 +194,12 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public void resetPassword(Integer id, String newPassword) {
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //权限验证
+        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+            //不是超级管理员不允许重置其他管理员密码
+            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        }
         AdminUser adminUser = adminUserMapper.selectById(id);
         if (adminUser == null) {
             throw new AccountNotFoundException("管理员账号不存在");
