@@ -1,10 +1,5 @@
 # RelicAdmin 前端优化说明
 
-## 更新说明（2026-06-03）
-
-**修改密码校验**：个人中心「安全设置」及管理员改密表单中，若新密码与原密码相同，提示 **「新密码不能与原密码相同」** 并阻止提交；后端 `PUT /admin/admin-user/current/password` 及用户端改密接口同步返回 `PASSWORD_SAME_AS_OLD`。
-
----
 
 ## 一、改动概览
 
@@ -12,7 +7,6 @@
 |------|------|
 | 个人中心 · 角色展示 | 角色栏改为调用与「角色管理」相同的数据源，按 `displayName` 显示 |
 | 个人中心 · 界面优化 | 双栏响应式布局、标签页分区、头像区与全局样式统一 |
-| 个人中心 · 修改密码校验 | 新密码与原密码相同时，表单提示「新密码不能与原密码相同」并阻止提交；后端同步校验 |
 | 全局 UI（延续） | Element Plus 管理后台风格：布局、主题、列表页、分页等 |
 
 ---
@@ -89,7 +83,6 @@ relic-frontend/src/api/adminUser.js         # getCurrentAdmin、getAdminUserPage
 | 头像上传 | 横向头像区 + 说明文字；编辑模式下可上传；成功后左侧概览头像同步更新 |
 | 基本信息 | 姓名 / 手机两列并排，邮箱单行；仅编辑模式可改 |
 | 安全设置 | 顶部 info 提示「修改密码后需重新登录」 |
-| 修改密码校验 | 新密码与原密码一致时，原密码/新密码表单项提示「新密码不能与原密码相同」，无法提交；接口 `PUT /admin/admin-user/current/password` 同样拦截 |
 | 时间格式 | `2026-05-23T17:07:00` 自动格式化为 `2026-05-23 17:07:00` |
 
 ### 3.3 样式
@@ -138,7 +131,6 @@ npm run dev
 2. 进入 **个人中心**（侧栏或顶栏用户菜单）
 3. 确认左侧「角色」与 **角色管理 → 显示名称** 一致
 4. 切换「基本信息 / 安全设置」标签页，检查布局与编辑、改密流程
-5. 在「安全设置」中将新密码设为与原密码相同，应出现「新密码不能与原密码相同」提示且无法提交
 
 ### 构建
 
@@ -157,12 +149,97 @@ npm run build
 2. **`/current` 无 roleId**  
    属现有接口返回字段限制；本次在前端用分页接口补全，未改后端。
 
-3. **管理员列表角色列**  
-   仍使用 `roleId` + 本地 `roleLabel` 映射；个人中心已改为 `getRoleList` 的 `displayName`，与角色管理数据源一致。
+## 八、2026-06-02 更新
+
+### 8.1 管理员列表 · 操作列优化
+
+- 操作按钮改为 **link 文字按钮**，按功能区分颜色（编辑/分配角色、禁用/启用、重置密码、删除）
+- 使用 `.table-actions` 容器统一 **12px 间距**，避免按钮挤在一起
+- 涉及：`AdminUserListView.vue`、`admin-theme.css`
+
+### 8.2 顶栏与个人头像
+
+- 新增默认头像资源 `public/default-avatar.svg` 与工具 `utils/avatar.js`
+- 顶栏右上角显示当前管理员头像（无头像时显示默认图）
+- 登录、进入后台、个人中心加载/上传头像后，通过 `auth.updateUserInfo` 同步顶栏
+- 涉及：`MainLayout.vue`、`stores/auth.js`、`ProfileView.vue`
+
+### 8.3 前端架构精简
+
+| 新增 | 说明 |
+|------|------|
+| `composables/usePagination.js` | 列表分页、加载、翻页统一逻辑 |
+| `composables/useDateRangeQuery.js` | 时间范围筛选参数 |
+| `composables/useUserBehaviorList.js` | 用户行为类列表组合逻辑 |
+| `utils/format.js` | 时间格式化 `formatDateTime` |
+| `utils/status.js` | 用户/管理员状态标签 |
+| `components/ListPagination.vue` | 全局分页组件 |
+| `components/UserBehaviorSearchBar.vue` | 行为页共用搜索条 |
+| `config/menu.js` | 侧栏菜单配置（单一数据源） |
+
+**布局调整：**
+
+- `MainLayout.vue` 侧栏菜单改为读取 `config/menu.js`，补充「审核统计」入口
+- 布局级 `el-page-header` 默认关闭，由 `PageContainer` 统一页面标题，避免双标题
+- 旧路由 `/favorites` 重定向至 `/user-behavior/favorites`
+
+**已迁移示例页面：**
+
+- `UserFavoriteAdminView.vue`、`UserFollowAdminView.vue`（`PageContainer` + composable）
+- `admin-theme.css` 新增 `.search-bar`、`.table-actions` 全局样式
+
+### 8.4 改动文件清单（本日）
+
+```
+relic-frontend/
+├── public/default-avatar.svg
+├── src/
+│   ├── composables/          # usePagination、useDateRangeQuery、useUserBehaviorList
+│   ├── config/menu.js      # 侧栏菜单配置
+│   ├── components/         # ListPagination、UserBehaviorSearchBar
+│   ├── utils/              # avatar.js、format.js、status.js
+│   ├── stores/auth.js      # 登录保存 avatarUrl、updateUserInfo
+│   ├── layout/MainLayout.vue
+│   ├── router/index.js
+│   ├── main.js
+│   ├── views/
+│   │   ├── AdminUserListView.vue
+│   │   ├── ProfileView.vue
+│   │   ├── UserFavoriteAdminView.vue
+│   │   └── UserFollowAdminView.vue
+│   └── styles/admin-theme.css
+└── README.md
+```
 
 ---
 
-## 七、改动文件清单（修改密码）
+*文档更新时间：2026-06-02*
+
+---
+
+## 九、2026-06-03 更新
+
+### 9.1 修改密码校验
+
+个人中心「安全设置」及管理员改密表单中，若新密码与原密码相同，提示 **「新密码不能与原密码相同」** 并阻止提交；后端 `PUT /admin/admin-user/current/password` 及用户端改密接口同步返回 `PASSWORD_SAME_AS_OLD`（`MessageConstant.PASSWORD_SAME_AS_OLD`）。
+
+| 模块 | 说明 |
+|------|------|
+| 个人中心 · 修改密码校验 | 新密码与原密码相同时，原密码/新密码表单项提示并拦截；后端同步校验 |
+| 管理员改密表单 | `AdminUserListView.vue` 中改密规则与个人中心一致 |
+
+### 9.2 个人中心 · 交互补充（相对第三节 3.2）
+
+| 项 | 说明 |
+|----|------|
+| 修改密码校验 | 新密码与原密码一致时无法提交；接口 `PUT /admin/admin-user/current/password` 同样拦截 |
+| 验证步骤 | 「安全设置」中将新密码设为与原密码相同，应出现「新密码不能与原密码相同」提示 |
+
+### 9.3 权限 ID 连续化
+
+新增 Flyway 迁移 `relic-server/src/main/resources/db/migration/V8__permissions_continuous_id.sql`：将 `permissions` 表主键整理为 `1..N` 连续编号，并同步 `role_permissions.permission_id`（适用于开发期多次增删权限导致 ID 空洞）。
+
+### 9.4 改动文件清单（本日）
 
 ```
 relic-frontend/src/views/ProfileView.vue
@@ -172,8 +249,14 @@ relic-server/src/main/java/com/relic/service/impl/AdminUserServiceImpl.java
 relic-server/src/main/java/com/relic/service/impl/AuthServiceImpl.java
 relic-server/src/main/java/com/relic/service/impl/MuseumAuthServiceImpl.java
 relic-server/src/main/java/com/relic/service/impl/KnowledgeAuthServiceImpl.java
+relic-server/src/main/resources/db/migration/V8__permissions_continuous_id.sql
 ```
 
+### 9.5 已知说明（补充第六节）
 
+3. **管理员列表角色列**  
+   仍使用 `roleId` + 本地 `roleLabel` 映射；个人中心已改为 `getRoleList` 的 `displayName`，与角色管理数据源一致。
+
+---
 
 *文档更新时间：2026-06-03*
