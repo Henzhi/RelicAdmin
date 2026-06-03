@@ -47,6 +47,7 @@
 
       <div class="pagination-container" v-if="tableData.length > 0">
         <el-pagination
+          background
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
           :page-sizes="[10, 20, 50]"

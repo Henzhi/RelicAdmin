@@ -1,28 +1,52 @@
 <template>
-  <div class="login-container">
-    <div class="login-card">
-      <h2>RelicAdmin 管理后台</h2>
-      <p class="subtitle">文物管理系统</p>
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="0">
-        <el-form-item prop="username">
-          <el-input v-model="form.username" placeholder="用户名" prefix-icon="User" />
+  <div class="login-page">
+    <div class="login-page__bg" />
+    <el-card class="login-card" shadow="hover">
+      <div class="login-card__brand">
+        <el-icon :size="40" color="var(--el-color-primary)"><Collection /></el-icon>
+        <h1>RelicAdmin</h1>
+        <p>文物管理系统 · 管理后台</p>
+      </div>
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="rules"
+        label-position="top"
+        size="large"
+        @submit.prevent="handleLogin"
+      >
+        <el-form-item label="用户名" prop="username">
+          <el-input
+            v-model="form.username"
+            placeholder="请输入用户名"
+            clearable
+            :prefix-icon="User"
+          />
         </el-form-item>
-        <el-form-item prop="password">
-          <el-input v-model="form.password" type="password" placeholder="密码" prefix-icon="Lock" />
+        <el-form-item label="密码" prop="password">
+          <el-input
+            v-model="form.password"
+            type="password"
+            placeholder="请输入密码"
+            show-password
+            :prefix-icon="Lock"
+            @keyup.enter="handleLogin"
+          />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :loading="loading" style="width:100%" @click="handleLogin">
+          <el-button type="primary" :loading="loading" class="login-submit" @click="handleLogin">
             登 录
           </el-button>
         </el-form-item>
       </el-form>
-    </div>
+    </el-card>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { User, Lock } from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
@@ -53,29 +77,63 @@ async function handleLogin() {
 </script>
 
 <style scoped>
-.login-container {
-  height: 100vh;
+.login-page {
+  position: relative;
+  min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  justify-content: center;
+  padding: 24px;
+  overflow: hidden;
 }
+
+.login-page__bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #ecf5ff 0%, #f0f9eb 50%, #fdf6ec 100%);
+  z-index: 0;
+}
+
+.login-page__bg::after {
+  content: '';
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  right: -120px;
+  top: -120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--el-color-primary-light-7) 0%, transparent 70%);
+  opacity: 0.6;
+}
+
 .login-card {
-  width: 400px;
-  padding: 40px 30px 30px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  border-radius: var(--el-border-radius-base);
 }
-.login-card h2 {
+
+.login-card__brand {
   text-align: center;
-  margin: 0 0 6px;
-  color: #303133;
+  margin-bottom: 28px;
 }
-.login-card .subtitle {
-  text-align: center;
-  color: #909399;
-  margin: 0 0 30px;
+
+.login-card__brand h1 {
+  margin: 12px 0 6px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.login-card__brand p {
+  margin: 0;
   font-size: 14px;
+  color: var(--el-text-color-secondary);
+}
+
+.login-submit {
+  width: 100%;
+  margin-top: 8px;
 }
 </style>

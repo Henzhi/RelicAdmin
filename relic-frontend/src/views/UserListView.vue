@@ -1,10 +1,10 @@
 <template>
   <div>
-    <el-card>
+    <el-card shadow="never" class="list-page-card">
       <template #header>
         <div class="card-header">
           <span>用户管理</span>
-          <el-button type="primary" size="small" @click="handleOpenCreate">
+          <el-button type="primary" @click="handleOpenCreate">
             <el-icon><Plus /></el-icon>新增用户
           </el-button>
         </div>
@@ -32,7 +32,7 @@
         </el-form-item>
       </el-form>
 
-      <el-table :data="tableData" v-loading="loading" stripe border row-key="id">
+      <el-table :data="tableData" v-loading="loading" stripe border row-key="id" empty-text="暂无数据">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column prop="nickname" label="昵称" width="120" />
@@ -47,8 +47,7 @@
         <el-table-column prop="lastLogin" label="最后登录" width="160" />
         <el-table-column label="操作" min-width="340" fixed="right">
           <template #default="{ row }">
-            <!-- 弃用：用户不能分配管理员角色 -->
-           <!-- <el-button size="small" @click="handleAssignRoles(row)">分配角色</el-button> -->
+<!--            <el-button size="small" @click="handleAssignRoles(row)">分配角色</el-button>-->
 
             <el-popconfirm title="确定要切换评论权限吗？" @confirm="handleToggleComment(row)">
               <template #reference>
@@ -96,7 +95,8 @@
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
           :page-sizes="[10, 20, 50]"
-          layout="total, sizes, prev, pager, next"
+          background
+          layout="total, sizes, prev, pager, next, jumper"
           :total="pagination.total"
           @size-change="handleSearch"
           @current-change="handlePageChange"
@@ -135,8 +135,9 @@
         <el-button type="primary" :loading="createSubmitting" @click="handleCreate">确 定</el-button>
       </template>
     </el-dialog>
-    <!-- 弃用 -->
-    <!-- <el-dialog v-model="roleDialogVisible" title="分配角色" width="480px">
+
+    <!-- 前台用户角色分配（后端已关闭，保留对话框占位可删） -->
+    <el-dialog v-if="false" v-model="roleDialogVisible" title="分配角色" width="480px">
       <div v-if="roleLoading" style="text-align:center;padding:40px">
         <el-icon class="is-loading" :size="32"><Loading /></el-icon>
         <p>加载中...</p>
@@ -156,7 +157,7 @@
         <el-button @click="roleDialogVisible = false">取消</el-button>
         <el-button type="primary" :loading="roleSubmitLoading" @click="confirmAssignRoles">确定</el-button>
       </template>
-    </el-dialog> -->
+    </el-dialog>
   </div>
 </template>
 
@@ -340,42 +341,40 @@ async function handleBan(row) {
   }
 }
 
-// const roleDialogVisible = ref(false)
-// const roleLoading = ref(false)
-// const roleSubmitLoading = ref(false)
-// const allRoles = ref([])
-// const selectedRoleIds = ref([])
-// let currentUserId = null
+const roleDialogVisible = ref(false)
+const roleLoading = ref(false)
+const roleSubmitLoading = ref(false)
+const allRoles = ref([])
+const selectedRoleIds = ref([])
+let currentUserId = null
 
-//弃用
-// async function handleAssignRoles(row) {
-//   currentUserId = row.id
-//   roleDialogVisible.value = true
-//   roleLoading.value = true
-//   try {
-//     const res = await getRoleList()
-//     allRoles.value = res.data
-//     selectedRoleIds.value = []
-//   } catch {
-//     ElMessage.error('加载角色列表失败')
-//     roleDialogVisible.value = false
-//   } finally {
-//     roleLoading.value = false
-//   }
-// }
+async function handleAssignRoles(row) {
+  currentUserId = row.id
+  roleDialogVisible.value = true
+  roleLoading.value = true
+  try {
+    const res = await getRoleList()
+    allRoles.value = res.data
+    selectedRoleIds.value = []
+  } catch {
+    ElMessage.error('加载角色列表失败')
+    roleDialogVisible.value = false
+  } finally {
+    roleLoading.value = false
+  }
+}
 
-// async function confirmAssignRoles() {
-//   roleSubmitLoading.value = true
-//   try {
-//     await assignUserRoles(currentUserId, { roleIds: selectedRoleIds.value })
-//     ElMessage.success('角色分配成功')
-//     roleDialogVisible.value = false
-//   } catch {
-//     ElMessage.error('角色分配失败')
-//   } finally {
-//     roleSubmitLoading.value = false
-//   }
-// }
+async function confirmAssignRoles() {
+  roleSubmitLoading.value = true
+  try {
+    ElMessage.warning('前台用户角色分配功能已关闭')
+    roleDialogVisible.value = false
+  } catch {
+    ElMessage.error('角色分配失败')
+  } finally {
+    roleSubmitLoading.value = false
+  }
+}
 
 onMounted(() => {
   fetchData()

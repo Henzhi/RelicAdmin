@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-card>
+    <el-card shadow="never">
       <template #header>
         <div class="card-header">
           <span>用户喜欢与点赞</span>
@@ -35,6 +35,7 @@
 
           <div class="pagination-wrap">
             <el-pagination
+          background
               v-model:current-page="artifactPagination.page"
               v-model:page-size="artifactPagination.pageSize"
               :page-sizes="[10, 20, 50]"
@@ -66,6 +67,7 @@
 
           <div class="pagination-wrap">
             <el-pagination
+          background
               v-model:current-page="postPagination.page"
               v-model:page-size="postPagination.pageSize"
               :page-sizes="[10, 20, 50]"
@@ -97,6 +99,7 @@
 
           <div class="pagination-wrap">
             <el-pagination
+          background
               v-model:current-page="commentPagination.page"
               v-model:page-size="commentPagination.pageSize"
               :page-sizes="[10, 20, 50]"

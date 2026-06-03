@@ -9,6 +9,7 @@ import com.relic.entity.AdminUser;
 import com.relic.entity.AdminUserRole;
 import com.relic.exception.AccountNotFoundException;
 import com.relic.exception.InsufficientPermissionsException;
+import com.relic.exception.PasswordEditFailedException;
 import com.relic.exception.PasswordErrorException;
 import com.relic.mapper.AdminUserMapper;
 import com.relic.mapper.AdminUserRoleMapper;
@@ -185,6 +186,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         AdminUser adminUser = adminUserMapper.selectById(id);
         if (adminUser == null) {
             throw new AccountNotFoundException("管理员账号不存在");
+        }
+        if (oldPassword != null && oldPassword.equals(newPassword)) {
+            throw new PasswordEditFailedException(MessageConstant.PASSWORD_SAME_AS_OLD);
         }
         if (!passwordEncoder.matches(oldPassword, adminUser.getPasswordHash())) {
             throw new PasswordErrorException("原密码错误");

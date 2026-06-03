@@ -6,8 +6,11 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
 import router from './router'
+import PageContainer from './components/PageContainer.vue'
+import './styles/admin-theme.css'
 
 const app = createApp(App)
+app.component('PageContainer', PageContainer)
 
 app.use(createPinia())
 app.use(router)

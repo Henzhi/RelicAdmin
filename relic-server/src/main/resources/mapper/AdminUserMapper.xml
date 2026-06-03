@@ -27,23 +27,26 @@
 
     <select id="selectByPage" resultType="com.relic.vo.AdminUserVO">
         SELECT ad.id, ad.username, ad.real_name, ad.email, ad.phone,
-        ad.avatar_url, ad.status, ad.last_login, ad.last_ip,
-        ad.created_at, ad.updated_at,
-        aur.role_id FROM admin_users ad
-        join admin_user_role aur
-        ON ad.id = aur.admin_user_id
+               ad.avatar_url, ad.status, ad.last_login, ad.last_ip,
+               ad.created_at, ad.updated_at,
+               (SELECT aur.role_id
+                FROM admin_user_role aur
+                WHERE aur.admin_user_id = ad.id
+                ORDER BY aur.role_id
+                LIMIT 1) AS role_id
+        FROM admin_users ad
         <where>
             <if test="username != null and username != ''">
-                AND username LIKE CONCAT('%', #{username}, '%')
+                AND ad.username LIKE CONCAT('%', #{username}, '%')
             </if>
             <if test="realName != null and realName != ''">
-                AND real_name LIKE CONCAT('%', #{realName}, '%')
+                AND ad.real_name LIKE CONCAT('%', #{realName}, '%')
             </if>
             <if test="status != null and status != ''">
-                AND status = #{status}
+                AND ad.status = #{status}
             </if>
         </where>
-        ORDER BY created_at DESC
+        ORDER BY ad.created_at DESC
         LIMIT #{offset}, #{limit}
     </select>
 

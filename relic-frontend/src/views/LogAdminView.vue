@@ -58,7 +58,8 @@
                         </el-table>
                     </div>
                     <div class="pagination-container" v-if="opData.length > 0">
-                        <el-pagination v-model:current-page="opPagination.page" v-model:page-size="opPagination.pageSize"
+                        <el-pagination
+          background v-model:current-page="opPagination.page" v-model:page-size="opPagination.pageSize"
                             :page-sizes="[10,20,50]" :total="opPagination.total" layout="total, sizes, prev, pager, next, jumper"
                             @size-change="handleOpSearch" @current-change="handleOpPageChange" />
                     </div>
@@ -111,7 +112,8 @@
                         </el-table>
                     </div>
                     <div class="pagination-container" v-if="sysData.length > 0">
-                        <el-pagination v-model:current-page="sysPagination.page" v-model:page-size="sysPagination.pageSize"
+                        <el-pagination
+          background v-model:current-page="sysPagination.page" v-model:page-size="sysPagination.pageSize"
                             :page-sizes="[10,20,50]" :total="sysPagination.total" layout="total, sizes, prev, pager, next, jumper"
                             @size-change="handleSysSearch" @current-change="handleSysPageChange" />
                     </div>
@@ -161,7 +163,8 @@
                         </el-table>
                     </div>
                     <div class="pagination-container" v-if="secData.length > 0">
-                        <el-pagination v-model:current-page="secPagination.page" v-model:page-size="secPagination.pageSize"
+                        <el-pagination
+          background v-model:current-page="secPagination.page" v-model:page-size="secPagination.pageSize"
                             :page-sizes="[10,20,50]" :total="secPagination.total" layout="total, sizes, prev, pager, next, jumper"
                             @size-change="handleSecSearch" @current-change="handleSecPageChange" />
                     </div>

@@ -13,6 +13,7 @@ public class MessageConstant {
     public static final String LOGIN_FAILED = "登录失败";
     public static final String UPLOAD_FAILED = "文件上传失败";
     public static final String PASSWORD_EDIT_FAILED = "密码修改失败";
+    public static final String PASSWORD_SAME_AS_OLD = "新密码不能与原密码相同";
 
     public static final String ALREADY_EXISTS = "账号已存在";
 

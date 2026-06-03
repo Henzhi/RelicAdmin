@@ -65,6 +65,7 @@
                     </div>
                     <div class="pagination-container" v-if="configData.length > 0">
                         <el-pagination
+          background
                             v-model:current-page="configPagination.page"
                             v-model:page-size="configPagination.pageSize"
                             :page-sizes="[10,20,50]"
@@ -126,6 +127,7 @@
                     </div>
                     <div class="pagination-container" v-if="dsData.length > 0">
                         <el-pagination
+          background
                             v-model:current-page="dsPagination.page"
                             v-model:page-size="dsPagination.pageSize"
                             :page-sizes="[10,20,50]"
