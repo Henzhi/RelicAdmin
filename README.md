@@ -1,5 +1,10 @@
 # RelicAdmin 前端优化说明
 
+## 更新说明（2026-06-03）
+
+**修改密码校验**：个人中心「安全设置」及管理员改密表单中，若新密码与原密码相同，提示 **「新密码不能与原密码相同」** 并阻止提交；后端 `PUT /admin/admin-user/current/password` 及用户端改密接口同步返回 `PASSWORD_SAME_AS_OLD`。
+
+---
 
 ## 一、改动概览
 
@@ -157,27 +162,16 @@ npm run build
 
 ---
 
-## 七、改动文件清单（本次重点）
+## 七、改动文件清单（修改密码）
 
 ```
-relic-frontend/
-├── src/
-│   ├── views/
-│   │   ├── ProfileView.vue          # 个人中心：布局、角色、修改密码校验
-│   │   └── AdminUserListView.vue    # 修改密码弹窗：同上校验规则
-│   ├── utils/
-│   │   └── adminRole.js             # 角色展示工具函数
-│   └── styles/
-│       └── admin-theme.css          # 个人中心及全局主题样式
-relic-common/
-└── src/main/java/com/relic/constant/MessageConstant.java   # PASSWORD_SAME_AS_OLD
-relic-server/
-└── src/main/java/com/relic/service/impl/
-    ├── AdminUserServiceImpl.java    # 管理端改密校验
-    ├── AuthServiceImpl.java
-    ├── MuseumAuthServiceImpl.java
-    └── KnowledgeAuthServiceImpl.java
-└── README.md                        # 本文档
+relic-frontend/src/views/ProfileView.vue
+relic-frontend/src/views/AdminUserListView.vue
+relic-common/src/main/java/com/relic/constant/MessageConstant.java
+relic-server/src/main/java/com/relic/service/impl/AdminUserServiceImpl.java
+relic-server/src/main/java/com/relic/service/impl/AuthServiceImpl.java
+relic-server/src/main/java/com/relic/service/impl/MuseumAuthServiceImpl.java
+relic-server/src/main/java/com/relic/service/impl/KnowledgeAuthServiceImpl.java
 ```
 
 
