@@ -34,7 +34,7 @@
       <el-table :data="tableData" v-loading="loading" stripe border row-key="id">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="username" label="用户名" width="120" />
-        <el-table-column label="头像" width="120">
+        <el-table-column label="头像" width="125">
           <template #default="{row}">
             <el-image style="width: 100px; height: 100px" :src="handleAvatar(row.avatarUrl)"/>
           </template>
@@ -279,7 +279,7 @@ function roleType(roleId) {
 //不同角色对应展示的名字
 function roleLabel(roleId) {
   switch(roleId){
-    case 1: return "超级审核员";
+    case 1: return "超级管理员";
     case 4: return "内容审核员";
     case 5: return "数据管理员";
   }
@@ -429,7 +429,7 @@ async function handleAssignRoles(row) {
   } finally {
     roleLoading.value = false
   }
-  console.log(allRoles)
+  // console.log(allRoles)
 }
 
 async function confirmAssignRoles() {

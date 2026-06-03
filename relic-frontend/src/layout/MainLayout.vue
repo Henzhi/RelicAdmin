@@ -14,10 +14,13 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="profile">个人中心</el-dropdown-item>
+              <el-dropdown-item command="changeLanguage">切换语言</el-dropdown-item>
               <el-dropdown-item command="logout">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+            <!-- 语言对话框 -->
+        <LanguageDialog ref="langDialogRef" />
       </div>
     </el-header>
     <el-container>
@@ -198,10 +201,14 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed,ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useLocaleStore } from '../stores/language'
 import { ElMessageBox } from 'element-plus'
+import { useI18n } from 'vue-i18n'
+import LanguageDialog from '../views/LanguageDialog.vue'
+
 
 const route = useRoute()
 const router = useRouter()
@@ -209,20 +216,48 @@ const auth = useAuthStore()
 
 const activeMenu = computed(() => route.path)
 
+const localeStore = useLocaleStore()  // ← 使用同一个 store 实例
+const langDialogRef = ref(null)
+const { locale } = useI18n()
+
+
+// function handleCommand(command) {
+//   if (command === 'profile') {
+//     router.push('/profile')
+//   } else if(command === 'changeLanguage'){
+
+//   }else if (command === 'logout') {
+//     ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+//       confirmButtonText: '确定',
+//       cancelButtonText: '取消',
+//       type: 'warning'
+//     }).then(() => {
+//       auth.logout()
+//       router.push('/login')
+//     })
+//   }
+// }
 function handleCommand(command) {
-  if (command === 'profile') {
-    router.push('/profile')
-  } else if (command === 'logout') {
-    ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }).then(() => {
-      auth.logout()
-      router.push('/login')
-    })
+  switch (command) {
+    case 'profile':
+      router.push('/profile')
+      break
+    case 'changeLanguage':
+      langDialogRef.value?.open()
+      break
+    case 'logout':
+      ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        auth.logout()
+        router.push('/login')
+      }).catch(() => {})
+      break
   }
 }
+
 </script>
 
 <style scoped>
