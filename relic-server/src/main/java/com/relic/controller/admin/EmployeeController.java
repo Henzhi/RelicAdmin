@@ -37,7 +37,7 @@ public class EmployeeController {
             return Result.error("账号不存在");
         }
         if (!passwordEncoder.matches(dto.getPassword(), adminUser.getPasswordHash())) {
-            return Result.error("密码错误");
+            return Result.error("用户名或密码错误");
         }
         if ("banned".equals(adminUser.getStatus())) {
             return Result.error("账号被锁定");

@@ -16,7 +16,7 @@ public interface AdminUserService {
     void delete(Integer id);
     void batchDelete(Integer[] ids);
     void updateStatus(Integer id, String status);
-    void assignRoles(Integer adminUserId, Integer roleIds) throws InvalidRoleValueException;
+    void assignRoles(Integer adminUserId, Integer roleId) throws InvalidRoleValueException;
     void updatePassword(Integer id, String oldPassword, String newPassword);
     void resetPassword(Integer id, String newPassword);
 }

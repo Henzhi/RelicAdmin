@@ -98,12 +98,16 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public void update(Integer id, AdminUserUpdateDTO dto) {
-        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //目前操作人id
+        Long currentId = BaseContext.getCurrentId();
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(currentId);
         //权限验证
-        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
-            //不是超级管理员不允许更新管理员信息
+        if(!Long.valueOf(id).equals(currentId)&&
+                !adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+            //不是超级管理员不允许更新其他管理员信息
             throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
         }
+        //管理员自己可以更新自己的信息
         AdminUser adminUser = new AdminUser();
         adminUser.setId(id);
         adminUser.setRealName(dto.getRealName());
@@ -177,9 +181,12 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public void updatePassword(Integer id, String oldPassword, String newPassword) {
-        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //目前操作人id
+        Long currentId = BaseContext.getCurrentId();
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(currentId);
         //权限验证
-        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+        if(!Long.valueOf(id).equals(currentId)&&
+                !adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
             //不是超级管理员不允许更新其他管理员密码
             throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
         }
@@ -198,9 +205,12 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public void resetPassword(Integer id, String newPassword) {
-        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //目前操作人id
+        Long currentId = BaseContext.getCurrentId();
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(currentId);
         //权限验证
-        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+        if(!Long.valueOf(id).equals(currentId)&&
+                !adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
             //不是超级管理员不允许重置其他管理员密码
             throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
         }

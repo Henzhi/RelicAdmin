@@ -124,10 +124,8 @@
           <el-input v-model="createForm.phone" placeholder="请输入手机号" maxlength="20" />
         </el-form-item>
         <el-form-item v-if="!isEdit" label="分配角色">
-          <el-radio-group v-model="createForm.roleId">
-            <el-radio v-for="role in allRoles" :key="role.id" :value="role.id">
-              {{ role.displayName || role.name }}
-            </el-radio>
+          <el-radio-group v-model="createForm.roleId" text-color="#fff" fill="#6c6cff">
+            <el-radio-button v-for="role in allRoles" :key="role.id" :label="role.displayName" :value="role.id" />
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -143,14 +141,14 @@
         <p>加载中...</p>
       </div>
       <template v-else>
-        <el-radio-group v-model="selectedRoleId">
-          <div v-for="role in allRoles" :key="role.id" style="margin-bottom:12px">
-            <el-radio :value="role.id">
-              {{ role.displayName || role.name }}
-              <span style="color:#909399;font-size:12px;margin-left:8px">{{ role.description }}</span>
+        <el-form-item label="分配角色">
+          <el-radio-group v-model="selectedRoleId">
+            <el-radio v-for="role in allRoles" :key="role.id" :label="role.displayName" :value="role.id">
+                {{ role.displayName || role.name }}
+                <span style="color:#909399;font-size:12px;margin-left:8px">{{ role.description }}</span>
             </el-radio>
-          </div>
-        </el-radio-group>
+          </el-radio-group>
+        </el-form-item>
         <el-empty v-if="allRoles.length === 0" description="暂无角色数据" />
       </template>
       <template #footer>
