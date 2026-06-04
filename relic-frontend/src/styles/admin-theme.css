@@ -407,3 +407,13 @@
 .fade-leave-to {
   opacity: 0;
 }
+
+/* 图片预览：挂载 body 后仍确保高于侧栏/顶栏/表格固定列 */
+.el-image-viewer__wrapper {
+  z-index: 3200 !important;
+}
+
+.el-image-viewer__actions,
+.el-image-viewer__btn {
+  z-index: 2;
+}

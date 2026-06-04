@@ -15,7 +15,15 @@
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column label="预览" width="100">
           <template #default="{ row }">
-            <el-image v-if="row.imageUrl" :src="row.imageUrl" style="width: 60px; height: 60px" fit="cover" :preview-src-list="[row.imageUrl]" />
+            <el-image
+              v-if="row.imageUrl"
+              :src="row.imageUrl"
+              style="width: 60px; height: 60px"
+              fit="cover"
+              :preview-src-list="[row.imageUrl]"
+              preview-teleported
+              :z-index="3200"
+            />
           </template>
         </el-table-column>
         <el-table-column prop="imageUrl" label="图片URL" min-width="250" show-overflow-tooltip />
