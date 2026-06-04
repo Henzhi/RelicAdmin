@@ -1,9 +1,9 @@
-<template>
-  <div>
-    <el-card>
+﻿<template>
+  <PageContainer title="管理员账号管理" description="管理系统后台账号与角色分配">
+    <el-card shadow="never">
       <template #header>
         <div class="card-header">
-          <span>管理员账号管理</span>
+          <span>账号列表</span>
           <el-button type="primary" size="small" @click="handleOpenCreate">
             <el-icon><Plus /></el-icon>新增管理员
           </el-button>
@@ -34,12 +34,20 @@
       <el-table :data="tableData" v-loading="loading" stripe border row-key="id">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="username" label="用户名" width="120" />
+        <el-table-column label="头像" width="100">
+          <template #default="{ row }">
+            <el-avatar :size="48" :src="handleAvatar(row.avatarUrl)" />
+          </template>
+        </el-table-column>
         <el-table-column prop="realName" label="真实姓名" width="120" />
         <el-table-column prop="email" label="邮箱" width="180" />
         <el-table-column prop="phone" label="手机" width="130" />
-        <el-table-column label="角色" width="110">
+        <el-table-column label="角色" width="120">
           <template #default="{ row }">
-            <el-tag :type="roleType(row.roleId)" size="small">{{ roleLabel(row.roleId) }}</el-tag>
+            <el-tag v-if="row.roleId" :type="roleType(row.roleId)" size="small">
+              {{ roleLabel(row.roleId) }}
+            </el-tag>
+            <el-tag v-else type="info" size="small" effect="plain">未分配</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="90">
@@ -50,10 +58,11 @@
         <el-table-column prop="lastLogin" label="最后登录" width="160" />
         <el-table-column prop="lastIp" label="最后IP" width="130" />
         <el-table-column prop="createdAt" label="创建时间" width="160" />
-        <el-table-column label="操作" min-width="300" fixed="right">
+        <el-table-column prop="updatedAt" label="更新时间" width="160" />
+        <el-table-column label="操作" min-width="350" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" @click="handleEdit(row)">编辑</el-button>
-            <el-button size="small" @click="handleAssignRoles(row)">分配角色</el-button>
+            <el-button type="success" size="small" @click="handleEdit(row)">编辑</el-button>
+            <el-button type="primary" size="small" @click="handleAssignRoles(row)">分配角色</el-button>
 
             <el-popconfirm v-if="row.status === 'active'" title="确定要禁用该管理员吗？" @confirm="handleChangeStatus(row, 'banned')">
               <template #reference>
@@ -86,7 +95,8 @@
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
           :page-sizes="[10, 20, 50]"
-          layout="total, sizes, prev, pager, next"
+          background
+          layout="total, sizes, prev, pager, next, jumper"
           :total="pagination.total"
           @size-change="handleSearch"
           @current-change="handlePageChange"
@@ -114,9 +124,9 @@
           <el-input v-model="createForm.phone" placeholder="请输入手机号" maxlength="20" />
         </el-form-item>
         <el-form-item v-if="!isEdit" label="分配角色">
-          <el-select v-model="createForm.roleIds" multiple placeholder="选择角色（可选）" style="width:100%">
-            <el-option v-for="role in allRoles" :key="role.id" :label="role.displayName" :value="role.id" />
-          </el-select>
+          <el-radio-group v-model="createForm.roleId" text-color="#fff" fill="#6c6cff">
+            <el-radio-button v-for="role in allRoles" :key="role.id" :label="role.displayName" :value="role.id" />
+          </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -131,14 +141,14 @@
         <p>加载中...</p>
       </div>
       <template v-else>
-        <el-checkbox-group v-model="selectedRoleIds">
-          <div v-for="role in allRoles" :key="role.id" style="margin-bottom:12px">
-            <el-checkbox :label="role.id" :value="role.id">
-              {{ role.displayName || role.name }}
-              <span style="color:#909399;font-size:12px;margin-left:8px">{{ role.description }}</span>
-            </el-checkbox>
-          </div>
-        </el-checkbox-group>
+        <el-form-item label="分配角色">
+          <el-radio-group v-model="selectedRoleId">
+            <el-radio v-for="role in allRoles" :key="role.id" :label="role.displayName" :value="role.id">
+                {{ role.displayName || role.name }}
+                <span style="color:#909399;font-size:12px;margin-left:8px">{{ role.description }}</span>
+            </el-radio>
+          </el-radio-group>
+        </el-form-item>
         <el-empty v-if="allRoles.length === 0" description="暂无角色数据" />
       </template>
       <template #footer>
@@ -184,7 +194,7 @@
         <el-button type="primary" :loading="selfPasswordSubmitting" @click="confirmSelfPassword">确 定</el-button>
       </template>
     </el-dialog>
-  </div>
+  </PageContainer>
 </template>
 
 <script setup>
@@ -238,6 +248,10 @@ function resetFilter() {
   handleSearch()
 }
 
+function handleAvatar(avatarUrl) {
+  return avatarUrl ? avatarUrl : 'https://seitem.oss-cn-beijing.aliyuncs.com/avatar/16/185f47ad-6198-4b73-90c5-e361f2238274.png'
+}
+
 function roleType(roleId) {
   switch(roleId){
     case 1: return "danger";
@@ -273,7 +287,7 @@ const createForm = reactive({
   realName: '',
   email: '',
   phone: '',
-  roleIds: []
+  roleId: 1
 })
 const createRules = {
   username: [
@@ -297,7 +311,7 @@ async function handleOpenCreate() {
   createForm.realName = ''
   createForm.email = ''
   createForm.phone = ''
-  createForm.roleIds = []
+  createForm.roleId = 1
   createFormRef.value?.resetFields()
   await loadRoles()
   createVisible.value = true
@@ -311,7 +325,6 @@ async function handleEdit(row) {
   createForm.realName = row.realName || ''
   createForm.email = row.email || ''
   createForm.phone = row.phone || ''
-  createForm.roleIds = []
   await loadRoles()
   createVisible.value = true
 }
@@ -326,7 +339,7 @@ async function handleSubmit() {
       realName: createForm.realName || undefined,
       email: createForm.email || undefined,
       phone: createForm.phone || undefined,
-      roleIds: createForm.roleIds.length > 0 ? createForm.roleIds : undefined
+      roleId: createForm.roleId || undefined
     }
     if (!isEdit.value) {
       data.password = createForm.password
@@ -373,7 +386,7 @@ const roleDialogVisible = ref(false)
 const roleLoading = ref(false)
 const roleSubmitLoading = ref(false)
 const allRoles = ref([])
-const selectedRoleIds = ref([])
+const selectedRoleId = ref(1)
 let currentAdminUserId = null
 
 async function loadRoles() {
@@ -389,7 +402,7 @@ async function handleAssignRoles(row) {
   currentAdminUserId = row.id
   roleDialogVisible.value = true
   roleLoading.value = true
-  selectedRoleIds.value = []
+  selectedRoleId.value = row.roleId ?? 1
   try {
     await loadRoles()
   } catch {
@@ -402,9 +415,10 @@ async function handleAssignRoles(row) {
 async function confirmAssignRoles() {
   roleSubmitLoading.value = true
   try {
-    await assignAdminRoles(currentAdminUserId, { roleIds: selectedRoleIds.value })
+    await assignAdminRoles(currentAdminUserId, { roleId: selectedRoleId.value })
     ElMessage.success('角色分配成功')
     roleDialogVisible.value = false
+    fetchData()
   } catch {
     ElMessage.error('角色分配失败')
   } finally {
@@ -470,13 +484,35 @@ const selfPasswordForm = reactive({
   newPassword: '',
   confirmPassword: ''
 })
+const SAME_PASSWORD_MSG = '新密码不能与原密码相同'
+
 const selfPasswordRules = {
   oldPassword: [
-    { required: true, message: '请输入原密码', trigger: 'blur' }
+    { required: true, message: '请输入原密码', trigger: 'blur' },
+    {
+      validator: (_rule, value, callback) => {
+        if (value && selfPasswordForm.newPassword && value === selfPasswordForm.newPassword) {
+          callback(new Error(SAME_PASSWORD_MSG))
+        } else {
+          callback()
+        }
+      },
+      trigger: ['blur', 'change']
+    }
   ],
   newPassword: [
     { required: true, message: '请输入新密码', trigger: 'blur' },
-    { min: 6, max: 20, message: '密码长度需要 6~20 个字符', trigger: 'blur' }
+    { min: 6, max: 20, message: '密码长度需要 6~20 个字符', trigger: 'blur' },
+    {
+      validator: (_rule, value, callback) => {
+        if (value && selfPasswordForm.oldPassword && value === selfPasswordForm.oldPassword) {
+          callback(new Error(SAME_PASSWORD_MSG))
+        } else {
+          callback()
+        }
+      },
+      trigger: ['blur', 'change']
+    }
   ],
   confirmPassword: [
     { required: true, message: '请再次输入密码', trigger: 'blur' },
@@ -498,19 +534,3 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.card-header {
-  font-weight: bold;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.filter-form {
-  margin-bottom: 16px;
-}
-.pagination-wrap {
-  margin-top: 16px;
-  display: flex;
-  justify-content: flex-end;
-}
-</style>

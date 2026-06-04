@@ -40,7 +40,8 @@
       </div>
 
       <div class="pagination-container" v-if="tableData.length > 0">
-        <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.pageSize"
+        <el-pagination
+          background v-model:current-page="pagination.page" v-model:page-size="pagination.pageSize"
           :page-sizes="[10,20,50]" :total="pagination.total" layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSearch" @current-change="handlePageChange" />
       </div>

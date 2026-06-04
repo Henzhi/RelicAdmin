@@ -1,12 +1,17 @@
 package com.relic.service.impl;
 
+import com.relic.constant.MessageConstant;
+import com.relic.constant.RoleConstant;
 import com.relic.context.BaseContext;
 import com.relic.converter.VoConverter;
 import com.relic.dto.UserBanDTO;
 import com.relic.dto.UserCreateDTO;
 import com.relic.dto.UserUpdateDTO;
+import com.relic.entity.AdminUserRole;
 import com.relic.entity.User;
 import com.relic.exception.AccountNotFoundException;
+import com.relic.exception.InsufficientPermissionsException;
+import com.relic.mapper.AdminUserRoleMapper;
 import com.relic.mapper.UserMapper;
 import com.relic.mapper.UserRoleMapper;
 import com.relic.properties.JwtProperties;
@@ -31,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final UserRoleMapper userRoleMapper;
     private final JwtProperties jwtProperties;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final AdminUserRoleMapper adminUserRoleMapper;
 
     @Override
     public PageResultVO<UserVO> page(String username, String nickname, String status, String userType, int page, int pageSize) {
@@ -61,6 +67,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void create(UserCreateDTO dto) {
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //权限验证
+        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+            //不是超级管理员不允许新增用户
+            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        }
         User existing = userMapper.selectByUsername(dto.getUsername());
         if (existing != null) {
             throw new RuntimeException("账号已存在");
@@ -86,6 +98,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void delete(Integer id) {
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //权限验证
+        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+            //不是超级管理员不允许删除用户
+            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        }
         userRoleMapper.deleteByUserId(id);
         userMapper.deleteById(id);
     }
@@ -104,28 +122,47 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void ban(Integer userId, UserBanDTO dto) {
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //权限验证
+        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+            //不是超级管理员不允许封禁用户
+            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        }
         userMapper.updateStatus(userId, dto.getStatus(), dto.getBanReason());
     }
 
-    @Override
-    @Transactional
-    public void assignRoles(Integer userId, Integer[] roleIds) {
-        userRoleMapper.deleteByUserId(userId);
-        if (roleIds != null && roleIds.length > 0) {
-            String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-            for (Integer roleId : roleIds) {
-                userRoleMapper.insert(userId, roleId, 1, now);
-            }
-        }
-    }
+//    @Override
+//    @Transactional
+//    public void assignRoles(Integer userId, Integer roleId) {
+//        userRoleMapper.deleteByUserId(userId);
+//        if (roleId != null) {
+//            String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+//            userRoleMapper.insert(userId, roleId, 1, now);
+//            for (Integer roleId : roleIds) {
+//                userRoleMapper.insert(userId, roleId, 1, now);
+//            }
+//        }
+//    }
 
     @Override
     public void disableComment(Integer userId, Integer commentDisabled) {
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //权限验证
+        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+            //不是超级管理员不允许禁止用户评论
+            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        }
         userMapper.updateCommentDisabled(userId, commentDisabled);
     }
 
     @Override
     public void disableUpload(Integer userId, Integer uploadDisabled) {
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
+        //权限验证
+        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+            //不是超级管理员不允许禁止用户上传
+            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        }
         userMapper.updateUploadDisabled(userId, uploadDisabled);
     }
 

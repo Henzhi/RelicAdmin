@@ -13,7 +13,8 @@ public interface UserService {
     void update(UserUpdateDTO dto);
     void delete(Integer id);
     void ban(Integer userId, UserBanDTO dto);
-    void assignRoles(Integer userId, Integer[] roleIds);
+    //已弃用
+//    void assignRoles(Integer userId, Integer[] roleIds);
     void disableComment(Integer userId, Integer commentDisabled);
     void disableUpload(Integer userId, Integer uploadDisabled);
     void updateAvatar(Integer userId, String avatarUrl);

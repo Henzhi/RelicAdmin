@@ -16,9 +16,10 @@ export function banUser(userId, data) {
   return adminApi.put(`/user/ban/${userId}`, data)
 }
 
-export function assignUserRoles(userId, data) {
-  return adminApi.put(`/user/${userId}/roles`, data)
-}
+// 弃用
+// export function assignUserRoles(userId, data) {
+//   return adminApi.put(`/user/${userId}/roles`, data)
+// }
 
 export function disableComment(userId, data) {
   return adminApi.put(`/user/comment-disable/${userId}`, data)

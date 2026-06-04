@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-card>
+    <el-card shadow="never">
       <template #header>
         <div class="card-header">
           <span>权限管理</span>
@@ -42,6 +42,7 @@
 
       <div class="pagination-wrap">
         <el-pagination
+          background
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
           :page-sizes="[10, 20, 50]"

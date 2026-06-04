@@ -20,31 +20,36 @@ const routes = [
         path: 'dashboard',
         name: 'Dashboard',
         component: () => import('@/views/DashboardView.vue'),
-        meta: { title: '仪表盘', icon: 'Odometer' }
+        meta: { title: '仪表盘', icon: 'Odometer', pageHeader: false }
       },
       {
         path: 'users',
         name: 'UserList',
         component: () => import('@/views/UserListView.vue'),
-        meta: { title: '用户管理', icon: 'User' }
+        meta: { title: '用户管理', icon: 'User', description: '前台用户账号、权限与封禁管理' }
       },
       {
         path: 'admin-users',
         name: 'AdminUserList',
         component: () => import('@/views/AdminUserListView.vue'),
-        meta: { title: '管理员管理', icon: 'UserFilled' }
+        meta: {
+          title: '管理员管理',
+          icon: 'UserFilled',
+          description: '管理系统后台账号与角色分配',
+          pageHeader: false
+        }
       },
       {
         path: 'roles',
         name: 'RoleList',
         component: () => import('@/views/RoleListView.vue'),
-        meta: { title: '角色管理', icon: 'Avatar' }
+        meta: { title: '角色管理', icon: 'Avatar', description: '配置角色标识与权限分配' }
       },
       {
         path: 'permissions',
         name: 'PermissionList',
         component: () => import('@/views/PermissionListView.vue'),
-        meta: { title: '权限管理', icon: 'Lock' }
+        meta: { title: '权限管理', icon: 'Lock', description: '管理系统功能权限项' }
       },
       {
         path: 'museums',
@@ -224,7 +229,7 @@ const routes = [
         path: 'profile',
         name: 'Profile',
         component: () => import('@/views/ProfileView.vue'),
-        meta: { title: '个人中心', icon: 'User' }
+        meta: { title: '个人中心', icon: 'User', pageHeader: false }
       },
       {
         path: 'logs',

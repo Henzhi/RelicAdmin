@@ -85,6 +85,7 @@
 
             <div class="pagination-container" v-if="tableData.length > 0">
                 <el-pagination
+          background
                     v-model:current-page="pagination.page"
                     v-model:page-size="pagination.pageSize"
                     :page-sizes="[10,20,50]"
@@ -206,6 +207,7 @@
             </div>
             <div class="pagination-container" v-if="logData.length > 0">
                 <el-pagination
+          background
                     v-model:current-page="logPagination.page"
                     v-model:page-size="logPagination.pageSize"
                     :page-sizes="[10,20,50]"

@@ -9,5 +9,6 @@ public class AdminUserCreateDTO {
     private String realName;
     private String email;
     private String phone;
-    private Integer[] roleIds;
+    //已弃用多选，改为单选
+    private Integer roleId;
 }

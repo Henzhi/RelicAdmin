@@ -4,5 +4,6 @@ import lombok.Data;
 
 @Data
 public class RoleAssignDTO {
-    private Integer[] roleIds;
+    //已弃用多选，改为单选
+    private Integer roleId;
 }

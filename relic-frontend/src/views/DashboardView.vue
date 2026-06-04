@@ -1,7 +1,9 @@
 <template>
-  <div>
-    <el-row :gutter="20">
-      <el-col :span="6">
+  <div class="dashboard-page">
+    <el-page-header class="dashboard-header" title="仪表盘" content="数据概览与运营监控" />
+
+    <el-row :gutter="16" class="dashboard-section">
+      <el-col :xs="24" :sm="12" :md="12" :lg="6">
         <el-card shadow="hover" class="stat-card stat-card-primary">
           <div class="stat-item">
             <el-icon :size="40" color="#409eff"><Monitor /></el-icon>
@@ -12,7 +14,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="24" :sm="12" :md="12" :lg="6">
         <el-card shadow="hover" class="stat-card stat-card-success">
           <div class="stat-item">
             <el-icon :size="40" color="#67c23a"><UserFilled /></el-icon>
@@ -23,7 +25,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="24" :sm="12" :md="12" :lg="6">
         <el-card shadow="hover" class="stat-card stat-card-warning">
           <div class="stat-item">
             <el-icon :size="40" color="#e6a23c"><EditPen /></el-icon>
@@ -34,7 +36,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="24" :sm="12" :md="12" :lg="6">
         <el-card shadow="hover" class="stat-card stat-card-danger">
           <div class="stat-item">
             <el-icon :size="40" color="#f56c6c"><WarningFilled /></el-icon>
@@ -47,8 +49,8 @@
       </el-col>
     </el-row>
 
-    <el-row :gutter="20" style="margin-top:20px">
-      <el-col :span="6">
+    <el-row :gutter="16" class="dashboard-section">
+      <el-col :xs="24" :sm="12" :md="12" :lg="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-item">
             <el-icon :size="40" color="#409eff"><User /></el-icon>
@@ -59,7 +61,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="24" :sm="12" :md="12" :lg="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-item">
             <el-icon :size="40" color="#67c23a"><Collection /></el-icon>
@@ -70,7 +72,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="24" :sm="12" :md="12" :lg="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-item">
             <el-icon :size="40" color="#e6a23c"><OfficeBuilding /></el-icon>
@@ -81,7 +83,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="24" :sm="12" :md="12" :lg="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-item">
             <el-icon :size="40" color="#f56c6c"><ChatDotRound /></el-icon>
@@ -94,7 +96,7 @@
       </el-col>
     </el-row>
 
-    <el-card style="margin-top:20px">
+    <el-card shadow="hover" class="dashboard-chart-card">
       <template #header>
         <div class="card-header">
           <span>访问量统计</span>
@@ -108,9 +110,9 @@
       <div ref="visitChartRef" style="height:360px"></div>
     </el-card>
 
-    <el-row :gutter="20" style="margin-top:20px">
-      <el-col :span="12">
-        <el-card>
+    <el-row :gutter="16" class="dashboard-section">
+      <el-col :xs="24" :lg="12">
+        <el-card shadow="hover">
           <template #header>
             <div class="card-header">
               <span>用户增长趋势</span>
@@ -124,8 +126,8 @@
           <div ref="userTrendChartRef" style="height:320px"></div>
         </el-card>
       </el-col>
-      <el-col :span="12">
-        <el-card>
+      <el-col :xs="24" :lg="12">
+        <el-card shadow="hover">
           <template #header>
             <div class="card-header">
               <span>数据增长统计</span>
@@ -141,14 +143,14 @@
       </el-col>
     </el-row>
 
-    <el-card style="margin-top:20px">
+    <el-card shadow="hover" class="dashboard-chart-card">
       <template #header>
         <div class="card-header">
           <span>异常告警</span>
           <el-button size="small" type="primary" @click="loadAlerts" :loading="alertsLoading">刷新</el-button>
         </div>
       </template>
-      <el-table :data="alerts" v-loading="alertsLoading" empty-text="暂无活跃告警">
+      <el-table :data="alerts" v-loading="alertsLoading" stripe border empty-text="暂无活跃告警">
         <el-table-column prop="alertType" label="告警类型" width="140">
           <template #default="{ row }">
             <el-tag :type="alertTypeTag(row.alertType)" size="small">{{ alertTypeLabel(row.alertType) }}</el-tag>
@@ -163,9 +165,9 @@
         <el-table-column prop="message" label="告警详情" min-width="200" show-overflow-tooltip></el-table-column>
         <el-table-column prop="source" label="来源" width="100"></el-table-column>
         <el-table-column prop="createdAt" label="时间" width="160"></el-table-column>
-        <el-table-column label="操作" width="120">
+        <el-table-column label="操作" width="100" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" type="primary" @click="handleResolve(row)">处理</el-button>
+            <el-button link type="primary" @click="handleResolve(row)">处理</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -402,28 +404,3 @@ onBeforeUnmount(() => {
   dataGrowthChart?.dispose()
 })
 </script>
-
-<style scoped>
-.stat-card {
-  border-radius: 8px;
-}
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.stat-num {
-  font-size: 28px;
-  font-weight: bold;
-  color: #303133;
-}
-.stat-txt {
-  font-size: 14px;
-  color: #909399;
-}
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-</style>

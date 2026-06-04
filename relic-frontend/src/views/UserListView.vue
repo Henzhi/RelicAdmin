@@ -1,10 +1,10 @@
 <template>
   <div>
-    <el-card>
+    <el-card shadow="never" class="list-page-card">
       <template #header>
         <div class="card-header">
           <span>用户管理</span>
-          <el-button type="primary" size="small" @click="handleOpenCreate">
+          <el-button type="primary" @click="handleOpenCreate">
             <el-icon><Plus /></el-icon>新增用户
           </el-button>
         </div>
@@ -32,7 +32,7 @@
         </el-form-item>
       </el-form>
 
-      <el-table :data="tableData" v-loading="loading" stripe border row-key="id">
+      <el-table :data="tableData" v-loading="loading" stripe border row-key="id" empty-text="暂无数据">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column prop="nickname" label="昵称" width="120" />
@@ -95,7 +95,8 @@
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
           :page-sizes="[10, 20, 50]"
-          layout="total, sizes, prev, pager, next"
+          background
+          layout="total, sizes, prev, pager, next, jumper"
           :total="pagination.total"
           @size-change="handleSearch"
           @current-change="handlePageChange"
@@ -135,7 +136,8 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="roleDialogVisible" title="分配角色" width="480px">
+    <!-- 前台用户角色分配（后端已关闭，保留对话框占位可删） -->
+    <el-dialog v-if="false" v-model="roleDialogVisible" title="分配角色" width="480px">
       <div v-if="roleLoading" style="text-align:center;padding:40px">
         <el-icon class="is-loading" :size="32"><Loading /></el-icon>
         <p>加载中...</p>
@@ -162,7 +164,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getUserPage, createUser, deleteUser, banUser, assignUserRoles, disableComment, disableUpload } from '../api/user'
+import { getUserPage, createUser, deleteUser, banUser, disableComment, disableUpload } from '../api/user'
 import { getRoleList } from '../api/role'
 
 const loading = ref(false)
@@ -365,8 +367,7 @@ async function handleAssignRoles(row) {
 async function confirmAssignRoles() {
   roleSubmitLoading.value = true
   try {
-    await assignUserRoles(currentUserId, { roleIds: selectedRoleIds.value })
-    ElMessage.success('角色分配成功')
+    ElMessage.warning('前台用户角色分配功能已关闭')
     roleDialogVisible.value = false
   } catch {
     ElMessage.error('角色分配失败')
