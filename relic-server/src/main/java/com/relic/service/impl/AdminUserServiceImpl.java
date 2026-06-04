@@ -7,10 +7,7 @@ import com.relic.dto.AdminUserCreateDTO;
 import com.relic.dto.AdminUserUpdateDTO;
 import com.relic.entity.AdminUser;
 import com.relic.entity.AdminUserRole;
-import com.relic.exception.AccountNotFoundException;
-import com.relic.exception.InsufficientPermissionsException;
-import com.relic.exception.PasswordEditFailedException;
-import com.relic.exception.PasswordErrorException;
+import com.relic.exception.*;
 import com.relic.mapper.AdminUserMapper;
 import com.relic.mapper.AdminUserRoleMapper;
 import com.relic.service.AdminUserService;
@@ -126,6 +123,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
             //不是超级管理员不允许删除管理员
             throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        }
+        if(Long.valueOf(id).equals(BaseContext.getCurrentId())){
+            throw new IllegalOperationException("不能删除自己");
         }
         adminUserRoleMapper.deleteByAdminUserId(id);
         adminUserMapper.deleteById(id);

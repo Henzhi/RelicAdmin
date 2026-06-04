@@ -7,8 +7,10 @@ import com.relic.vo.PageResultVO;
 import com.relic.vo.UserVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/admin/user")
 @RequiredArgsConstructor

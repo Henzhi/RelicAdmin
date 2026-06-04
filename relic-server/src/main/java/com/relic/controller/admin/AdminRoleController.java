@@ -10,10 +10,12 @@ import com.relic.vo.PermissionVO;
 import com.relic.vo.RoleVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/admin/role")
 @RequiredArgsConstructor
@@ -26,6 +28,7 @@ public class AdminRoleController {
     public Result<PageResultVO<RoleVO>> page(@RequestParam(defaultValue = "1") int page,
                                               @RequestParam(defaultValue = "10") int pageSize,
                                               @RequestParam(required = false) String name) {
+        log.info("查询角色信息...");
         return Result.success(roleService.page(name, page, pageSize));
     }
 

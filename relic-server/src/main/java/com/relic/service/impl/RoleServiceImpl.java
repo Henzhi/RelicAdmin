@@ -5,6 +5,7 @@ import com.relic.dto.RoleCreateDTO;
 import com.relic.dto.RoleUpdateDTO;
 import com.relic.entity.Permission;
 import com.relic.entity.Role;
+import com.relic.exception.InsufficientPermissionsException;
 import com.relic.mapper.PermissionMapper;
 import com.relic.mapper.RoleMapper;
 import com.relic.mapper.RolePermissionMapper;
@@ -80,6 +81,10 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public void delete(Integer id) {
+        //暂时不允许删除
+        if(true){
+            throw new InsufficientPermissionsException("不允许删除");
+        }
         rolePermissionMapper.deleteByRoleId(id);
         roleMapper.deleteById(id);
     }
