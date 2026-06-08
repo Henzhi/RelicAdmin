@@ -6,7 +6,7 @@ backups/
 .trae/
 .vscode/
 .idea/
-
+.m2_repo/
 # 忽略编译输出（如果是 Java 项目，也加上）
 target/
 *.class
@@ -26,3 +26,11 @@ Github-SSH-connect.md
 # 忽略敏感信息
 **/application-dev.yml
 
+
+RelicAdmin-项目汇报PPT.md
+seitem_结构和数据.sql
+测试报告.md
+用户使用手册.md
+项目阶段开发文档.md
+
+homework/

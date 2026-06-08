@@ -24,4 +24,8 @@ public interface UserPostMapper {
                      @Param("status") String status,
                      @Param("startTime") String startTime,
                      @Param("endTime") String endTime);
+    /**
+     * 查询尚未同步到 user_behaviors 的发布记录
+     */
+    List<Map<String, Object>> selectUnsynced(@Param("limit") int limit);
 }

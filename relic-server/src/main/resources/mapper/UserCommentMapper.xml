@@ -59,4 +59,15 @@
         </where>
     </select>
 
+    <select id="selectUnsynced" resultType="map">
+        SELECT uc.id, uc.user_id, uc.content, uc.created_at
+        FROM user_comments uc
+        WHERE NOT EXISTS (
+            SELECT 1 FROM user_behaviors ub
+            WHERE ub.target_type = 'comment' AND ub.target_id = CAST(uc.id AS CHAR)
+        )
+        ORDER BY uc.created_at ASC
+        LIMIT #{limit}
+    </select>
+
 </mapper>

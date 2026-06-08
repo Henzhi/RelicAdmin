@@ -26,6 +26,24 @@
             <el-option label="已封禁" value="banned" />
           </el-select>
         </el-form-item>
+        <el-form-item label="用户来源">
+          <el-select v-model="filter.userType" placeholder="全部" clearable style="width:130px">
+            <el-option label="知识服务" value="knowledge" />
+            <el-option label="掌上博物馆" value="museum" />
+            <el-option label="普通用户" value="normal" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="注册时间">
+          <el-date-picker
+            v-model="filter.registeredAtRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            value-format="YYYY-MM-DD"
+            style="width:260px"
+          />
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">查询</el-button>
           <el-button @click="resetFilter">重置</el-button>
@@ -170,18 +188,22 @@ import { getRoleList } from '../api/role'
 const loading = ref(false)
 const tableData = ref([])
 const pagination = reactive({ page: 1, pageSize: 10, total: 0 })
-const filter = reactive({ username: '', nickname: '', status: '' })
+const filter = reactive({ username: '', nickname: '', status: '', userType: '', registeredAtRange: null })
 
 async function fetchData() {
   loading.value = true
   try {
-    const res = await getUserPage({
+    const params = {
       page: pagination.page,
       pageSize: pagination.pageSize,
       username: filter.username || undefined,
       nickname: filter.nickname || undefined,
-      status: filter.status || undefined
-    })
+      status: filter.status || undefined,
+      userType: filter.userType || undefined,
+      registeredAtStart: filter.registeredAtRange ? filter.registeredAtRange[0] : undefined,
+      registeredAtEnd: filter.registeredAtRange ? filter.registeredAtRange[1] : undefined
+    }
+    const res = await getUserPage(params)
     tableData.value = res.data.records
     pagination.total = res.data.total
     pagination.page = res.data.page
@@ -206,6 +228,8 @@ function resetFilter() {
   filter.username = ''
   filter.nickname = ''
   filter.status = ''
+  filter.userType = ''
+  filter.registeredAtRange = null
   handleSearch()
 }
 

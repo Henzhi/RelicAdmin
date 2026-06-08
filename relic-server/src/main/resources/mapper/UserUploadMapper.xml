@@ -49,4 +49,15 @@
         </where>
     </select>
 
+    <select id="selectUnsynced" resultType="map">
+        SELECT uu.id, uu.user_id, uu.caption, uu.created_at
+        FROM user_uploads uu
+        WHERE NOT EXISTS (
+            SELECT 1 FROM user_behaviors ub
+            WHERE ub.target_type = 'upload' AND ub.target_id = CAST(uu.id AS CHAR)
+        )
+        ORDER BY uu.created_at ASC
+        LIMIT #{limit}
+    </select>
+
 </mapper>
