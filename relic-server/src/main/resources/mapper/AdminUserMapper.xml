@@ -45,6 +45,12 @@
             <if test="status != null and status != ''">
                 AND ad.status = #{status}
             </if>
+            <if test="createdAtStart != null and createdAtStart != ''">
+                AND ad.created_at &gt;= #{createdAtStart}
+            </if>
+            <if test="createdAtEnd != null and createdAtEnd != ''">
+                AND ad.created_at &lt;= #{createdAtEnd}
+            </if>
         </where>
         ORDER BY ad.created_at DESC
         LIMIT #{offset}, #{limit}
@@ -61,6 +67,12 @@
             </if>
             <if test="status != null and status != ''">
                 AND status = #{status}
+            </if>
+            <if test="createdAtStart != null and createdAtStart != ''">
+                AND created_at &gt;= #{createdAtStart}
+            </if>
+            <if test="createdAtEnd != null and createdAtEnd != ''">
+                AND created_at &lt;= #{createdAtEnd}
             </if>
         </where>
     </select>

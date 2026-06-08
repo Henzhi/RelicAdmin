@@ -10,8 +10,10 @@ import java.util.List;
 public interface MuseumMapper {
     Museum selectById(@Param("id") Integer id);
     List<Museum> selectByPage(@Param("name") String name, @Param("country") String country,
+                              @Param("createdAtStart") String createdAtStart, @Param("createdAtEnd") String createdAtEnd,
                               @Param("offset") int offset, @Param("limit") int limit);
-    long countByPage(@Param("name") String name, @Param("country") String country);
+    long countByPage(@Param("name") String name, @Param("country") String country,
+                     @Param("createdAtStart") String createdAtStart, @Param("createdAtEnd") String createdAtEnd);
     int insert(Museum museum);
     int update(Museum museum);
     int deleteById(@Param("id") Integer id);

@@ -33,11 +33,11 @@ public class AdminUserServiceImpl implements AdminUserService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
-    public PageResultVO<AdminUserVO> page(String username, String realName, String status, int page, int pageSize) {
+    public PageResultVO<AdminUserVO> page(String username, String realName, String status,
+                                          String createdAtStart, String createdAtEnd, int page, int pageSize) {
         int offset = (page - 1) * pageSize;
-        List<AdminUserVO> records = adminUserMapper.selectByPage(username, realName, status, offset, pageSize);
-        long total = adminUserMapper.countByPage(username, realName, status);
-//        List<AdminUserVO> records = entities.stream().map(this::toVO).collect(Collectors.toList());
+        List<AdminUserVO> records = adminUserMapper.selectByPage(username, realName, status, createdAtStart, createdAtEnd, offset, pageSize);
+        long total = adminUserMapper.countByPage(username, realName, status, createdAtStart, createdAtEnd);
         return new PageResultVO<>(total, records, page, pageSize);
     }
 

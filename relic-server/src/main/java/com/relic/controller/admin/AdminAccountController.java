@@ -37,9 +37,10 @@ public class AdminAccountController {
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String realName,
-            @RequestParam(required = false) String status) {
-        PageResultVO<AdminUserVO> pageResultVO = adminUserService.page(username, realName, status, page, pageSize);
-//        log.info("{}",pageResultVO);
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String createdAtStart,
+            @RequestParam(required = false) String createdAtEnd) {
+        PageResultVO<AdminUserVO> pageResultVO = adminUserService.page(username, realName, status, createdAtStart, createdAtEnd, page, pageSize);
         log.info("当前操作人Id：{}",BaseContext.getCurrentId());
         return Result.success(pageResultVO);
     }
