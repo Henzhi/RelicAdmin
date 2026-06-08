@@ -30,4 +30,9 @@ public interface UserCommentMapper {
      * 查询尚未同步到 user_behaviors 的评论记录
      */
     List<Map<String, Object>> selectUnsynced(@Param("limit") int limit);
+
+    List<Map<String, Object>> selectUnaudited(@Param("limit") int limit);
+
+    int updateAuditStatus(@Param("id") Integer id, @Param("status") String status,
+                          @Param("auditBy") Integer auditBy, @Param("rejectReason") String rejectReason);
 }

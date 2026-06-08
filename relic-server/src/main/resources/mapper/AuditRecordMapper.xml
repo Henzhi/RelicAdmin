@@ -23,6 +23,12 @@
             <if test="sourceType != null and sourceType != ''">
                 AND ar.source_type = #{sourceType}
             </if>
+            <if test="startDate != null and startDate != ''">
+                AND ar.created_at &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND ar.created_at &lt;= #{endDate}
+            </if>
         </where>
         ORDER BY ar.created_at DESC
         LIMIT #{offset}, #{limit}
@@ -39,6 +45,12 @@
             </if>
             <if test="sourceType != null and sourceType != ''">
                 AND ar.source_type = #{sourceType}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                AND ar.created_at &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND ar.created_at &lt;= #{endDate}
             </if>
         </where>
     </select>
@@ -104,6 +116,33 @@
         </if>
         GROUP BY ar.auditor_id, au.username
         ORDER BY auditCount DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO audit_records (content_id, content_type, source_type, content, submitter_id, auto_audit_result, manual_audit_result, created_at)
+        VALUES (#{contentId}, #{contentType}, #{sourceType}, #{content}, #{submitterId}, 'pending', 'pending', NOW())
+    </insert>
+
+    <select id="selectById" resultType="map">
+        SELECT id, content_id AS contentId, content_type AS contentType, source_type AS sourceType
+        FROM audit_records WHERE id = #{id}
+    </select>
+
+    <select id="selectContentTypeStats" resultType="map">
+        SELECT content_type AS contentType,
+               COUNT(*) AS totalCount,
+               SUM(CASE WHEN manual_audit_result = 'approved' THEN 1 ELSE 0 END) AS approvedCount,
+               SUM(CASE WHEN manual_audit_result = 'rejected' THEN 1 ELSE 0 END) AS rejectedCount,
+               SUM(CASE WHEN manual_audit_result = 'pending' THEN 1 ELSE 0 END) AS pendingCount
+        FROM audit_records
+        WHERE 1=1
+        <if test="startDate != null and startDate != ''">
+            AND created_at >= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND created_at &lt;= #{endDate}
+        </if>
+        GROUP BY content_type
     </select>
 
 </mapper>

@@ -11,12 +11,16 @@ public interface AuditRecordMapper {
     List<Map<String, Object>> selectByPage(@Param("contentType") String contentType,
                                            @Param("manualAuditResult") String manualAuditResult,
                                            @Param("sourceType") String sourceType,
+                                           @Param("startDate") String startDate,
+                                           @Param("endDate") String endDate,
                                            @Param("offset") int offset,
                                            @Param("limit") int limit);
 
     long countByPage(@Param("contentType") String contentType,
                      @Param("manualAuditResult") String manualAuditResult,
-                     @Param("sourceType") String sourceType);
+                     @Param("sourceType") String sourceType,
+                     @Param("startDate") String startDate,
+                     @Param("endDate") String endDate);
 
     int updateAuditResult(@Param("id") Long id,
                           @Param("manualAuditResult") String manualAuditResult,
@@ -37,4 +41,13 @@ public interface AuditRecordMapper {
 
     List<Map<String, Object>> selectAuditorStats(@Param("startDate") String startDate,
                                                  @Param("endDate") String endDate);
+
+    int insert(@Param("contentId") String contentId, @Param("contentType") String contentType,
+               @Param("sourceType") String sourceType, @Param("content") String content,
+               @Param("submitterId") Integer submitterId);
+
+    Map<String, Object> selectById(@Param("id") Long id);
+
+    List<Map<String, Object>> selectContentTypeStats(@Param("startDate") String startDate,
+                                                     @Param("endDate") String endDate);
 }

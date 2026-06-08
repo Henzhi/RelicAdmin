@@ -27,8 +27,34 @@
           <el-option label="已通过" value="approved" />
           <el-option label="已拒绝" value="rejected" />
         </el-select>
+        <el-date-picker v-model="searchDateRange" type="daterange" range-separator="至"
+          start-placeholder="开始日期" end-placeholder="结束日期"
+          value-format="YYYY-MM-DD" style="width:260px" />
         <el-button type="primary" :icon="Search" @click="handleSearch">查询</el-button>
         <el-button :icon="Refresh" @click="handleReset">重置</el-button>
+      </div>
+
+      <div class="stats-bar" v-if="quickStats.totalCount > 0">
+        <div class="stat-item">
+          <span class="stat-label">待审核</span>
+          <el-tag type="warning" size="large" effect="dark">{{ quickStats.pendingCount || 0 }}</el-tag>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">已通过</span>
+          <el-tag type="success" size="large" effect="dark">{{ quickStats.approvedCount || 0 }}</el-tag>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">已拒绝</span>
+          <el-tag type="danger" size="large" effect="dark">{{ quickStats.rejectedCount || 0 }}</el-tag>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">自动拦截</span>
+          <el-tag type="info" size="large" effect="dark">{{ quickStats.autoRejectedCount || 0 }}</el-tag>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">总计</span>
+          <span class="stat-total">{{ quickStats.totalCount || 0 }}</span>
+        </div>
       </div>
 
       <div class="batch-bar" v-if="selectedIds.length > 0">
@@ -102,6 +128,14 @@
 
     <el-dialog v-model="auditDialogVisible" title="执行审核" width="500px" :close-on-click-modal="false">
       <el-form :model="auditForm" label-width="90px">
+        <el-form-item label="内容ID">
+          <span>{{ currentAuditRow?.contentId }}</span>
+        </el-form-item>
+        <el-form-item label="来源">
+          <el-tag v-if="currentAuditRow?.sourceType === 'user_comments'" type="info" size="small">用户评论</el-tag>
+          <el-tag v-else-if="currentAuditRow?.sourceType === 'user_posts'" size="small">用户动态</el-tag>
+          <el-tag v-else-if="currentAuditRow?.sourceType === 'user_uploads'" type="success" size="small">用户上传</el-tag>
+        </el-form-item>
         <el-form-item label="审核内容">
           <div class="audit-content">{{ currentAuditRow?.content }}</div>
         </el-form-item>
@@ -142,7 +176,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, DataAnalysis } from '@element-plus/icons-vue'
-import { getAuditPage, auditRecord, batchAudit } from '../api/auditAdmin'
+import { getAuditPage, auditRecord, batchAudit, getAuditStats } from '../api/auditAdmin'
 
 const loading = ref(false)
 const tableRef = ref(null)
@@ -151,7 +185,10 @@ const selectedIds = ref([])
 const searchContentType = ref('')
 const searchSourceType = ref('')
 const searchManualAuditResult = ref('')
+const searchDateRange = ref(null)
 const pagination = reactive({ page: 1, pageSize: 10, total: 0 })
+
+const quickStats = reactive({ totalCount: 0, approvedCount: 0, rejectedCount: 0, pendingCount: 0, autoRejectedCount: 0 })
 
 const auditDialogVisible = ref(false)
 const auditSubmitting = ref(false)
@@ -163,7 +200,14 @@ const batchAction = ref('approved')
 const batchRejectReason = ref('')
 const batchSubmitting = ref(false)
 
-onMounted(() => { fetchData() })
+onMounted(() => { fetchQuickStats(); fetchData() })
+
+async function fetchQuickStats() {
+  try {
+    const res = await getAuditStats({})
+    Object.assign(quickStats, res.data || {})
+  } catch { /* ignore */ }
+}
 
 async function fetchData() {
   loading.value = true
@@ -172,7 +216,9 @@ async function fetchData() {
       page: pagination.page, pageSize: pagination.pageSize,
       contentType: searchContentType.value || undefined,
       sourceType: searchSourceType.value || undefined,
-      manualAuditResult: searchManualAuditResult.value || undefined
+      manualAuditResult: searchManualAuditResult.value || undefined,
+      startDate: searchDateRange.value ? searchDateRange.value[0] : undefined,
+      endDate: searchDateRange.value ? searchDateRange.value[1] : undefined
     })
     tableData.value = res.data.records
     pagination.total = res.data.total
@@ -188,7 +234,7 @@ function handleSearch() { pagination.page = 1; selectedIds.value = []; fetchData
 function handlePageChange(page) { pagination.page = page; fetchData() }
 
 function handleReset() {
-  searchContentType.value = ''; searchSourceType.value = ''; searchManualAuditResult.value = ''
+  searchContentType.value = ''; searchSourceType.value = ''; searchManualAuditResult.value = ''; searchDateRange.value = null
   handleSearch()
 }
 
@@ -234,6 +280,7 @@ async function submitAudit() {
     ElMessage.success('审核完成')
     auditDialogVisible.value = false
     fetchData()
+    fetchQuickStats()
   } catch { ElMessage.error('审核操作失败') }
   finally { auditSubmitting.value = false }
 }
@@ -259,6 +306,7 @@ async function submitBatch() {
     batchDialogVisible.value = false
     handleClearSelection()
     fetchData()
+    fetchQuickStats()
   } catch { ElMessage.error('批量审核失败') }
   finally { batchSubmitting.value = false }
 }
@@ -269,6 +317,10 @@ async function submitBatch() {
 .card-header { display: flex; justify-content: space-between; align-items: center; }
 .card-title { font-size: 18px; font-weight: 600; }
 .search-bar { margin-bottom: 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.stats-bar { margin-bottom: 16px; padding: 12px 16px; background: #f5f7fa; border-radius: 6px; display: flex; align-items: center; gap: 24px; }
+.stat-item { display: flex; align-items: center; gap: 6px; }
+.stat-label { font-size: 13px; color: #666; }
+.stat-total { font-size: 20px; font-weight: 700; color: #303133; }
 .batch-bar { margin-bottom: 12px; padding: 8px 12px; background: #ecf5ff; border-radius: 4px; display: flex; align-items: center; gap: 8px; font-size: 14px; }
 .pagination-container { display: flex; justify-content: flex-end; margin-top: 16px; }
 .empty-state { display: flex; flex-direction: column; align-items: center; padding: 40px 0; gap: 16px; }

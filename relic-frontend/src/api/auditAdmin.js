@@ -19,3 +19,5 @@ export function getAuditStats(params) {
 export function getAuditorStats(params) {
   return adminApi.get('/audit/auditor-stats', { params })
 }
+
+export const getContentTypeStats = (params) => adminApi.get('/audit/content-type-stats', { params })
