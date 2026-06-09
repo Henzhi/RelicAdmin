@@ -67,6 +67,10 @@
               <el-icon><Collection /></el-icon>
               <template #title>文物类型管理</template>
             </el-menu-item>
+            <el-menu-item index="/artifact-import">
+              <el-icon><Upload /></el-icon>
+              <template #title>批量导入</template>
+            </el-menu-item>
           </el-sub-menu>
 
           <el-sub-menu index="user-behavior">

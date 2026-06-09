@@ -94,6 +94,12 @@ const routes = [
         meta: { title: '文物类型管理', icon: 'Collection' }
       },
       {
+        path: 'artifact-import',
+        name: 'ArtifactImport',
+        component: () => import('@/views/ArtifactImportView.vue'),
+        meta: { title: '批量导入', icon: 'Upload' }
+      },
+      {
         path: 'favorites',
         name: 'UserFavoriteList',
         component: () => import('@/views/UserFavoriteListView.vue'),
