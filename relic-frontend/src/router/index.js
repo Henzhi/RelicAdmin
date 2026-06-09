@@ -238,6 +238,36 @@ const routes = [
         meta: { title: '个人中心', icon: 'User', pageHeader: false }
       },
       {
+        path: 'qa-logs',
+        name: 'QaLogs',
+        component: () => import('@/views/QaLogsView.vue'),
+        meta: { title: '问答日志' }
+      },
+      {
+        path: 'qa-feedback',
+        name: 'QaFeedback',
+        component: () => import('@/views/QaFeedbackView.vue'),
+        meta: { title: '用户反馈' }
+      },
+      {
+        path: 'qa-failed-questions',
+        name: 'QaFailedQuestions',
+        component: () => import('@/views/QaFailedQuestionsView.vue'),
+        meta: { title: '失败问题' }
+      },
+      {
+        path: 'qa-review-tasks',
+        name: 'QaReviewTasks',
+        component: () => import('@/views/QaReviewTasksView.vue'),
+        meta: { title: '审核任务' }
+      },
+      {
+        path: 'qa-stats',
+        name: 'QaStats',
+        component: () => import('@/views/QaStatsView.vue'),
+        meta: { title: '问答统计' }
+      },
+      {
         path: 'logs',
         name: 'LogAdmin',
         component: () => import('@/views/LogAdminView.vue'),
