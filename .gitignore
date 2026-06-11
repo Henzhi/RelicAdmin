@@ -1,28 +1,29 @@
-# 忽略 node_modules 目录（前端依赖，不需要提交）
-node_modules/
-dist/
-backups/
-# 忽略 IDE / 工具生成的目录
-.trae/
-.vscode/
-.idea/
+# 敏感配置（数据库、Redis 等）
+.env
+relic-server/src/main/resources/application-dev.yml
 
-# 忽略编译输出（如果是 Java 项目，也加上）
-target/
+# Java / Maven
+**/target/
 *.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
 
-# 忽略日志文件
-*.log
+# Node / 前端
+relic-frontend/node_modules/
+relic-frontend/dist/
 
-# 忽略系统文件
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
 .DS_Store
 Thumbs.db
-.gitignore
-项目开发文档.md
-Sql-create.md
-Mysql-connect.md
-Github-SSH-connect.md
 
-# 忽略敏感信息
-**/application-dev.yml
-
+# Logs
+*.log
