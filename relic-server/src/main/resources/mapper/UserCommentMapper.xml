@@ -10,7 +10,7 @@
     <select id="selectByPage" resultType="map">
         SELECT uc.id, uc.user_id, uc.artifact_id, uc.parent_id, uc.content,
                uc.like_count AS likeCount, uc.status, uc.audit_by AS auditBy, uc.audit_time AS auditTime,
-               uc.reject_reason AS rejectReason, uc.created_at,
+               uc.reject_reason AS rejectReason, uc.created_at AS createdAt,
                u.username, u.avatar_url AS userAvatar,
                a.title_zh AS artifactName
         FROM user_comments uc

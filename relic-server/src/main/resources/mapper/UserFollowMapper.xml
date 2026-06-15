@@ -4,7 +4,7 @@
 <mapper namespace="com.relic.mapper.UserFollowMapper">
 
     <select id="selectByPage" resultType="map">
-        SELECT uf.follower_id, uf.followee_id, uf.created_at,
+        SELECT uf.follower_id, uf.followee_id, uf.created_at AS createdAt,
                fu.username AS followerName, fu.avatar_url AS followerAvatar,
                eu.username AS followeeName, eu.avatar_url AS followeeAvatar
         FROM user_follows uf
