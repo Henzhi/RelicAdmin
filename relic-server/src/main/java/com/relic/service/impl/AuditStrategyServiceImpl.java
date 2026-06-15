@@ -52,11 +52,23 @@ public class AuditStrategyServiceImpl implements AuditStrategyService {
 
     @Override
     public String getAutoMode(String contentType) {
-        Map<String, Object> strategy = auditStrategyMapper.selectByContentType(contentType);
-        if (strategy == null || strategy.isEmpty()) {
-            return "auto_review";
-        }
+        Map<String, Object> strategy = getStrategy(contentType);
         Object mode = strategy.get("autoMode");
         return mode != null ? mode.toString() : "auto_review";
+    }
+
+    @Override
+    public Map<String, Object> getStrategy(String contentType) {
+        Map<String, Object> strategy = auditStrategyMapper.selectByContentType(contentType);
+        if (strategy == null || strategy.isEmpty()) {
+            // 返回默认策略
+            return Map.of(
+                    "autoMode", "auto_review",
+                    "enableSensitiveCheck", 1,
+                    "enableImageCheck", 0,
+                    "riskThreshold", 2
+            );
+        }
+        return strategy;
     }
 }

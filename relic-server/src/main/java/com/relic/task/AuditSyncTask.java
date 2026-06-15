@@ -139,11 +139,21 @@ public class AuditSyncTask {
     /**
      * 执行自动审核逻辑：
      * 1. auto_pass → 直接通过
-     * 2. auto_review → 敏感词检测，无敏感词则通过，有则拒绝转人工
-     * 3. auto_reject → 直接拒绝
+     * 2. auto_reject → 直接拒绝
+     * 3. auto_review → 计算风险评分，与风险阈值比较：
+     *    - 风险评分 < 阈值 → 自动通过
+     *    - 风险评分 >= 阈值 → 自动拒绝，转人工复核
+     * 
+     * 风险评分规则：
+     * - 基础分 0
+     * - 命中敏感词：每个 +2
+     * - 内容过短（<5字）：+1
+     * - 包含URL链接：+1
+     * - 内容含特殊字符过多：+1
      */
     private String executeAutoAudit(String contentType, String content) {
-        String autoMode = auditStrategyService.getAutoMode(contentType);
+        Map<String, Object> strategy = auditStrategyService.getStrategy(contentType);
+        String autoMode = String.valueOf(strategy.getOrDefault("autoMode", "auto_review"));
 
         switch (autoMode) {
             case "auto_pass":
@@ -152,14 +162,74 @@ public class AuditSyncTask {
                 return "rejected";
             case "auto_review":
             default:
-                // 敏感词检测
-                List<String> hits = sensitiveWordChecker.checkText(content);
-                if (hits.isEmpty()) {
-                    return "approved";
-                } else {
-                    log.info("自动审核检测到敏感词: {}, 内容类型: {}", hits, contentType);
-                    return "rejected";
-                }
+                return executeAutoReview(strategy, content);
+        }
+    }
+
+    /**
+     * auto_review 模式下的自动审核：计算风险评分并与阈值比较
+     */
+    private String executeAutoReview(Map<String, Object> strategy, String content) {
+        int riskThreshold = getRiskThreshold(strategy);
+        int riskScore = calculateRiskScore(strategy, content);
+        log.debug("自动审核风险评分: score={}, threshold={}", riskScore, riskThreshold);
+
+        if (riskScore < riskThreshold) {
+            return "approved";
+        } else {
+            log.info("自动审核风险评分 {} >= 阈值 {}，转人工复核", riskScore, riskThreshold);
+            return "rejected";
+        }
+    }
+
+    /**
+     * 计算内容的风险评分
+     */
+    private int calculateRiskScore(Map<String, Object> strategy, String content) {
+        int score = 0;
+
+        // 1. 敏感词检测：每个命中 +2
+        boolean enableSensitiveCheck = "1".equals(String.valueOf(strategy.getOrDefault("enableSensitiveCheck", 1)));
+        if (enableSensitiveCheck && content != null && !content.isBlank()) {
+            List<String> hits = sensitiveWordChecker.checkText(content);
+            if (!hits.isEmpty()) {
+                score += hits.size() * 2;
+                log.info("敏感词命中 {} 个: {}", hits.size(), hits);
+            }
+        }
+
+        // 2. 内容过短（<5字）：+1
+        if (content == null || content.isBlank() || content.trim().length() < 5) {
+            score += 1;
+        }
+
+        // 3. 包含URL链接：+1
+        if (content != null && content.matches(".*https?://.*")) {
+            score += 1;
+        }
+
+        // 4. 特殊字符占比过高（>30%）：+1
+        if (content != null && content.length() > 10) {
+            long specialCount = content.chars().filter(c -> !Character.isLetterOrDigit(c) && !Character.isWhitespace(c)).count();
+            if ((double) specialCount / content.length() > 0.3) {
+                score += 1;
+            }
+        }
+
+        return score;
+    }
+
+    /**
+     * 获取风险阈值，默认为 2
+     */
+    private int getRiskThreshold(Map<String, Object> strategy) {
+        Object threshold = strategy.get("riskThreshold");
+        if (threshold == null) return 2;
+        if (threshold instanceof Number) return ((Number) threshold).intValue();
+        try {
+            return Integer.parseInt(String.valueOf(threshold));
+        } catch (NumberFormatException e) {
+            return 2;
         }
     }
 
