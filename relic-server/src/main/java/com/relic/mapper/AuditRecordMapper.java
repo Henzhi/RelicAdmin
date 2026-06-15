@@ -44,7 +44,9 @@ public interface AuditRecordMapper {
 
     int insert(@Param("contentId") String contentId, @Param("contentType") String contentType,
                @Param("sourceType") String sourceType, @Param("content") String content,
-               @Param("submitterId") Integer submitterId);
+               @Param("submitterId") Integer submitterId,
+               @Param("autoAuditResult") String autoAuditResult,
+               @Param("manualAuditResult") String manualAuditResult);
 
     Map<String, Object> selectById(@Param("id") Long id);
 

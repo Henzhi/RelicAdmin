@@ -36,15 +36,15 @@
 
       <div class="stats-bar" v-if="quickStats.totalCount > 0">
         <div class="stat-item">
-          <span class="stat-label">待审核</span>
+          <span class="stat-label">待人工审核</span>
           <el-tag type="warning" size="large" effect="dark">{{ quickStats.pendingCount || 0 }}</el-tag>
         </div>
         <div class="stat-item">
-          <span class="stat-label">已通过</span>
+          <span class="stat-label">人工通过</span>
           <el-tag type="success" size="large" effect="dark">{{ quickStats.approvedCount || 0 }}</el-tag>
         </div>
         <div class="stat-item">
-          <span class="stat-label">已拒绝</span>
+          <span class="stat-label">人工拒绝</span>
           <el-tag type="danger" size="large" effect="dark">{{ quickStats.rejectedCount || 0 }}</el-tag>
         </div>
         <div class="stat-item">
@@ -91,6 +91,15 @@
             </template>
           </el-table-column>
           <el-table-column prop="content" label="内容" min-width="220" show-overflow-tooltip />
+          <el-table-column label="审核阶段" width="110">
+            <template #default="{ row }">
+              <el-tag v-if="row.autoAuditResult === 'approved' && row.manualAuditResult === 'approved'" type="success" size="small">自动通过</el-tag>
+              <el-tag v-else-if="row.autoAuditResult === 'rejected' && row.manualAuditResult === 'pending'" type="danger" size="small">待人工复核</el-tag>
+              <el-tag v-else-if="row.autoAuditResult === 'rejected' && row.manualAuditResult !== 'pending'" type="warning" size="small">人工已处理</el-tag>
+              <el-tag v-else-if="row.autoAuditResult === 'pending'" type="info" size="small">未自动审核</el-tag>
+              <el-tag v-else type="info" size="small">{{ row.autoAuditResult }}/{{ row.manualAuditResult }}</el-tag>
+            </template>
+          </el-table-column>
           <el-table-column label="自动审核" width="90">
             <template #default="{ row }">
               <el-tag :type="auditResultTag(row.autoAuditResult)" size="small">{{ auditResultLabel(row.autoAuditResult) }}</el-tag>
@@ -98,14 +107,16 @@
           </el-table-column>
           <el-table-column label="人工审核" width="90">
             <template #default="{ row }">
-              <el-tag :type="auditResultTag(row.manualAuditResult)" size="small">{{ auditResultLabel(row.manualAuditResult) }}</el-tag>
+              <el-tag v-if="row.autoAuditResult === 'approved' && row.manualAuditResult === 'approved'" type="info" size="small">无需</el-tag>
+              <el-tag v-else :type="auditResultTag(row.manualAuditResult)" size="small">{{ auditResultLabel(row.manualAuditResult) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="rejectReason" label="拒绝原因" min-width="130" show-overflow-tooltip />
           <el-table-column prop="createdAt" label="提交时间" width="160" />
           <el-table-column label="操作" width="100" fixed="right">
             <template #default="{ row }">
-              <el-button v-if="row.manualAuditResult === 'pending'" type="primary" size="small" link @click="openAuditDialog(row)">审核</el-button>
+              <el-button v-if="row.autoAuditResult === 'approved' && row.manualAuditResult === 'approved'" type="info" size="small" link disabled>自动通过</el-button>
+              <el-button v-else-if="row.manualAuditResult === 'pending'" type="primary" size="small" link @click="openAuditDialog(row)">审核</el-button>
               <span v-else class="text-muted">已处理</span>
             </template>
           </el-table-column>
@@ -126,7 +137,7 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="auditDialogVisible" title="执行审核" width="500px" :close-on-click-modal="false">
+    <el-dialog v-model="auditDialogVisible" title="执行人工审核" width="500px" :close-on-click-modal="false">
       <el-form :model="auditForm" label-width="90px">
         <el-form-item label="内容ID">
           <span>{{ currentAuditRow?.contentId }}</span>
@@ -135,6 +146,10 @@
           <el-tag v-if="currentAuditRow?.sourceType === 'user_comments'" type="info" size="small">用户评论</el-tag>
           <el-tag v-else-if="currentAuditRow?.sourceType === 'user_posts'" size="small">用户动态</el-tag>
           <el-tag v-else-if="currentAuditRow?.sourceType === 'user_uploads'" type="success" size="small">用户上传</el-tag>
+        </el-form-item>
+        <el-form-item label="自动审核">
+          <el-tag :type="auditResultTag(currentAuditRow?.autoAuditResult)" size="small">{{ auditResultLabel(currentAuditRow?.autoAuditResult) }}</el-tag>
+          <span style="margin-left: 8px; color: #909399; font-size: 12px;" v-if="currentAuditRow?.autoAuditResult === 'rejected'">自动审核未通过，需人工复核</span>
         </el-form-item>
         <el-form-item label="审核内容">
           <div class="audit-content">{{ currentAuditRow?.content }}</div>

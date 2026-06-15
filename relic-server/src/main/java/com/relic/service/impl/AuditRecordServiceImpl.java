@@ -42,6 +42,20 @@ public class AuditRecordServiceImpl implements AuditRecordService {
         if ("rejected".equals(dto.getManualAuditResult()) && (dto.getRejectReason() == null || dto.getRejectReason().isBlank())) {
             throw new IllegalArgumentException("拒绝时必须填写拒绝原因");
         }
+        // 校验：自动审核通过的记录不允许进入人工审核
+        Map<String, Object> record = auditRecordMapper.selectById(id);
+        if (record == null) {
+            throw new IllegalArgumentException("审核记录不存在");
+        }
+        String autoResult = String.valueOf(record.get("autoAuditResult"));
+        String currentManualResult = String.valueOf(record.get("manualAuditResult"));
+        if ("approved".equals(autoResult) && "approved".equals(currentManualResult)) {
+            throw new IllegalArgumentException("该记录已自动审核通过，无需人工审核");
+        }
+        if (!"pending".equals(currentManualResult)) {
+            throw new IllegalArgumentException("该记录已完成人工审核，不可重复操作");
+        }
+
         auditRecordMapper.updateAuditResult(id, dto.getManualAuditResult(), auditorId, dto.getRejectReason());
         // 同步更新源表审核状态
         syncSourceTableStatus(id, dto.getManualAuditResult(), auditorId, dto.getRejectReason());
@@ -57,12 +71,30 @@ public class AuditRecordServiceImpl implements AuditRecordService {
         if ("rejected".equals(dto.getManualAuditResult()) && (dto.getRejectReason() == null || dto.getRejectReason().isBlank())) {
             throw new IllegalArgumentException("批量拒绝时必须填写拒绝原因");
         }
-        auditRecordMapper.batchUpdateResult(dto.getIds(), dto.getManualAuditResult(), auditorId, dto.getRejectReason());
-        // 同步更新源表审核状态
+        // 过滤掉自动审核已通过的记录，只处理需要人工审核的
+        java.util.List<Long> validIds = new java.util.ArrayList<>();
         for (Long id : dto.getIds()) {
+            Map<String, Object> record = auditRecordMapper.selectById(id);
+            if (record == null) continue;
+            String autoResult = String.valueOf(record.get("autoAuditResult"));
+            String currentManualResult = String.valueOf(record.get("manualAuditResult"));
+            // 自动审核通过且人工也通过的记录跳过
+            if ("approved".equals(autoResult) && "approved".equals(currentManualResult)) continue;
+            // 已完成人工审核的记录跳过
+            if (!"pending".equals(currentManualResult)) continue;
+            validIds.add(id);
+        }
+        if (validIds.isEmpty()) {
+            throw new IllegalArgumentException("选中的记录均无需人工审核");
+        }
+
+        Long[] validIdsArray = validIds.toArray(new Long[0]);
+        auditRecordMapper.batchUpdateResult(validIdsArray, dto.getManualAuditResult(), auditorId, dto.getRejectReason());
+        // 同步更新源表审核状态
+        for (Long id : validIdsArray) {
             syncSourceTableStatus(id, dto.getManualAuditResult(), auditorId, dto.getRejectReason());
         }
-        log.info("管理员 {} 批量审核 {} 条记录为 {}", auditorId, dto.getIds().length, dto.getManualAuditResult());
+        log.info("管理员 {} 批量审核 {} 条记录为 {} (有效记录: {})", auditorId, dto.getIds().length, dto.getManualAuditResult(), validIds.size());
     }
 
     @Override

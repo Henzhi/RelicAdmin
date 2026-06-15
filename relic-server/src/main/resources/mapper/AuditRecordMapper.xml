@@ -120,11 +120,12 @@
 
     <insert id="insert">
         INSERT INTO audit_records (content_id, content_type, source_type, content, submitter_id, auto_audit_result, manual_audit_result, created_at)
-        VALUES (#{contentId}, #{contentType}, #{sourceType}, #{content}, #{submitterId}, 'pending', 'pending', NOW())
+        VALUES (#{contentId}, #{contentType}, #{sourceType}, #{content}, #{submitterId}, #{autoAuditResult}, #{manualAuditResult}, NOW())
     </insert>
 
     <select id="selectById" resultType="map">
-        SELECT id, content_id AS contentId, content_type AS contentType, source_type AS sourceType
+        SELECT id, content_id AS contentId, content_type AS contentType, source_type AS sourceType,
+               auto_audit_result AS autoAuditResult, manual_audit_result AS manualAuditResult
         FROM audit_records WHERE id = #{id}
     </select>
 
