@@ -20,10 +20,10 @@ RelicAdmin 是一个面向博物馆和文物管理机构的全栈后台管理系
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    RelicAdmin 前端                        │
-│         Vue 3 + Element Plus + Vite 5                    │
+│         Vue 3 + Element Plus + Vite 6                    │
 ├─────────────────────────────────────────────────────────┤
 │                    RelicAdmin 后端                        │
-│         Spring Boot 3.2 + MyBatis + Redis                │
+│      Spring Boot 3.2 + MyBatis + Redis + WebSocket      │
 ├──────────┬──────────┬──────────┬────────────────────────┤
 │  管理端   │ 博物馆端  │ 问答端   │      用户端            │
 │ /admin/* │/museum/* │/knowledge│     /user/*            │
@@ -34,7 +34,7 @@ RelicAdmin 是一个面向博物馆和文物管理机构的全栈后台管理系
 
 系统采用多模块 Maven 项目结构，前后端分离部署：
 
-- **后端**：Spring Boot 3.2 提供 RESTful API，通过 JWT 实现四端独立鉴权
+- **后端**：Spring Boot 3.2 提供 RESTful API，通过 JWT 实现四端独立鉴权，WebSocket 支持实时通信
 - **前端**：Vue 3 SPA 应用，Vite 开发服务器通过代理转发 API 请求
 - **数据库**：MySQL 存储业务数据，Redis 缓存热点数据（敏感词等）
 - **对象存储**：阿里云 OSS 存储文物图片等文件资源
@@ -50,6 +50,7 @@ RelicAdmin 是一个面向博物馆和文物管理机构的全栈后台管理系
 | MyBatis | 3.0.4 | ORM 框架 |
 | MySQL | 8.x | 关系型数据库 |
 | Redis (Lettuce) | - | 缓存中间件 |
+| WebSocket | - | 实时通信 |
 | JWT (jjwt) | 0.11.5 | 多端令牌鉴权 |
 | PageHelper | 2.1.0 | 分页插件 |
 | Druid | 1.2.23 | 数据库连接池 |
@@ -57,6 +58,7 @@ RelicAdmin 是一个面向博物馆和文物管理机构的全栈后台管理系
 | Apache POI | 5.2.5 | Excel 导入导出 |
 | OpenCSV | 5.9 | CSV 解析 |
 | 阿里云 OSS SDK | 3.18.3 | 文件存储 |
+| Spring Security Crypto | - | BCrypt 密码加密 |
 | Lombok | 1.18.36 | 代码简化 |
 | Fastjson2 | 2.0.61 | JSON 处理 |
 
@@ -65,7 +67,7 @@ RelicAdmin 是一个面向博物馆和文物管理机构的全栈后台管理系
 | 技术 | 版本 | 用途 |
 |------|------|------|
 | Vue | 3.4 | 前端框架 |
-| Vite | 5.x | 构建工具 |
+| Vite | 6.x | 构建工具 |
 | Element Plus | 2.14 | UI 组件库 |
 | Pinia | 3.0 | 状态管理 |
 | Vue Router | 4.6 | 路由管理 |
@@ -268,12 +270,21 @@ spring:
 ```javascript
 // API 代理配置
 server: {
+  historyApiFallback: true,
   proxy: {
     '^/admin/': {
       target: 'http://localhost:8080',
       changeOrigin: true
     },
+    '^/admin$': {
+      target: 'http://localhost:8080',
+      changeOrigin: true
+    },
     '^/user/': {
+      target: 'http://localhost:8080',
+      changeOrigin: true
+    },
+    '^/user$': {
       target: 'http://localhost:8080',
       changeOrigin: true
     }
@@ -334,7 +345,8 @@ RelicAdmin/
 │       ├── interceptor/           # JWT 拦截器（四端独立）
 │       ├── mapper/                # MyBatis Mapper 接口
 │       ├── service/               # 业务接口与实现
-│       └── task/                  # 定时任务（行为同步、审核同步）
+│       ├── task/                  # 定时任务（行为同步、审核同步、备份调度、爬取调度、告警检测）
+│       └── websocket/             # WebSocket 实时通信
 │   └── src/main/resources/
 │       ├── application.yml        # 主配置
 │       ├── application-dev.yml    # 开发环境配置
