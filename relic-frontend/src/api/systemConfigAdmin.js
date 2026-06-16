@@ -28,30 +28,6 @@ export function deleteSystemConfig(id) {
   return adminApi.delete(`/system-config/${id}`)
 }
 
-export function getDatasourcePage(params) {
-  return adminApi.get('/system-config/datasource/page', { params })
-}
-
-export function getDatasourceById(id) {
-  return adminApi.get(`/system-config/datasource/${id}`)
-}
-
-export function createDatasource(data) {
-  return adminApi.post('/system-config/datasource', data)
-}
-
-export function updateDatasource(id, data) {
-  return adminApi.put(`/system-config/datasource/${id}`, data)
-}
-
-export function testDatasourceConnection(id) {
-  return adminApi.post(`/system-config/datasource/${id}/test`)
-}
-
-export function deleteDatasource(id) {
-  return adminApi.delete(`/system-config/datasource/${id}`)
-}
-
 export function getFeatureToggles() {
   return adminApi.get('/system-config/feature-toggles')
 }

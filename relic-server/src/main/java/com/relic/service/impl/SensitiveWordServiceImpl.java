@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class SensitiveWordServiceImpl implements SensitiveWordService {
 
     private final SensitiveWordMapper sensitiveWordMapper;
+    private final SensitiveWordChecker sensitiveWordChecker;
 
     @Override
     public PageResultVO<Map<String, Object>> page(String word, String category, Integer status, int page, int pageSize) {
@@ -39,6 +40,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService {
             throw new SensitiveWordException("敏感词已存在");
         }
         sensitiveWordMapper.insert(word, dto.getCategory() != null ? dto.getCategory() : "other");
+        sensitiveWordChecker.clearCache();
         log.info("新增敏感词: {}", word);
     }
 
@@ -50,18 +52,21 @@ public class SensitiveWordServiceImpl implements SensitiveWordService {
         String word = dto.getWord().trim();
         int status = dto.getStatus() != null ? dto.getStatus() : 1;
         sensitiveWordMapper.update(id, word, dto.getCategory() != null ? dto.getCategory() : "other", status);
+        sensitiveWordChecker.clearCache();
         log.info("更新敏感词 id={}", id);
     }
 
     @Override
     public void updateStatus(Long id, Integer status) {
         sensitiveWordMapper.updateStatus(id, status);
+        sensitiveWordChecker.clearCache();
         log.info("敏感词 id={} 状态更新为 {}", id, status);
     }
 
     @Override
     public void delete(Long id) {
         sensitiveWordMapper.deleteById(id);
+        sensitiveWordChecker.clearCache();
         log.info("删除敏感词 id={}", id);
     }
 
@@ -83,6 +88,7 @@ public class SensitiveWordServiceImpl implements SensitiveWordService {
         }
         if (!list.isEmpty()) {
             sensitiveWordMapper.batchInsert(list);
+            sensitiveWordChecker.clearCache();
             log.info("批量导入 {} 个敏感词", list.size());
         }
     }

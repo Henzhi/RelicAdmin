@@ -24,8 +24,8 @@ public class MuseumServiceImpl implements MuseumService {
     @Override
     public PageResultVO<MuseumVO> page(String name, String country, int page, int pageSize) {
         int offset = (page - 1) * pageSize;
-        List<Museum> entities = museumMapper.selectByPage(name, country, offset, pageSize);
-        long total = museumMapper.countByPage(name, country);
+        List<Museum> entities = museumMapper.selectByPage(name, country, null, null, offset, pageSize);
+        long total = museumMapper.countByPage(name, country, null, null);
         List<MuseumVO> records = entities.stream().map(VoConverter::toMuseumVO).collect(Collectors.toList());
         return new PageResultVO<>(total, records, page, pageSize);
     }

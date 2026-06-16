@@ -1,7 +1,5 @@
 package com.relic.service;
 
-import com.relic.dto.DatasourceConfigCreateDTO;
-import com.relic.dto.DatasourceConfigUpdateDTO;
 import com.relic.dto.SystemConfigCreateDTO;
 import com.relic.dto.SystemConfigUpdateDTO;
 import com.relic.vo.PageResultVO;
@@ -25,16 +23,4 @@ public interface SystemConfigService {
     void updateValue(Integer id, String configValue);
 
     void delete(Integer id);
-
-    PageResultVO<Map<String, Object>> listDatasourcePage(String dsType, String status, int page, int pageSize);
-
-    Map<String, Object> getDatasourceById(Integer id);
-
-    void createDatasource(DatasourceConfigCreateDTO dto);
-
-    void updateDatasource(Integer id, DatasourceConfigUpdateDTO dto);
-
-    void testConnection(Integer id);
-
-    void deleteDatasource(Integer id);
 }

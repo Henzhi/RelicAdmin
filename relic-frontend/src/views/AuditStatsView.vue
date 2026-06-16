@@ -57,18 +57,48 @@
         </el-table-column>
       </el-table>
     </el-card>
+
+    <el-card shadow="never" style="margin-top: 16px;" v-loading="contentTypeLoading">
+      <template #header>
+        <span class="card-title">内容类型分布</span>
+      </template>
+      <div v-if="contentTypeStats.length === 0 && !contentTypeLoading" class="empty-state">
+        <el-empty description="暂无数据" />
+      </div>
+      <el-table v-else :data="contentTypeStats" border stripe style="width: 100%">
+        <el-table-column label="内容类型" width="120">
+          <template #default="{ row }">
+            <el-tag v-if="row.contentType === 'comment'" type="info" size="small">评论</el-tag>
+            <el-tag v-else-if="row.contentType === 'post'" size="small">动态</el-tag>
+            <el-tag v-else-if="row.contentType === 'upload'" type="success" size="small">上传</el-tag>
+            <span v-else>{{ row.contentType }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="totalCount" label="总数" width="100" align="center" sortable />
+        <el-table-column prop="pendingCount" label="待审核" width="100" align="center" sortable />
+        <el-table-column prop="approvedCount" label="已通过" width="100" align="center" sortable />
+        <el-table-column prop="rejectedCount" label="已拒绝" width="100" align="center" sortable />
+        <el-table-column label="通过率" width="150" align="center">
+          <template #default="{ row }">
+            <el-progress :percentage="row.totalCount ? Math.round(row.approvedCount / row.totalCount * 100) : 0" :stroke-width="16" />
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getAuditStats, getAuditorStats } from '../api/auditAdmin'
+import { getAuditStats, getAuditorStats, getContentTypeStats } from '../api/auditAdmin'
 
 const statsLoading = ref(false)
 const auditorLoading = ref(false)
+const contentTypeLoading = ref(false)
 const stats = reactive({ totalCount: 0, approvedCount: 0, rejectedCount: 0, pendingCount: 0, autoRejectedCount: 0 })
 const auditorStats = ref([])
+const contentTypeStats = ref([])
 const dateRange = ref(null)
 
 const passRate = computed(() => {
@@ -85,7 +115,7 @@ onMounted(() => { fetchAllStats() })
 async function fetchAllStats() {
   const startDate = dateRange.value?.[0] ? dateRange.value[0] : undefined
   const endDate = dateRange.value?.[1] ? dateRange.value[1] : undefined
-  await Promise.all([fetchStats(startDate, endDate), fetchAuditorStats(startDate, endDate)])
+  await Promise.all([fetchStats(startDate, endDate), fetchAuditorStats(startDate, endDate), fetchContentTypeStats(startDate, endDate)])
 }
 
 async function fetchStats(startDate, endDate) {
@@ -104,6 +134,15 @@ async function fetchAuditorStats(startDate, endDate) {
     auditorStats.value = res.data || []
   } catch { ElMessage.error('加载审核员统计失败') }
   finally { auditorLoading.value = false }
+}
+
+async function fetchContentTypeStats(startDate, endDate) {
+  contentTypeLoading.value = true
+  try {
+    const res = await getContentTypeStats({ startDate, endDate })
+    contentTypeStats.value = res.data || []
+  } catch { ElMessage.error('加载内容类型统计失败') }
+  finally { contentTypeLoading.value = false }
 }
 </script>
 

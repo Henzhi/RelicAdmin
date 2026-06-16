@@ -5,7 +5,7 @@
 
     <select id="selectByPage" resultType="map">
         SELECT ub.id, ub.user_id, ub.behavior_type AS behaviorType, ub.target_type AS targetType, ub.target_id AS targetId,
-               ub.target_desc AS targetDesc, ub.ip, ub.device, ub.detail, ub.created_at,
+               ub.target_desc AS targetDesc, ub.ip, ub.device, ub.detail, ub.created_at AS createdAt,
                u.username, u.avatar_url AS userAvatar
         FROM user_behaviors ub
         LEFT JOIN users u ON ub.user_id = u.id
@@ -51,5 +51,10 @@
             </if>
         </where>
     </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_behaviors (user_id, behavior_type, target_type, target_id, target_desc, ip, device, detail, created_at)
+        VALUES (#{userId}, #{behaviorType}, #{targetType}, #{targetId}, #{targetDesc}, #{ip}, #{device}, #{detail}, #{createdAt})
+    </insert>
 
 </mapper>

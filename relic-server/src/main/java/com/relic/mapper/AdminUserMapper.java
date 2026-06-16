@@ -12,8 +12,11 @@ public interface AdminUserMapper {
     AdminUser selectById(@Param("id") Integer id);
     AdminUser selectByUsername(@Param("username") String username);
     List<AdminUserVO> selectByPage(@Param("username") String username, @Param("realName") String realName,
-                                   @Param("status") String status, @Param("offset") int offset, @Param("limit") int limit);
-    long countByPage(@Param("username") String username, @Param("realName") String realName, @Param("status") String status);
+                                   @Param("status") String status,
+                                   @Param("createdAtStart") String createdAtStart, @Param("createdAtEnd") String createdAtEnd,
+                                   @Param("offset") int offset, @Param("limit") int limit);
+    long countByPage(@Param("username") String username, @Param("realName") String realName, @Param("status") String status,
+                     @Param("createdAtStart") String createdAtStart, @Param("createdAtEnd") String createdAtEnd);
     int insert(AdminUser adminUser);
     int update(AdminUser adminUser);
     int updatePassword(@Param("id") Integer id, @Param("passwordHash") String passwordHash);
