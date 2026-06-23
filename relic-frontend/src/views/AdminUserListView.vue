@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <PageContainer title="管理员账号管理" description="管理系统后台账号与角色分配">
     <el-card shadow="never">
       <template #header>
@@ -24,6 +24,17 @@
             <el-option label="启用" value="active" />
             <el-option label="禁用" value="banned" />
           </el-select>
+        </el-form-item>
+        <el-form-item label="创建时间">
+          <el-date-picker
+            v-model="filter.createdAtRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            value-format="YYYY-MM-DD"
+            style="width:260px"
+          />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">查询</el-button>
@@ -209,7 +220,7 @@ import { getRoleList } from '../api/role'
 const loading = ref(false)
 const tableData = ref([])
 const pagination = reactive({ page: 1, pageSize: 10, total: 0 })
-const filter = reactive({ username: '', realName: '', status: '' })
+const filter = reactive({ username: '', realName: '', status: '', createdAtRange: null })
 
 async function fetchData() {
   loading.value = true
@@ -219,7 +230,9 @@ async function fetchData() {
       pageSize: pagination.pageSize,
       username: filter.username || undefined,
       realName: filter.realName || undefined,
-      status: filter.status || undefined
+      status: filter.status || undefined,
+      createdAtStart: filter.createdAtRange ? filter.createdAtRange[0] : undefined,
+      createdAtEnd: filter.createdAtRange ? filter.createdAtRange[1] : undefined
     })
     tableData.value = res.data.records
     pagination.total = res.data.total
@@ -245,6 +258,7 @@ function resetFilter() {
   filter.username = ''
   filter.realName = ''
   filter.status = ''
+  filter.createdAtRange = null
   handleSearch()
 }
 

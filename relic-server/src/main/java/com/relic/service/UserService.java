@@ -6,7 +6,8 @@ import com.relic.vo.UserVO;
 import com.relic.dto.UserCreateDTO;
 
 public interface UserService {
-    PageResultVO<UserVO> page(String username, String nickname, String status, String userType, int page, int pageSize);
+    PageResultVO<UserVO> page(String username, String nickname, String status, String userType,
+                              String registeredAtStart, String registeredAtEnd, int page, int pageSize);
     UserVO getById(Integer id);
     UserVO getCurrentUser();
     void create(UserCreateDTO dto);

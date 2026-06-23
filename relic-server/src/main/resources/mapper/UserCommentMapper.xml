@@ -10,7 +10,7 @@
     <select id="selectByPage" resultType="map">
         SELECT uc.id, uc.user_id, uc.artifact_id, uc.parent_id, uc.content,
                uc.like_count AS likeCount, uc.status, uc.audit_by AS auditBy, uc.audit_time AS auditTime,
-               uc.reject_reason AS rejectReason, uc.created_at,
+               uc.reject_reason AS rejectReason, uc.created_at AS createdAt,
                u.username, u.avatar_url AS userAvatar,
                a.title_zh AS artifactName
         FROM user_comments uc
@@ -58,5 +58,30 @@
             </if>
         </where>
     </select>
+
+    <select id="selectUnsynced" resultType="map">
+        SELECT uc.id, uc.user_id, uc.content, uc.created_at
+        FROM user_comments uc
+        WHERE NOT EXISTS (
+            SELECT 1 FROM user_behaviors ub
+            WHERE ub.target_type = 'comment' AND ub.target_id = CAST(uc.id AS CHAR)
+        )
+        ORDER BY uc.created_at ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectUnaudited" resultType="map">
+        SELECT id, user_id, content, created_at
+        FROM user_comments
+        WHERE NOT EXISTS (
+            SELECT 1 FROM audit_records ar WHERE ar.content_id = CONCAT('comment_', user_comments.id)
+        )
+        ORDER BY created_at ASC
+        LIMIT #{limit}
+    </select>
+
+    <update id="updateAuditStatus">
+        UPDATE user_comments SET status = #{status}, audit_by = #{auditBy}, audit_time = NOW(), reject_reason = #{rejectReason} WHERE id = #{id}
+    </update>
 
 </mapper>

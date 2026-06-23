@@ -8,7 +8,8 @@ import com.relic.vo.PageResultVO;
 import javax.management.relation.InvalidRoleValueException;
 
 public interface AdminUserService {
-    PageResultVO<AdminUserVO> page(String username, String realName, String status, int page, int pageSize);
+    PageResultVO<AdminUserVO> page(String username, String realName, String status,
+                                  String createdAtStart, String createdAtEnd, int page, int pageSize);
     AdminUserVO getById(Integer id);
     AdminUserVO getCurrentAdmin();
     void create(AdminUserCreateDTO dto);

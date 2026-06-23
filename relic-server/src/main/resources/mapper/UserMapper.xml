@@ -46,6 +46,12 @@
             <if test="userType != null and userType != ''">
                 AND user_type = #{userType}
             </if>
+            <if test="registeredAtStart != null and registeredAtStart != ''">
+                AND registered_at &gt;= #{registeredAtStart}
+            </if>
+            <if test="registeredAtEnd != null and registeredAtEnd != ''">
+                AND registered_at &lt;= #{registeredAtEnd}
+            </if>
         </where>
         ORDER BY created_at DESC
         LIMIT #{offset}, #{limit}
@@ -65,6 +71,12 @@
             </if>
             <if test="userType != null and userType != ''">
                 AND user_type = #{userType}
+            </if>
+            <if test="registeredAtStart != null and registeredAtStart != ''">
+                AND registered_at &gt;= #{registeredAtStart}
+            </if>
+            <if test="registeredAtEnd != null and registeredAtEnd != ''">
+                AND registered_at &lt;= #{registeredAtEnd}
             </if>
         </where>
     </select>

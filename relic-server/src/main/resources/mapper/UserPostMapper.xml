@@ -57,4 +57,29 @@
         </where>
     </select>
 
+    <select id="selectUnsynced" resultType="map">
+        SELECT up.id, up.user_id, up.content, up.created_at
+        FROM user_posts up
+        WHERE NOT EXISTS (
+            SELECT 1 FROM user_behaviors ub
+            WHERE ub.target_type = 'post' AND ub.target_id = CAST(up.id AS CHAR)
+        )
+        ORDER BY up.created_at ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectUnaudited" resultType="map">
+        SELECT id, user_id, content, created_at
+        FROM user_posts
+        WHERE NOT EXISTS (
+            SELECT 1 FROM audit_records ar WHERE ar.content_id = CONCAT('post_', user_posts.id)
+        )
+        ORDER BY created_at ASC
+        LIMIT #{limit}
+    </select>
+
+    <update id="updateAuditStatus">
+        UPDATE user_posts SET status = #{status}, audit_by = #{auditBy}, audit_time = NOW(), reject_reason = #{rejectReason} WHERE id = #{id}
+    </update>
+
 </mapper>

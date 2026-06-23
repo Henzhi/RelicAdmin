@@ -94,6 +94,12 @@ const routes = [
         meta: { title: '文物类型管理', icon: 'Collection' }
       },
       {
+        path: 'artifact-import',
+        name: 'ArtifactImport',
+        component: () => import('@/views/ArtifactImportView.vue'),
+        meta: { title: '批量导入', icon: 'Upload' }
+      },
+      {
         path: 'favorites',
         name: 'UserFavoriteList',
         component: () => import('@/views/UserFavoriteListView.vue'),
@@ -230,6 +236,36 @@ const routes = [
         name: 'Profile',
         component: () => import('@/views/ProfileView.vue'),
         meta: { title: '个人中心', icon: 'User', pageHeader: false }
+      },
+      {
+        path: 'qa-logs',
+        name: 'QaLogs',
+        component: () => import('@/views/QaLogsView.vue'),
+        meta: { title: '问答日志' }
+      },
+      {
+        path: 'qa-feedback',
+        name: 'QaFeedback',
+        component: () => import('@/views/QaFeedbackView.vue'),
+        meta: { title: '用户反馈' }
+      },
+      {
+        path: 'qa-failed-questions',
+        name: 'QaFailedQuestions',
+        component: () => import('@/views/QaFailedQuestionsView.vue'),
+        meta: { title: '失败问题' }
+      },
+      {
+        path: 'qa-review-tasks',
+        name: 'QaReviewTasks',
+        component: () => import('@/views/QaReviewTasksView.vue'),
+        meta: { title: '审核任务' }
+      },
+      {
+        path: 'qa-stats',
+        name: 'QaStats',
+        component: () => import('@/views/QaStatsView.vue'),
+        meta: { title: '问答统计' }
       },
       {
         path: 'logs',

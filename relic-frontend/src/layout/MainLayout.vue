@@ -67,6 +67,10 @@
               <el-icon><Collection /></el-icon>
               <template #title>文物类型管理</template>
             </el-menu-item>
+            <el-menu-item index="/artifact-import">
+              <el-icon><Upload /></el-icon>
+              <template #title>批量导入</template>
+            </el-menu-item>
           </el-sub-menu>
 
           <el-sub-menu index="user-behavior">
@@ -140,6 +144,33 @@
             <el-menu-item index="/violation-type">
               <el-icon><CircleClose /></el-icon>
               <template #title>违规类型</template>
+            </el-menu-item>
+          </el-sub-menu>
+
+          <el-sub-menu index="qa">
+            <template #title>
+              <el-icon><ChatDotRound /></el-icon>
+              <span>知识问答</span>
+            </template>
+            <el-menu-item index="/qa-logs">
+              <el-icon><Document /></el-icon>
+              <template #title>问答日志</template>
+            </el-menu-item>
+            <el-menu-item index="/qa-feedback">
+              <el-icon><Comment /></el-icon>
+              <template #title>用户反馈</template>
+            </el-menu-item>
+            <el-menu-item index="/qa-failed-questions">
+              <el-icon><WarningFilled /></el-icon>
+              <template #title>失败问题</template>
+            </el-menu-item>
+            <el-menu-item index="/qa-review-tasks">
+              <el-icon><Checked /></el-icon>
+              <template #title>审核任务</template>
+            </el-menu-item>
+            <el-menu-item index="/qa-stats">
+              <el-icon><DataAnalysis /></el-icon>
+              <template #title>问答统计</template>
             </el-menu-item>
           </el-sub-menu>
 

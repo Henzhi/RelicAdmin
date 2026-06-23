@@ -1,5 +1,6 @@
 package com.relic.mapper;
 
+import com.relic.entity.UserBehavior;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -22,4 +23,5 @@ public interface UserBehaviorMapper {
                      @Param("keyword") String keyword,
                      @Param("startTime") String startTime,
                      @Param("endTime") String endTime);
+    int insert(UserBehavior userBehavior);
 }

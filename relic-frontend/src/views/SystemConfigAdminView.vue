@@ -77,68 +77,6 @@
                     </div>
                 </el-tab-pane>
 
-                <el-tab-pane label="数据源连接" name="datasource">
-                    <div class="search-bar">
-                        <el-select v-model="dsSearchType" placeholder="数据源类型" clearable style="width:140px" @change="handleDsSearch">
-                            <el-option label="MySQL" value="mysql" />
-                            <el-option label="PostgreSQL" value="postgresql" />
-                            <el-option label="API" value="api" />
-                        </el-select>
-                        <el-select v-model="dsSearchStatus" placeholder="连接状态" clearable style="width:130px" @change="handleDsSearch">
-                            <el-option label="未测试" value="untested" />
-                            <el-option label="已连接" value="connected" />
-                            <el-option label="失败" value="failed" />
-                        </el-select>
-                        <el-button type="primary" :icon="Search" @click="handleDsSearch">查询</el-button>
-                        <el-button :icon="Refresh" @click="handleDsReset">重置</el-button>
-                        <el-tag type="info" style="margin-left:auto">共 {{ dsPagination.total }} 条</el-tag>
-                        <el-button type="primary" :icon="Plus" size="small" @click="openDsDialog">添加数据源</el-button>
-                    </div>
-                    <div v-loading="dsLoading">
-                        <div v-if="dsData.length === 0 && !dsLoading" class="empty-state">
-                            <el-empty description="暂无数据源配置" />
-                        </div>
-                        <el-table v-else :data="dsData" border stripe>
-                            <el-table-column prop="id" label="ID" width="60" />
-                            <el-table-column prop="dsName" label="数据源名称" width="150" />
-                            <el-table-column prop="dsKey" label="标识" width="120" />
-                            <el-table-column prop="dsType" label="类型" width="100" />
-                            <el-table-column prop="host" label="主机地址" min-width="160" />
-                            <el-table-column prop="port" label="端口" width="70" />
-                            <el-table-column prop="databaseName" label="数据库名" width="120" show-overflow-tooltip />
-                            <el-table-column label="连接状态" width="110">
-                                <template #default="{ row }">
-                                    <el-tag v-if="row.status === 'connected'" type="success" size="small">已连接</el-tag>
-                                    <el-tag v-else-if="row.status === 'failed'" type="danger" size="small">失败</el-tag>
-                                    <el-tag v-else type="info" size="small">未测试</el-tag>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="lastTestResult" label="测试结果" min-width="150" show-overflow-tooltip />
-                            <el-table-column label="操作" width="240" fixed="right">
-                                <template #default="{ row: dsRow }">
-                                    <el-button size="small" link type="primary" @click="openDsEdit(dsRow)">编辑</el-button>
-                                    <el-button size="small" link type="success" :loading="dsRow._testing" @click="handleTestConnection(dsRow)">
-                                        {{ dsRow._testing ? '测试中...' : '测试连接' }}
-                                    </el-button>
-                                    <el-button size="small" link type="danger" @click="handleDsDelete(dsRow)">删除</el-button>
-                                </template>
-                            </el-table-column>
-                        </el-table>
-                    </div>
-                    <div class="pagination-container" v-if="dsData.length > 0">
-                        <el-pagination
-          background
-                            v-model:current-page="dsPagination.page"
-                            v-model:page-size="dsPagination.pageSize"
-                            :page-sizes="[10,20,50]"
-                            :total="dsPagination.total"
-                            layout="total, sizes, prev, pager, next, jumper"
-                            @size-change="handleDsSearch"
-                            @current-change="handleDsPageChange"
-                        />
-                    </div>
-                </el-tab-pane>
-
                 <el-tab-pane label="日志级别" name="log">
                     <div class="log-config-area">
                         <el-descriptions :column="1" border size="large">
@@ -271,68 +209,6 @@
                 <el-button type="primary" :loading="valueSaving" @click="submitValue">保存</el-button>
             </template>
         </el-dialog>
-
-        <el-dialog v-model="dsDialogVisible" :title="isDsEdit ? '编辑数据源' : '添加数据源'"
-                   width="550px" :close-on-click-modal="false" @closed="resetDsForm">
-            <el-form :model="dsForm" label-width="110px">
-                <el-row :gutter="16">
-                    <el-col :span="12">
-                        <el-form-item label="数据源名称">
-                            <el-input v-model="dsForm.dsName" placeholder="显示名称" />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="数据源标识">
-                            <el-input v-model="dsForm.dsKey" placeholder="唯一标识" :disabled="isDsEdit" />
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-form-item label="数据源类型">
-                    <el-select v-model="dsForm.dsType" style="width:100%">
-                        <el-option label="MySQL" value="mysql" />
-                        <el-option label="PostgreSQL" value="postgresql" />
-                        <el-option label="API" value="api" />
-                    </el-select>
-                </el-form-item>
-                <el-row :gutter="16">
-                    <el-col :span="16">
-                        <el-form-item label="主机地址">
-                            <el-input v-model="dsForm.host" placeholder="IP或域名" />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="8">
-                        <el-form-item label="端口">
-                            <el-input-number v-model="dsForm.port" :min="1" :max="65535" style="width:100%" />
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-form-item label="数据库名">
-                    <el-input v-model="dsForm.databaseName" placeholder="数据库名称" />
-                </el-form-item>
-                <el-row :gutter="16">
-                    <el-col :span="12">
-                        <el-form-item label="用户名">
-                            <el-input v-model="dsForm.username" placeholder="数据库用户名" />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="密码">
-                            <el-input v-model="dsForm.passwordEncrypted" type="password" placeholder="数据库密码" show-password />
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-form-item label="最大连接池">
-                    <el-input-number v-model="dsForm.maxPoolSize" :min="1" :max="100" style="width:100%" />
-                </el-form-item>
-                <el-form-item label="额外参数">
-                    <el-input v-model="dsForm.extraParams" type="textarea" :rows="2" placeholder="JSON格式额外参数" />
-                </el-form-item>
-            </el-form>
-            <template #footer>
-                <el-button @click="dsDialogVisible = false">取消</el-button>
-                <el-button type="primary" :loading="dsSubmitLoading" @click="submitDsForm">{{ isDsEdit ? '保存' : '添加' }}</el-button>
-            </template>
-        </el-dialog>
     </div>
 </template>
 
@@ -342,8 +218,6 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { getSystemConfigPage, createSystemConfig, updateSystemConfig,
          updateSystemConfigValue, deleteSystemConfig,
-         getDatasourcePage, createDatasource, updateDatasource,
-         testDatasourceConnection, deleteDatasource,
          getSystemConfigByGroup, getFeatureToggles, toggleFeature } from '../api/systemConfigAdmin'
 
 const activeTab = ref('config')
@@ -363,20 +237,6 @@ const configForm = reactive({
 const valueDialogVisible = ref(false)
 const valueSaving = ref(false)
 const valueForm = reactive({ id:null, configKey:'', configValue:'' })
-
-const dsLoading = ref(false)
-const dsData = ref([])
-const dsSearchType = ref(null)
-const dsSearchStatus = ref(null)
-const dsPagination = reactive({ page:1, pageSize:10, total:0 })
-const dsDialogVisible = ref(false)
-const isDsEdit = ref(false)
-const dsEditId = ref(null)
-const dsSubmitLoading = ref(false)
-const dsForm = reactive({
-    dsName:'', dsKey:'', dsType:'mysql', host:'localhost', port:3306,
-    databaseName:'', username:'root', passwordEncrypted:'', extraParams:'', maxPoolSize:10
-})
 
 const currentLogLevel = ref('INFO')
 const tempLogLevel = ref('INFO')
@@ -407,27 +267,6 @@ async function fetchConfigData() {
 function handleConfigSearch() { configPagination.page = 1; fetchConfigData() }
 function handleConfigPageChange(page) { configPagination.page = page; fetchConfigData() }
 function handleConfigReset() { configSearchGroup.value = null; handleConfigSearch() }
-
-async function fetchDsData() {
-    dsLoading.value = true
-    try {
-        const res = await getDatasourcePage({
-            page: dsPagination.page, pageSize: dsPagination.pageSize,
-            dsType: dsSearchType.value, status: dsSearchStatus.value
-        })
-        dsData.value = res.data.records.map(r => ({ ...r, _testing: false }))
-        dsPagination.total = res.data.total
-    } catch {
-        ElMessage.error('加载数据源列表失败')
-        dsData.value = []
-    } finally {
-        dsLoading.value = false
-    }
-}
-
-function handleDsSearch() { dsPagination.page = 1; fetchDsData() }
-function handleDsPageChange(page) { dsPagination.page = page; fetchDsData() }
-function handleDsReset() { dsSearchType.value = null; dsSearchStatus.value = null; handleDsSearch() }
 
 function resetConfigForm() {
     configForm.configKey = ''; configForm.configName = ''; configForm.configValue = '';
@@ -536,79 +375,7 @@ async function saveLogLevel() {
     }
 }
 
-function resetDsForm() {
-    dsForm.dsName = ''; dsForm.dsKey = ''; dsForm.dsType = 'mysql';
-    dsForm.host = 'localhost'; dsForm.port = 3306; dsForm.databaseName = '';
-    dsForm.username = 'root'; dsForm.passwordEncrypted = ''; dsForm.extraParams = '';
-    dsForm.maxPoolSize = 10; isDsEdit.value = false; dsEditId.value = null;
-}
-
-function openDsDialog() { resetDsForm(); dsDialogVisible.value = true }
-
-function openDsEdit(row) {
-    isDsEdit.value = true; dsEditId.value = row.id;
-    dsForm.dsName = row.dsName; dsForm.dsKey = row.dsKey; dsForm.dsType = row.dsType;
-    dsForm.host = row.host; dsForm.port = row.port; dsForm.databaseName = row.databaseName;
-    dsForm.username = row.username; dsForm.passwordEncrypted = row.passwordEncrypted || '';
-    dsForm.extraParams = row.extraParams; dsForm.maxPoolSize = row.maxPoolSize;
-    dsDialogVisible.value = true;
-}
-
-async function submitDsForm() {
-    if (!dsForm.dsName.trim()) { ElMessage.warning('请输入数据源名称'); return }
-    if (!dsForm.dsKey.trim() && !isDsEdit.value) { ElMessage.warning('请输入数据源标识'); return }
-    if (!dsForm.host.trim()) { ElMessage.warning('请输入主机地址'); return }
-    if (!dsForm.port) { ElMessage.warning('请输入端口'); return }
-    dsSubmitLoading.value = true
-    try {
-        if (isDsEdit.value) {
-            await updateDatasource(dsEditId.value, {
-                dsName: dsForm.dsName, dsType: dsForm.dsType, host: dsForm.host,
-                port: dsForm.port, databaseName: dsForm.databaseName,
-                username: dsForm.username, passwordEncrypted: dsForm.passwordEncrypted,
-                extraParams: dsForm.extraParams, maxPoolSize: dsForm.maxPoolSize
-            })
-            ElMessage.success('已更新')
-        } else {
-            await createDatasource({
-                dsName: dsForm.dsName, dsKey: dsForm.dsKey, dsType: dsForm.dsType,
-                host: dsForm.host, port: dsForm.port, databaseName: dsForm.databaseName,
-                username: dsForm.username, passwordEncrypted: dsForm.passwordEncrypted,
-                extraParams: dsForm.extraParams, maxPoolSize: dsForm.maxPoolSize
-            })
-            ElMessage.success('已添加')
-        }
-        dsDialogVisible.value = false; fetchDsData()
-    } catch (err) {
-        ElMessage.error(err.message || '操作失败')
-    } finally {
-        dsSubmitLoading.value = false
-    }
-}
-
-async function handleTestConnection(row) {
-    row._testing = true
-    try {
-        await testDatasourceConnection(row.id)
-        ElMessage.success('连接测试成功')
-        fetchDsData()
-    } catch (err) {
-        ElMessage.error(err.message || '连接测试失败')
-        row._testing = false
-    }
-}
-
-async function handleDsDelete(row) {
-    try {
-        await ElMessageBox.confirm(`确定要删除数据源「${row.dsName}」吗？`, '确认删除', { type:'warning' })
-        await deleteDatasource(row.id)
-        ElMessage.success('已删除')
-        fetchDsData()
-    } catch {}
-}
-
 function onTabChange(tabName) {
-    if (tabName === 'datasource') fetchDsData()
     if (tabName === 'config') fetchConfigData()
     if (tabName === 'log') loadLogLevel()
     if (tabName === 'feature') loadToggles()

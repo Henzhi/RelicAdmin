@@ -39,10 +39,11 @@ public class UserServiceImpl implements UserService {
     private final AdminUserRoleMapper adminUserRoleMapper;
 
     @Override
-    public PageResultVO<UserVO> page(String username, String nickname, String status, String userType, int page, int pageSize) {
+    public PageResultVO<UserVO> page(String username, String nickname, String status, String userType,
+                                     String registeredAtStart, String registeredAtEnd, int page, int pageSize) {
         int offset = (page - 1) * pageSize;
-        List<User> entities = userMapper.selectByPage(username, nickname, status, userType, offset, pageSize);
-        long total = userMapper.countByPage(username, nickname, status, userType);
+        List<User> entities = userMapper.selectByPage(username, nickname, status, userType, registeredAtStart, registeredAtEnd, offset, pageSize);
+        long total = userMapper.countByPage(username, nickname, status, userType, registeredAtStart, registeredAtEnd);
         List<UserVO> records = entities.stream().map(VoConverter::toUserVO).collect(Collectors.toList());
         return new PageResultVO<>(total, records, page, pageSize);
     }

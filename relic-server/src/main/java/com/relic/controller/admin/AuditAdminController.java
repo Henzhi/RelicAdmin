@@ -26,8 +26,10 @@ public class AuditAdminController {
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String contentType,
             @RequestParam(required = false) String manualAuditResult,
-            @RequestParam(required = false) String sourceType) {
-        return Result.success(auditRecordService.listAudits(contentType, manualAuditResult, sourceType, page, pageSize));
+            @RequestParam(required = false) String sourceType,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        return Result.success(auditRecordService.listAudits(contentType, manualAuditResult, sourceType, startDate, endDate, page, pageSize));
     }
 
     @PutMapping("/{id}")
@@ -54,5 +56,12 @@ public class AuditAdminController {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
         return Result.success(auditRecordService.getAuditorStats(startDate, endDate));
+    }
+
+    @GetMapping("/content-type-stats")
+    public Result<List<Map<String, Object>>> contentTypeStats(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        return Result.success(auditRecordService.getContentTypeStats(startDate, endDate));
     }
 }

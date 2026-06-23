@@ -12,9 +12,11 @@ public interface UserMapper {
     User selectByUsername(@Param("username") String username);
     List<User> selectByPage(@Param("username") String username, @Param("nickname") String nickname,
                             @Param("status") String status, @Param("userType") String userType,
+                            @Param("registeredAtStart") String registeredAtStart, @Param("registeredAtEnd") String registeredAtEnd,
                             @Param("offset") int offset, @Param("limit") int limit);
     long countByPage(@Param("username") String username, @Param("nickname") String nickname,
-                     @Param("status") String status, @Param("userType") String userType);
+                     @Param("status") String status, @Param("userType") String userType,
+                     @Param("registeredAtStart") String registeredAtStart, @Param("registeredAtEnd") String registeredAtEnd);
     int insert(User user);
     int update(User user);
     int updatePassword(@Param("id") Integer id, @Param("passwordHash") String passwordHash);

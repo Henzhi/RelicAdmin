@@ -10,4 +10,5 @@ public interface AuditStrategyService {
     void initDefaults();
     void updateStrategy(Integer id, AuditStrategyUpdateDTO dto);
     String getAutoMode(String contentType);
+    Map<String, Object> getStrategy(String contentType);
 }

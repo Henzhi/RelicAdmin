@@ -49,4 +49,29 @@
         </where>
     </select>
 
+    <select id="selectUnsynced" resultType="map">
+        SELECT uu.id, uu.user_id, uu.caption, uu.created_at
+        FROM user_uploads uu
+        WHERE NOT EXISTS (
+            SELECT 1 FROM user_behaviors ub
+            WHERE ub.target_type = 'upload' AND ub.target_id = CAST(uu.id AS CHAR)
+        )
+        ORDER BY uu.created_at ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectUnaudited" resultType="map">
+        SELECT id, user_id, caption AS content, created_at
+        FROM user_uploads
+        WHERE NOT EXISTS (
+            SELECT 1 FROM audit_records ar WHERE ar.content_id = CONCAT('upload_', user_uploads.id)
+        )
+        ORDER BY created_at ASC
+        LIMIT #{limit}
+    </select>
+
+    <update id="updateAuditStatus">
+        UPDATE user_uploads SET status = #{status}, audit_by = #{auditBy}, audit_time = NOW(), reject_reason = #{rejectReason} WHERE id = #{id}
+    </update>
+
 </mapper>
