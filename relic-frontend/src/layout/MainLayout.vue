@@ -258,6 +258,7 @@
                 class="route-page__header"
                 :title="childRoute.meta.title"
                 :content="childRoute.meta.description"
+                @back="goBack"
               />
               <component :is="Component" />
             </div>
@@ -321,6 +322,14 @@ function showRoutePageHeader(childRoute) {
   if (!childRoute.meta?.title) return false
   if (childRoute.meta.pageHeader === false) return false
   return true
+}
+
+function goBack() {
+  if (window.history.length > 1) {
+    router.back()
+  } else {
+    router.push('/dashboard')
+  }
 }
 
 function handleCommand(command) {
