@@ -8,7 +8,7 @@
         </div>
       </template>
 
-      <el-table :data="tableData" v-loading="loading" stripe border>
+      <el-table v-loading="loading" :data="tableData" stripe border>
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="name" label="角色标识" width="140" />
         <el-table-column prop="displayName" label="显示名称" width="140" />
@@ -25,9 +25,9 @@
 
       <div class="pagination-wrap">
         <el-pagination
-          background
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
+          background
           :page-sizes="[10, 20]"
           layout="total, sizes, prev, pager, next"
           :total="pagination.total"

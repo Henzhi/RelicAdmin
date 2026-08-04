@@ -136,7 +136,7 @@
                 </el-collapse-item>
               </el-collapse>
             </div>
-            <el-button type="primary" @click="handleReset" style="margin-top: 16px;">继续导入</el-button>
+            <el-button type="primary" style="margin-top: 16px;" @click="handleReset">继续导入</el-button>
             <el-button @click="$router.push('/artifacts')">返回文物列表</el-button>
           </template>
         </el-result>
@@ -146,7 +146,7 @@
     <!-- 导入历史 -->
     <el-card shadow="never" style="margin-top: 16px;">
       <template #header><span class="card-title">导入历史</span></template>
-      <el-table :data="historyData" border stripe v-loading="historyLoading" style="width: 100%;">
+      <el-table v-loading="historyLoading" :data="historyData" border stripe style="width: 100%;">
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="fileName" label="文件名" min-width="180" show-overflow-tooltip />
         <el-table-column prop="fileType" label="类型" width="80">
@@ -180,8 +180,9 @@
           </template>
         </el-table-column>
       </el-table>
-      <div class="pagination-container" v-if="historyTotal > 0">
-        <el-pagination background v-model:current-page="historyPage" v-model:page-size="historyPageSize"
+      <div v-if="historyTotal > 0" class="pagination-container">
+        <el-pagination
+v-model:current-page="historyPage" v-model:page-size="historyPageSize" background
           :total="historyTotal" layout="total, prev, pager, next" @current-change="fetchHistory" />
       </div>
     </el-card>

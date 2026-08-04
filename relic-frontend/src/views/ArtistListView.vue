@@ -18,7 +18,7 @@
         <el-button :icon="Refresh" @click="handleReset">重置</el-button>
       </div>
 
-      <el-table :data="tableData" v-loading="loading" border stripe row-key="id" style="width: 100%">
+      <el-table v-loading="loading" :data="tableData" border stripe row-key="id" style="width: 100%">
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="nameZh" label="中文名" min-width="120" />
         <el-table-column prop="nameEn" label="英文名" min-width="150" show-overflow-tooltip />
@@ -41,9 +41,9 @@
 
       <div class="pagination-container">
         <el-pagination
-          background
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
+          background
           :page-sizes="[10, 20, 50, 100]"
           :total="pagination.total"
           layout="total, sizes, prev, pager, next, jumper"

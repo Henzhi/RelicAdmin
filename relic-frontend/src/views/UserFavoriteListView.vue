@@ -45,11 +45,11 @@
         </el-table>
       </div>
 
-      <div class="pagination-container" v-if="tableData.length > 0">
+      <div v-if="tableData.length > 0" class="pagination-container">
         <el-pagination
-          background
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
+          background
           :page-sizes="[10, 20, 50]"
           :total="pagination.total"
           layout="total, sizes, prev, pager, next, jumper"

@@ -1,0 +1,51 @@
+# =====================================================================
+# 生产环境配置（application-prod.yml）
+# 使用方式：启动时指定 --spring.profiles.active=prod
+# 安全要求：以下所有敏感配置必须通过环境变量注入，禁止在部署机上硬编码；
+#           未配置相应环境变量时应用将启动失败（安全兜底）。
+# =====================================================================
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      database: ${REDIS_DATABASE:0}
+      ssl:
+        enabled: ${REDIS_SSL:true}
+      timeout: ${REDIS_TIMEOUT:2000ms}
+      lettuce:
+        pool:
+          max-active: ${REDIS_POOL_MAX_ACTIVE:8}
+          max-idle: ${REDIS_POOL_MAX_IDLE:8}
+          min-idle: ${REDIS_POOL_MIN_IDLE:0}
+
+relic:
+  jwt:
+    # 生产密钥必须由部署平台 secrets / 环境变量注入，并定期轮换
+    admin-secret-key: ${JWT_ADMIN_SECRET_KEY}
+    knowledge-secret-key: ${JWT_KNOWLEDGE_SECRET_KEY}
+    museum-secret-key: ${JWT_MUSEUM_SECRET_KEY}
+    user-secret-key: ${JWT_USER_SECRET_KEY}
+
+  alioss:
+    endpoint: ${ALIYUN_OSS_ENDPOINT}
+    access-key-id: ${ALIYUN_OSS_ACCESS_KEY_ID}
+    access-key-secret: ${ALIYUN_OSS_ACCESS_KEY_SECRET}
+    bucket-name: ${ALIYUN_OSS_BUCKET_NAME}
+
+  qa:
+    base-url: ${QA_BASE_URL}
+
+  cache:
+    sensitive-word:
+      key-prefix: "relic:sensitive:words"
+      ttl: 30m
+      enabled: true

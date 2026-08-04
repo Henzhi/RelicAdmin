@@ -22,7 +22,7 @@
         <el-tag v-else type="info">共 {{ tableData.length }} 条数据</el-tag>
       </div>
 
-      <el-table :data="tableData" v-loading="loading" border row-key="id" style="width: 100%">
+      <el-table v-loading="loading" :data="tableData" border row-key="id" style="width: 100%">
         <el-table-column type="index" width="50" />
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="nameZh" label="中文名" min-width="150" />
@@ -94,7 +94,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus, Search, Refresh, Edit, Delete } from '@element-plus/icons-vue'
-import { getLocationTree, getLocationAll, getLocationList, getLocationParents, createLocation, updateLocation, deleteLocation } from '@/api/location'
+import { getLocationAll, getLocationList, getLocationParents, createLocation, updateLocation, deleteLocation } from '@/api/location'
 
 const PARENT_TYPE_MAP = { site: 'city', city: 'province', province: 'country' }
 const PARENT_TYPE_LABEL = { city: '城市', province: '省份', country: '国家' }

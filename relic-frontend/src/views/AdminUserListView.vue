@@ -12,11 +12,13 @@
 
       <el-form :inline="true" :model="filter" class="filter-form">
         <el-form-item label="用户名">
-          <el-input v-model="filter.username" placeholder="模糊搜索" clearable
+          <el-input
+v-model="filter.username" placeholder="模糊搜索" clearable
             @keyup.enter="handleSearch" />
         </el-form-item>
         <el-form-item label="真实姓名">
-          <el-input v-model="filter.realName" placeholder="模糊搜索" clearable
+          <el-input
+v-model="filter.realName" placeholder="模糊搜索" clearable
             @keyup.enter="handleSearch" />
         </el-form-item>
         <el-form-item label="状态">
@@ -42,7 +44,7 @@
         </el-form-item>
       </el-form>
 
-      <el-table :data="tableData" v-loading="loading" stripe border row-key="id">
+      <el-table v-loading="loading" :data="tableData" stripe border row-key="id">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column label="头像" width="100">
@@ -88,7 +90,8 @@
 
             <el-button size="small" type="info" @click="handleResetPassword(row)">重置密码</el-button>
 
-            <el-popconfirm title="确定要删除该管理员吗？删除后数据不可恢复。"
+            <el-popconfirm
+title="确定要删除该管理员吗？删除后数据不可恢复。"
               confirm-button-text="确认删除" cancel-button-text="取消"
               confirm-button-type="danger" @confirm="handleDelete(row)">
               <template #reference>
@@ -118,11 +121,13 @@
     <el-dialog v-model="createVisible" :title="isEdit ? '编辑管理员' : '新增管理员'" width="520px" :close-on-click-modal="false">
       <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="90px">
         <el-form-item label="用户名" prop="username">
-          <el-input v-model="createForm.username" placeholder="4~50个字符" maxlength="50"
+          <el-input
+v-model="createForm.username" placeholder="4~50个字符" maxlength="50"
             :disabled="isEdit" />
         </el-form-item>
         <el-form-item v-if="!isEdit" label="密码" prop="password">
-          <el-input v-model="createForm.password" type="password" placeholder="6~20个字符"
+          <el-input
+v-model="createForm.password" type="password" placeholder="6~20个字符"
             maxlength="20" show-password />
         </el-form-item>
         <el-form-item label="真实姓名">
@@ -171,11 +176,13 @@
     <el-dialog v-model="passwordDialogVisible" title="重置密码" width="400px">
       <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="80px">
         <el-form-item label="新密码" prop="newPassword">
-          <el-input v-model="passwordForm.newPassword" type="password" placeholder="6~20个字符"
+          <el-input
+v-model="passwordForm.newPassword" type="password" placeholder="6~20个字符"
             maxlength="20" show-password />
         </el-form-item>
         <el-form-item label="确认密码" prop="confirmPassword">
-          <el-input v-model="passwordForm.confirmPassword" type="password" placeholder="再次输入密码"
+          <el-input
+v-model="passwordForm.confirmPassword" type="password" placeholder="再次输入密码"
             maxlength="20" show-password />
         </el-form-item>
       </el-form>
@@ -188,15 +195,18 @@
     <el-dialog v-model="selfPasswordDialogVisible" title="修改密码" width="400px">
       <el-form ref="selfPasswordFormRef" :model="selfPasswordForm" :rules="selfPasswordRules" label-width="80px">
         <el-form-item label="原密码" prop="oldPassword">
-          <el-input v-model="selfPasswordForm.oldPassword" type="password" placeholder="请输入原密码"
+          <el-input
+v-model="selfPasswordForm.oldPassword" type="password" placeholder="请输入原密码"
             maxlength="20" show-password />
         </el-form-item>
         <el-form-item label="新密码" prop="newPassword">
-          <el-input v-model="selfPasswordForm.newPassword" type="password" placeholder="6~20个字符"
+          <el-input
+v-model="selfPasswordForm.newPassword" type="password" placeholder="6~20个字符"
             maxlength="20" show-password />
         </el-form-item>
         <el-form-item label="确认密码" prop="confirmPassword">
-          <el-input v-model="selfPasswordForm.confirmPassword" type="password" placeholder="再次输入密码"
+          <el-input
+v-model="selfPasswordForm.confirmPassword" type="password" placeholder="再次输入密码"
             maxlength="20" show-password />
         </el-form-item>
       </el-form>
@@ -210,10 +220,10 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import {
   getAdminUserPage, createAdminUser, updateAdminUser, deleteAdminUser,
-  updateAdminUserStatus, assignAdminRoles, resetAdminPassword, updateAdminPassword
+  updateAdminUserStatus, assignAdminRoles, resetAdminPassword
 } from '../api/adminUser'
 import { getRoleList } from '../api/role'
 import { roleType, roleLabel } from '../utils/adminRole'
@@ -240,6 +250,7 @@ async function fetchData() {
     pagination.page = res.data.page
     pagination.pageSize = res.data.pageSize
   } catch {
+    // 加载失败保持空列表，错误已由拦截器统一提示
   } finally {
     loading.value = false
   }
@@ -353,6 +364,7 @@ async function handleSubmit() {
     createVisible.value = false
     fetchData()
   } catch {
+    // 创建失败时保留弹窗，错误已由拦截器统一提示
   } finally {
     createSubmitting.value = false
   }
@@ -470,6 +482,7 @@ async function confirmResetPassword() {
     ElMessage.success('密码重置成功')
     passwordDialogVisible.value = false
   } catch {
+    // 重置失败时错误已由拦截器统一提示
   } finally {
     passwordSubmitting.value = false
   }

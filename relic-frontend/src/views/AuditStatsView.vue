@@ -4,7 +4,8 @@
       <template #header>
         <div class="card-header">
           <span class="card-title">审核统计</span>
-          <el-date-picker v-model="dateRange" type="datetimerange" range-separator="至"
+          <el-date-picker
+v-model="dateRange" type="datetimerange" range-separator="至"
             start-placeholder="开始时间" end-placeholder="结束时间"
             format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss"
             style="width:360px" @change="fetchAllStats" />
@@ -38,7 +39,7 @@
       </div>
     </el-card>
 
-    <el-card shadow="never" style="margin-top: 16px;" v-loading="auditorLoading">
+    <el-card v-loading="auditorLoading" shadow="never" style="margin-top: 16px;">
       <template #header>
         <span class="card-title">审核员工作量统计</span>
       </template>
@@ -58,7 +59,7 @@
       </el-table>
     </el-card>
 
-    <el-card shadow="never" style="margin-top: 16px;" v-loading="contentTypeLoading">
+    <el-card v-loading="contentTypeLoading" shadow="never" style="margin-top: 16px;">
       <template #header>
         <span class="card-title">内容类型分布</span>
       </template>

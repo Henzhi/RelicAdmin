@@ -27,14 +27,15 @@
           <el-option label="已通过" value="approved" />
           <el-option label="已拒绝" value="rejected" />
         </el-select>
-        <el-date-picker v-model="searchDateRange" type="daterange" range-separator="至"
+        <el-date-picker
+v-model="searchDateRange" type="daterange" range-separator="至"
           start-placeholder="开始日期" end-placeholder="结束日期"
           value-format="YYYY-MM-DD" style="width:260px" />
         <el-button type="primary" :icon="Search" @click="handleSearch">查询</el-button>
         <el-button :icon="Refresh" @click="handleReset">重置</el-button>
       </div>
 
-      <div class="stats-bar" v-if="quickStats.totalCount > 0">
+      <div v-if="quickStats.totalCount > 0" class="stats-bar">
         <div class="stat-item">
           <span class="stat-label">待人工审核</span>
           <el-tag type="warning" size="large" effect="dark">{{ quickStats.pendingCount || 0 }}</el-tag>
@@ -57,7 +58,7 @@
         </div>
       </div>
 
-      <div class="batch-bar" v-if="selectedIds.length > 0">
+      <div v-if="selectedIds.length > 0" class="batch-bar">
         <span>已选 <strong>{{ selectedIds.length }}</strong> 条</span>
         <el-button type="success" size="small" @click="openBatchDialog('approved')">批量通过</el-button>
         <el-button type="danger" size="small" @click="openBatchDialog('rejected')">批量拒绝</el-button>
@@ -69,7 +70,8 @@
           <el-empty description="暂无审核记录" />
         </div>
 
-        <el-table v-else ref="tableRef" :data="tableData" border stripe style="width: 100%"
+        <el-table
+v-else ref="tableRef" :data="tableData" border stripe style="width: 100%"
           @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="45" />
           <el-table-column prop="id" label="ID" width="70" />
@@ -123,11 +125,11 @@
         </el-table>
       </div>
 
-      <div class="pagination-container" v-if="tableData.length > 0">
+      <div v-if="tableData.length > 0" class="pagination-container">
         <el-pagination
-          background
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
+          background
           :page-sizes="[10, 20, 50]"
           :total="pagination.total"
           layout="total, sizes, prev, pager, next, jumper"
@@ -149,7 +151,7 @@
         </el-form-item>
         <el-form-item label="自动审核">
           <el-tag :type="auditResultTag(currentAuditRow?.autoAuditResult)" size="small">{{ auditResultLabel(currentAuditRow?.autoAuditResult) }}</el-tag>
-          <span style="margin-left: 8px; color: #909399; font-size: 12px;" v-if="currentAuditRow?.autoAuditResult === 'rejected'">自动审核未通过，需人工复核</span>
+          <span v-if="currentAuditRow?.autoAuditResult === 'rejected'" style="margin-left: 8px; color: #909399; font-size: 12px;">自动审核未通过，需人工复核</span>
         </el-form-item>
         <el-form-item label="审核内容">
           <div class="audit-content">{{ currentAuditRow?.content }}</div>
@@ -160,7 +162,7 @@
             <el-radio value="rejected">拒绝</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="拒绝原因" v-if="auditForm.manualAuditResult === 'rejected'">
+        <el-form-item v-if="auditForm.manualAuditResult === 'rejected'" label="拒绝原因">
           <el-input v-model="auditForm.rejectReason" type="textarea" :rows="3" placeholder="请输入拒绝原因" />
         </el-form-item>
       </el-form>

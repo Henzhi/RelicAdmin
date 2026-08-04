@@ -18,7 +18,8 @@
         <el-tab-pane label="文物喜欢" name="artifact">
           <el-form :inline="true" :model="artifactFilter" class="filter-form">
             <el-form-item label="用户ID">
-              <el-input v-model="artifactFilter.userId" placeholder="请输入用户ID" clearable
+              <el-input
+v-model="artifactFilter.userId" placeholder="请输入用户ID" clearable
                 @keyup.enter="handleArtifactSearch" />
             </el-form-item>
             <el-form-item>
@@ -27,7 +28,7 @@
             </el-form-item>
           </el-form>
 
-          <el-table :data="artifactTableData" v-loading="artifactLoading" stripe border>
+          <el-table v-loading="artifactLoading" :data="artifactTableData" stripe border>
             <el-table-column prop="username" label="用户名" min-width="150" show-overflow-tooltip />
             <el-table-column prop="artifactName" label="文物名称" min-width="200" show-overflow-tooltip />
             <el-table-column prop="likedAt" label="喜欢时间" width="180" />
@@ -35,9 +36,9 @@
 
           <div class="pagination-wrap">
             <el-pagination
-          background
-              v-model:current-page="artifactPagination.page"
+          v-model:current-page="artifactPagination.page"
               v-model:page-size="artifactPagination.pageSize"
+              background
               :page-sizes="[10, 20, 50]"
               layout="total, sizes, prev, pager, next"
               :total="artifactPagination.total"
@@ -50,7 +51,8 @@
         <el-tab-pane label="动态点赞" name="post">
           <el-form :inline="true" :model="postFilter" class="filter-form">
             <el-form-item label="用户ID">
-              <el-input v-model="postFilter.userId" placeholder="请输入用户ID" clearable
+              <el-input
+v-model="postFilter.userId" placeholder="请输入用户ID" clearable
                 @keyup.enter="handlePostSearch" />
             </el-form-item>
             <el-form-item>
@@ -59,7 +61,7 @@
             </el-form-item>
           </el-form>
 
-          <el-table :data="postTableData" v-loading="postLoading" stripe border>
+          <el-table v-loading="postLoading" :data="postTableData" stripe border>
             <el-table-column prop="username" label="用户名" min-width="150" show-overflow-tooltip />
             <el-table-column prop="postTitle" label="动态标题" min-width="250" show-overflow-tooltip />
             <el-table-column prop="likedAt" label="点赞时间" width="180" />
@@ -67,9 +69,9 @@
 
           <div class="pagination-wrap">
             <el-pagination
-          background
-              v-model:current-page="postPagination.page"
+          v-model:current-page="postPagination.page"
               v-model:page-size="postPagination.pageSize"
+              background
               :page-sizes="[10, 20, 50]"
               layout="total, sizes, prev, pager, next"
               :total="postPagination.total"
@@ -82,7 +84,8 @@
         <el-tab-pane label="评论点赞" name="comment">
           <el-form :inline="true" :model="commentFilter" class="filter-form">
             <el-form-item label="用户ID">
-              <el-input v-model="commentFilter.userId" placeholder="请输入用户ID" clearable
+              <el-input
+v-model="commentFilter.userId" placeholder="请输入用户ID" clearable
                 @keyup.enter="handleCommentSearch" />
             </el-form-item>
             <el-form-item>
@@ -91,7 +94,7 @@
             </el-form-item>
           </el-form>
 
-          <el-table :data="commentTableData" v-loading="commentLoading" stripe border>
+          <el-table v-loading="commentLoading" :data="commentTableData" stripe border>
             <el-table-column prop="username" label="用户名" min-width="150" show-overflow-tooltip />
             <el-table-column prop="commentContent" label="评论内容" min-width="300" show-overflow-tooltip />
             <el-table-column prop="likedAt" label="点赞时间" width="180" />
@@ -99,9 +102,9 @@
 
           <div class="pagination-wrap">
             <el-pagination
-          background
-              v-model:current-page="commentPagination.page"
+          v-model:current-page="commentPagination.page"
               v-model:page-size="commentPagination.pageSize"
+              background
               :page-sizes="[10, 20, 50]"
               layout="total, sizes, prev, pager, next"
               :total="commentPagination.total"
@@ -155,6 +158,7 @@ async function fetchArtifactLikes() {
     artifactTableData.value = res.data.records
     artifactPagination.total = res.data.total
   } catch {
+    // 加载失败保持空列表，错误已由拦截器统一提示
   } finally {
     artifactLoading.value = false
   }
@@ -191,6 +195,7 @@ async function fetchPostLikes() {
     postTableData.value = res.data.records
     postPagination.total = res.data.total
   } catch {
+    // 加载失败保持空列表，错误已由拦截器统一提示
   } finally {
     postLoading.value = false
   }
@@ -227,6 +232,7 @@ async function fetchCommentLikes() {
     commentTableData.value = res.data.records
     commentPagination.total = res.data.total
   } catch {
+    // 加载失败保持空列表，错误已由拦截器统一提示
   } finally {
     commentLoading.value = false
   }

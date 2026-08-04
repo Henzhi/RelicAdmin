@@ -55,7 +55,8 @@
                     <el-table-column label="操作" width="200" fixed="right">
                         <template #default="{ row }">
                             <el-button size="small" link type="primary" @click="openEditDialog(row)">编辑</el-button>
-                            <el-button size="small" link :type="row.status === 1 ? 'warning' : 'success'"
+                            <el-button
+size="small" link :type="row.status === 1 ? 'warning' : 'success'"
                                        @click="toggleStatus(row)">
                                 {{ row.status === 1 ? '禁用' : '启用' }}
                             </el-button>
@@ -65,11 +66,11 @@
                 </el-table>
             </div>
 
-            <div class="pagination-container" v-if="tableData.length > 0">
+            <div v-if="tableData.length > 0" class="pagination-container">
                 <el-pagination
-          background
-                    v-model:current-page="pagination.page"
+          v-model:current-page="pagination.page"
                     v-model:page-size="pagination.pageSize"
+                    background
                     :page-sizes="[10,20,50]"
                     :total="pagination.total"
                     layout="total, sizes, prev, pager, next, jumper"
@@ -79,7 +80,8 @@
             </div>
         </el-card>
 
-        <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑违规类型' : '添加违规类型'"
+        <el-dialog
+v-model="dialogVisible" :title="isEdit ? '编辑违规类型' : '添加违规类型'"
                    width="520px" :close-on-click-modal="false" @closed="resetForm">
             <el-form :model="form" label-width="100px">
                 <el-form-item label="类型编码">
@@ -106,7 +108,7 @@
                 <el-form-item label="描述">
                     <el-input v-model="form.description" type="textarea" :rows="3" placeholder="说明" />
                 </el-form-item>
-                <el-form-item label="状态" v-if="isEdit">
+                <el-form-item v-if="isEdit" label="状态">
                     <el-radio-group v-model="form.status">
                         <el-radio :value="1">启用</el-radio>
                         <el-radio :value="0">禁用</el-radio>
@@ -220,7 +222,9 @@ async function handleDelete(row) {
         await deleteViolationType(row.id)
         ElMessage.success('已删除')
         fetchData()
-    } catch {}
+    } catch {
+        // 用户取消确认时静默返回
+    }
 }
 </script>
 

@@ -20,7 +20,8 @@
           <el-input v-model="searchForm.keyword" placeholder="问题/回答关键词" clearable style="width: 160px;" />
         </el-form-item>
         <el-form-item label="时间范围">
-          <el-date-picker v-model="searchForm.dateRange" type="daterange" range-separator="至"
+          <el-date-picker
+v-model="searchForm.dateRange" type="daterange" range-separator="至"
             start-placeholder="开始日期" end-placeholder="结束日期" value-format="YYYY-MM-DD" style="width: 260px;" />
         </el-form-item>
         <el-form-item>
@@ -29,7 +30,7 @@
         </el-form-item>
       </el-form>
       <!-- 数据表格 -->
-      <el-table :data="tableData" border stripe v-loading="loading" style="width: 100%;">
+      <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%;">
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="qa_log_uuid" label="日志UUID" width="160" show-overflow-tooltip />
         <el-table-column prop="session_id" label="会话ID" width="140" show-overflow-tooltip />
@@ -48,8 +49,9 @@
         <el-table-column prop="latency_ms" label="耗时(ms)" width="90" align="center" />
         <el-table-column prop="created_at" label="创建时间" width="170" />
       </el-table>
-      <div class="pagination-container" v-if="total > 0">
-        <el-pagination background v-model:current-page="page" v-model:page-size="pageSize"
+      <div v-if="total > 0" class="pagination-container">
+        <el-pagination
+v-model:current-page="page" v-model:page-size="pageSize" background
           :total="total" layout="total, prev, pager, next" @current-change="fetchData" />
       </div>
     </el-card>

@@ -4,8 +4,6 @@ server:
 spring:
   profiles:
     active: dev
-  main:
-    allow-circular-references: true
   servlet:
     multipart:
       max-file-size: 10MB
@@ -28,7 +26,8 @@ spring:
       port: ${relic.redis.port}
       password: ${relic.redis.password}
       database: ${relic.redis.database}
-      ssl: ${relic.redis.ssl:false}
+      ssl:
+        enabled: ${relic.redis.ssl:false}
       timeout: ${relic.redis.timeout:2000ms}
       lettuce:
         pool:
@@ -69,16 +68,17 @@ knife4j:
 
 relic:
   jwt:
-    admin-secret-key: ZO/5IEc8jY5csLQPhQ2nwkXvEbyIL7v/6AvShE0V5Ic=
+    # 敏感密钥一律通过环境变量注入，禁止明文入库；未配置时应用启动失败（安全兜底）
+    admin-secret-key: ${JWT_ADMIN_SECRET_KEY}
     admin-ttl: 72000000000
     admin-token-name: token
-    knowledge-secret-key: QjnEXgrR7DaaP2quggUJrQED2hVCKVHUcKaHRdMGHdU=
+    knowledge-secret-key: ${JWT_KNOWLEDGE_SECRET_KEY}
     knowledge-ttl: 72000000000
     knowledge-token-name: token
-    museum-secret-key: o0mIRWHix+bqlpYLeV4PgyoKz/E2dyH3Nh38/hvlFMg=
+    museum-secret-key: ${JWT_MUSEUM_SECRET_KEY}
     museum-ttl: 72000000000
     museum-token-name: token
-    user-secret-key: /MHVvN9ftpXoFVlzZxWp3OqE1W1gueCvSabRCdisdWM=
+    user-secret-key: ${JWT_USER_SECRET_KEY}
     user-ttl: 72000000000
     user-token-name: token
 

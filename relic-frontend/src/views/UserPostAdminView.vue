@@ -9,18 +9,21 @@
 
       <el-form :inline="true" :model="filter" class="filter-form">
         <el-form-item label="用户名">
-          <el-input v-model="filter.username" placeholder="用户名搜索" clearable style="width:160px"
+          <el-input
+v-model="filter.username" placeholder="用户名搜索" clearable style="width:160px"
             @keyup.enter="handleSearch" />
         </el-form-item>
         <el-form-item label="关键词">
-          <el-input v-model="filter.keyword" placeholder="搜索内容关键词" clearable
+          <el-input
+v-model="filter.keyword" placeholder="搜索内容关键词" clearable
             @keyup.enter="handleSearch" />
         </el-form-item>
         <el-form-item label="时间范围">
           <el-date-picker v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间" format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" style="width:360px" clearable @change="handleSearch" />
         </el-form-item>
         <el-form-item label="用户ID">
-          <el-input v-model="filter.userId" placeholder="输入用户ID" clearable
+          <el-input
+v-model="filter.userId" placeholder="输入用户ID" clearable
             @keyup.enter="handleSearch" />
         </el-form-item>
         <el-form-item label="状态">
@@ -36,7 +39,7 @@
         </el-form-item>
       </el-form>
 
-      <el-table :data="tableData" v-loading="loading" stripe border row-key="id">
+      <el-table v-loading="loading" :data="tableData" stripe border row-key="id">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column prop="content" label="内容" min-width="300" show-overflow-tooltip />
@@ -53,9 +56,9 @@
 
       <div class="pagination-wrap">
         <el-pagination
-          background
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
+          background
           :page-sizes="[10, 20, 50]"
           layout="total, sizes, prev, pager, next"
           :total="pagination.total"
@@ -97,6 +100,7 @@ async function fetchData() {
     pagination.page = res.data.page
     pagination.pageSize = res.data.pageSize
   } catch {
+    // 加载失败保持空列表，错误已由拦截器统一提示
   } finally {
     loading.value = false
   }

@@ -31,7 +31,7 @@
           <el-button @click="resetSearch">重置</el-button>
         </el-form-item>
       </el-form>
-      <el-table :data="tableData" border stripe v-loading="loading" style="width: 100%;">
+      <el-table v-loading="loading" :data="tableData" border stripe style="width: 100%;">
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="qa_log_id" label="日志ID" width="90" />
         <el-table-column prop="session_id" label="会话ID" width="130" show-overflow-tooltip />
@@ -53,8 +53,9 @@
         </el-table-column>
         <el-table-column prop="created_at" label="创建时间" width="170" />
       </el-table>
-      <div class="pagination-container" v-if="total > 0">
-        <el-pagination background v-model:current-page="page" v-model:page-size="pageSize"
+      <div v-if="total > 0" class="pagination-container">
+        <el-pagination
+v-model:current-page="page" v-model:page-size="pageSize" background
           :total="total" layout="total, prev, pager, next" @current-change="fetchData" />
       </div>
     </el-card>

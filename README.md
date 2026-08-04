@@ -193,9 +193,12 @@ relic:
 ### 4. 启动后端
 
 ```bash
-# 在项目根目录执行
+# 在项目根目录执行（不要省略 -pl relic-server，根 pom 为聚合模块、无主类）
 mvn clean install -DskipTests
 mvn spring-boot:run -pl relic-server
+
+# 或者首次运行（依赖未安装到本地仓库时）加上 -am 一并构建依赖模块：
+mvn spring-boot:run -pl relic-server -am
 ```
 
 后端启动后访问：

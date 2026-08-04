@@ -26,7 +26,7 @@
         </el-form-item>
       </el-form>
 
-      <el-table :data="tableData" v-loading="loading" stripe border>
+      <el-table v-loading="loading" :data="tableData" stripe border>
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="name" label="权限标识" width="180" />
         <el-table-column prop="displayName" label="显示名称" width="180" />
@@ -42,9 +42,9 @@
 
       <div class="pagination-wrap">
         <el-pagination
-          background
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
+          background
           :page-sizes="[10, 20, 50]"
           layout="total, sizes, prev, pager, next"
           :total="pagination.total"

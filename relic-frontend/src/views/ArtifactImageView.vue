@@ -11,7 +11,7 @@
         </div>
       </template>
 
-      <el-table :data="tableData" v-loading="loading" border stripe row-key="id" style="width: 100%">
+      <el-table v-loading="loading" :data="tableData" border stripe row-key="id" style="width: 100%">
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column label="预览" width="100">
           <template #default="{ row }">
@@ -131,7 +131,7 @@ function onUploadSuccess(response) {
   }
 }
 
-function onUploadError(error, file) {
+function onUploadError(error, _file) {
   uploadLoading.value = false
   uploadPercent.value = 0
   let msg = '图片上传失败'

@@ -62,7 +62,7 @@
         FROM user_posts up
         WHERE NOT EXISTS (
             SELECT 1 FROM user_behaviors ub
-            WHERE ub.target_type = 'post' AND ub.target_id = CAST(up.id AS CHAR)
+            WHERE ub.target_type = 'post' AND ub.target_id = CAST(up.id AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_general_ci
         )
         ORDER BY up.created_at ASC
         LIMIT #{limit}

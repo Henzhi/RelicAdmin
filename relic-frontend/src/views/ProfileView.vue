@@ -152,8 +152,8 @@
                     type="password"
                     placeholder="请输入原密码"
                     show-password
-                    @input="onOldPasswordInput"
                     autocomplete="off"
+                    @input="onOldPasswordInput"
                   />
                 </el-form-item>
                 <el-form-item label="新密码" prop="newPassword">

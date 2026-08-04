@@ -4,11 +4,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint src --ext .js,.vue",
+    "lint:fix": "eslint src --ext .js,.vue --fix",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
-    "axios": "^1.16.0",
+    "axios": "^1.19.0",
     "echarts": "^6.1.0",
     "element-plus": "^2.14.0",
     "pinia": "^3.0.4",
@@ -18,11 +22,16 @@
   "name": "relic-frontend",
   "version": "1.0.0",
   "overrides": {
-    "esbuild": ">=0.28.1"
+    "esbuild": ">=0.28.1",
+    "postcss": "^8.5.23"
   },
   "devDependencies": {
     "vite": "^6.4.3",
-    "@vitejs/plugin-vue": "^5.2.4"
+    "@vitejs/plugin-vue": "^5.2.4",
+    "eslint": "^8.57.1",
+    "eslint-plugin-vue": "^9.28.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3"
   }
 }
 

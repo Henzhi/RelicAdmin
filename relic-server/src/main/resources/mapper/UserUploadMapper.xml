@@ -54,7 +54,7 @@
         FROM user_uploads uu
         WHERE NOT EXISTS (
             SELECT 1 FROM user_behaviors ub
-            WHERE ub.target_type = 'upload' AND ub.target_id = CAST(uu.id AS CHAR)
+            WHERE ub.target_type = 'upload' AND ub.target_id = CAST(uu.id AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_general_ci
         )
         ORDER BY uu.created_at ASC
         LIMIT #{limit}

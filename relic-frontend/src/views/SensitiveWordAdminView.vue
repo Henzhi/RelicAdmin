@@ -53,7 +53,8 @@
           <el-table-column label="操作" width="200" fixed="right">
             <template #default="{ row }">
               <el-button size="small" link type="primary" @click="openEditDialog(row)">编辑</el-button>
-              <el-button size="small" link :type="row.status === 1 ? 'warning' : 'success'"
+              <el-button
+size="small" link :type="row.status === 1 ? 'warning' : 'success'"
                 @click="toggleStatus(row)">{{ row.status === 1 ? '禁用' : '启用' }}</el-button>
               <el-button size="small" link type="danger" @click="handleDelete(row)">删除</el-button>
             </template>
@@ -61,11 +62,11 @@
         </el-table>
       </div>
 
-      <div class="pagination-container" v-if="tableData.length > 0">
+      <div v-if="tableData.length > 0" class="pagination-container">
         <el-pagination
-          background
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
+          background
           :page-sizes="[10, 20, 50]"
           :total="pagination.total"
           layout="total, sizes, prev, pager, next, jumper"
@@ -89,7 +90,7 @@
             <el-option label="其他" value="other" />
           </el-select>
         </el-form-item>
-        <el-form-item label="状态" v-if="isEdit">
+        <el-form-item v-if="isEdit" label="状态">
           <el-radio-group v-model="form.status">
             <el-radio :value="1">启用</el-radio>
             <el-radio :value="0">禁用</el-radio>
@@ -219,7 +220,9 @@ async function handleDelete(row) {
     await ElMessageBox.confirm(`确定要删除敏感词「${row.word}」吗？`, '确认删除', { type: 'warning' })
     await deleteSensitiveWord(row.id)
     ElMessage.success('已删除'); fetchData()
-  } catch {}
+  } catch {
+    // 用户取消确认时静默返回
+  }
 }
 
 function openImportDialog() { importContent.value = ''; importDialogVisible.value = true }

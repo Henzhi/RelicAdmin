@@ -83,11 +83,11 @@
                 </el-table>
             </div>
 
-            <div class="pagination-container" v-if="tableData.length > 0">
+            <div v-if="tableData.length > 0" class="pagination-container">
                 <el-pagination
-          background
-                    v-model:current-page="pagination.page"
+          v-model:current-page="pagination.page"
                     v-model:page-size="pagination.pageSize"
+                    background
                     :page-sizes="[10,20,50]"
                     :total="pagination.total"
                     layout="total, sizes, prev, pager, next, jumper"
@@ -97,7 +97,8 @@
             </div>
         </el-card>
 
-        <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑爬取任务' : '添加爬取任务'"
+        <el-dialog
+v-model="dialogVisible" :title="isEdit ? '编辑爬取任务' : '添加爬取任务'"
                    width="620px" :close-on-click-modal="false" @closed="resetForm">
             <el-form :model="form" label-width="110px">
                 <el-row :gutter="16">
@@ -161,7 +162,7 @@
                 <el-form-item label="任务描述">
                     <el-input v-model="form.description" type="textarea" :rows="2" placeholder="任务描述说明" />
                 </el-form-item>
-                <el-form-item label="启用状态" v-if="isEdit">
+                <el-form-item v-if="isEdit" label="启用状态">
                     <el-radio-group v-model="form.enabled">
                         <el-radio :value="1">启用</el-radio>
                         <el-radio :value="0">禁用</el-radio>
@@ -205,11 +206,11 @@
                     <el-table-column prop="errorMessage" label="错误信息" min-width="180" show-overflow-tooltip />
                 </el-table>
             </div>
-            <div class="pagination-container" v-if="logData.length > 0">
+            <div v-if="logData.length > 0" class="pagination-container">
                 <el-pagination
-          background
-                    v-model:current-page="logPagination.page"
+          v-model:current-page="logPagination.page"
                     v-model:page-size="logPagination.pageSize"
+                    background
                     :page-sizes="[10,20,50]"
                     :total="logPagination.total"
                     layout="total, prev, pager, next"
@@ -226,7 +227,7 @@
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
-import { getCrawlTaskPage, getCrawlTaskDetail, createCrawlTask, updateCrawlTask,
+import { getCrawlTaskPage, createCrawlTask, updateCrawlTask,
          executeCrawlTask, pauseCrawlTask, resumeCrawlTask, deleteCrawlTask,
          getCrawlTaskLogs } from '../api/crawlTaskAdmin'
 
@@ -348,7 +349,9 @@ async function handleExecute(row) {
         await executeCrawlTask(row.id)
         ElMessage.success('任务执行成功')
         fetchData()
-    } catch {}
+    } catch {
+        // 用户取消确认时静默返回
+    }
 }
 
 async function handlePause(row) {
@@ -402,7 +405,9 @@ async function handleDelete(row) {
         await deleteCrawlTask(row.id)
         ElMessage.success('已删除')
         fetchData()
-    } catch {}
+    } catch {
+        // 用户取消确认时静默返回
+    }
 }
 
 </script>

@@ -65,15 +65,15 @@
         </el-table>
       </div>
 
-      <div class="pagination-container" v-if="tableData.length > 0">
+      <div v-if="tableData.length > 0" class="pagination-container">
         <el-pagination
-          background v-model:current-page="pagination.page" v-model:page-size="pagination.pageSize"
+          v-model:current-page="pagination.page" v-model:page-size="pagination.pageSize" background
           :page-sizes="[10,20,50]" :total="pagination.total" layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSearch" @current-change="handlePageChange" />
       </div>
     </el-card>
 
-    <el-card shadow="never" style="margin-top:16px" v-loading="storageLoading">
+    <el-card v-loading="storageLoading" shadow="never" style="margin-top:16px">
       <template #header>
         <div class="card-header">
           <span class="card-title">存储容量监控</span>
@@ -82,7 +82,7 @@
           </el-tag>
         </div>
       </template>
-      <div class="storage-info" v-if="storageInfo">
+      <div v-if="storageInfo" class="storage-info">
         <div class="storage-item">
           <span class="storage-label">已用空间</span>
           <span class="storage-value">{{ storageInfo.usageMB }} MB</span>
@@ -145,7 +145,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus, Setting } from '@element-plus/icons-vue'
-import { getBackupPage, createBackup, deleteBackup, downloadBackup, restoreFromBackup, getStorageInfo } from '../api/backupAdmin'
+import { getBackupPage, createBackup, deleteBackup, restoreFromBackup, getStorageInfo } from '../api/backupAdmin'
 
 const loading = ref(false)
 const tableData = ref([])
@@ -185,7 +185,7 @@ async function fetchStorageInfo() {
     const res = await getStorageInfo()
     storageInfo.value = res.data
     storageWarning.value = res.data.warning
-  } catch {} finally { storageLoading.value=false }
+  } catch { /* 存储信息加载失败不影响主体 */ } finally { storageLoading.value=false }
 }
 
 function handleSearch() { pagination.page=1; fetchData() }
@@ -247,7 +247,9 @@ async function handleDelete(row) {
     await deleteBackup(row.id)
     ElMessage.success('已删除')
     fetchData(); fetchStorageInfo()
-  } catch {}
+  } catch {
+    // 用户取消确认时静默返回
+  }
 }
 
 function openRestoreDialog(row) {

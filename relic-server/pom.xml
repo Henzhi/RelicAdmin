@@ -37,6 +37,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Spring Boot 3.2+ 的 starter-test 不再传递 junit-platform-launcher，需显式声明供 surefire 发现测试 -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- MySQL 驱动（替换为与 Java 21 兼容的 artifactId） -->
         <dependency>
@@ -101,17 +107,6 @@
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
 
-        <!-- JAXB API（替换为 Jakarta 命名空间） -->
-        <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
         <!-- Spring Security Crypto (BCrypt) -->
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -128,11 +123,10 @@
             <artifactId>poi-ooxml</artifactId>
         </dependency>
 
-        <!-- OpenCSV -->
+        <!-- OpenCSV（版本由父 pom dependencyManagement 统一管理） -->
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.9</version>
         </dependency>
     </dependencies>
 
@@ -141,6 +135,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.relic.RelicApplication</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>

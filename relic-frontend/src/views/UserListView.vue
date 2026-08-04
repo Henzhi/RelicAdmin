@@ -12,11 +12,13 @@
 
       <el-form :inline="true" :model="filter" class="filter-form">
         <el-form-item label="用户名">
-          <el-input v-model="filter.username" placeholder="模糊搜索" clearable
+          <el-input
+v-model="filter.username" placeholder="模糊搜索" clearable
             @keyup.enter="handleSearch" />
         </el-form-item>
         <el-form-item label="昵称">
-          <el-input v-model="filter.nickname" placeholder="模糊搜索" clearable
+          <el-input
+v-model="filter.nickname" placeholder="模糊搜索" clearable
             @keyup.enter="handleSearch" />
         </el-form-item>
         <el-form-item label="状态">
@@ -50,7 +52,7 @@
         </el-form-item>
       </el-form>
 
-      <el-table :data="tableData" v-loading="loading" stripe border row-key="id" empty-text="暂无数据">
+      <el-table v-loading="loading" :data="tableData" stripe border row-key="id" empty-text="暂无数据">
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column prop="nickname" label="昵称" width="120" />
@@ -69,7 +71,8 @@
 
             <el-popconfirm title="确定要切换评论权限吗？" @confirm="handleToggleComment(row)">
               <template #reference>
-                <el-button size="small"
+                <el-button
+size="small"
                   :type="row.commentDisabled ? 'warning' : 'primary'"
                   :loading="row._commentLoading">
                   {{ row.commentDisabled ? '开启评论' : '禁止评论' }}
@@ -79,7 +82,8 @@
 
             <el-popconfirm title="确定要切换上传权限吗？" @confirm="handleToggleUpload(row)">
               <template #reference>
-                <el-button size="small"
+                <el-button
+size="small"
                   :type="row.uploadDisabled ? 'warning' : 'primary'"
                   :loading="row._uploadLoading">
                   {{ row.uploadDisabled ? '开启上传' : '禁止上传' }}
@@ -87,7 +91,8 @@
               </template>
             </el-popconfirm>
 
-            <el-button v-if="row.status !== 'banned'" size="small" type="danger"
+            <el-button
+v-if="row.status !== 'banned'" size="small" type="danger"
               @click="handleBan(row)">封禁</el-button>
             <el-popconfirm v-else title="确定要解封该用户吗？" @confirm="handleUnban(row)">
               <template #reference>
@@ -95,7 +100,8 @@
               </template>
             </el-popconfirm>
 
-            <el-popconfirm title="确定要删除该用户吗？删除后数据不可恢复。"
+            <el-popconfirm
+title="确定要删除该用户吗？删除后数据不可恢复。"
               confirm-button-text="确认删除" cancel-button-text="取消"
               confirm-button-type="danger" @confirm="handleDelete(row)">
               <template #reference>
@@ -128,7 +134,8 @@
           <el-input v-model="createForm.username" placeholder="4~50个字符" maxlength="50" />
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="createForm.password" type="password" placeholder="6~20个字符"
+          <el-input
+v-model="createForm.password" type="password" placeholder="6~20个字符"
             maxlength="20" show-password />
         </el-form-item>
         <el-form-item label="昵称" prop="nickname">
@@ -161,7 +168,7 @@
         <p>加载中...</p>
       </div>
       <template v-else>
-        <el-checkbox-group v-model="selectedRoleIds" v-if="allRoles.length > 0">
+        <el-checkbox-group v-if="allRoles.length > 0" v-model="selectedRoleIds">
           <div v-for="role in allRoles" :key="role.id" style="margin-bottom:12px">
             <el-checkbox :label="role.id" :value="role.id">
               {{ role.displayName || role.name }}
@@ -183,7 +190,6 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getUserPage, createUser, deleteUser, banUser, disableComment, disableUpload } from '../api/user'
-import { getRoleList } from '../api/role'
 
 const loading = ref(false)
 const tableData = ref([])
@@ -209,6 +215,7 @@ async function fetchData() {
     pagination.page = res.data.page
     pagination.pageSize = res.data.pageSize
   } catch {
+    // 加载失败保持空列表，错误已由拦截器统一提示
   } finally {
     loading.value = false
   }
@@ -294,6 +301,7 @@ async function handleCreate() {
     createVisible.value = false
     fetchData()
   } catch {
+    // 创建失败时保留弹窗，错误已由拦截器统一提示
   } finally {
     createSubmitting.value = false
   }
@@ -362,6 +370,7 @@ async function handleBan(row) {
     row.banReason = value || ''
     ElMessage.success('封禁成功')
   } catch {
+    // 封禁失败时错误已由拦截器统一提示
   }
 }
 
@@ -370,23 +379,6 @@ const roleLoading = ref(false)
 const roleSubmitLoading = ref(false)
 const allRoles = ref([])
 const selectedRoleIds = ref([])
-let currentUserId = null
-
-async function handleAssignRoles(row) {
-  currentUserId = row.id
-  roleDialogVisible.value = true
-  roleLoading.value = true
-  try {
-    const res = await getRoleList()
-    allRoles.value = res.data
-    selectedRoleIds.value = []
-  } catch {
-    ElMessage.error('加载角色列表失败')
-    roleDialogVisible.value = false
-  } finally {
-    roleLoading.value = false
-  }
-}
 
 async function confirmAssignRoles() {
   roleSubmitLoading.value = true

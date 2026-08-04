@@ -64,7 +64,7 @@
         FROM user_comments uc
         WHERE NOT EXISTS (
             SELECT 1 FROM user_behaviors ub
-            WHERE ub.target_type = 'comment' AND ub.target_id = CAST(uc.id AS CHAR)
+            WHERE ub.target_type = 'comment' AND ub.target_id = CAST(uc.id AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_general_ci
         )
         ORDER BY uc.created_at ASC
         LIMIT #{limit}

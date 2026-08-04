@@ -36,6 +36,7 @@
         <druid>1.2.23</druid>                                <!-- 最新稳定版 -->
         <aliyun.sdk.oss>3.18.3</aliyun.sdk.oss>              <!-- 阿里云OSS SDK最新版 -->
         <knife4j>4.5.0</knife4j>                             <!-- 适配Spring Boot 3.x的版本 -->
+        <opencsv>5.9</opencsv>                               <!-- CSV 导入导出 -->
         <!-- 注意：aspectj, jjwt, jaxb-api, poi 已调整为更稳妥的配置，详见下方说明 -->
     </properties>
 
@@ -110,19 +111,6 @@
                 <scope>runtime</scope>
             </dependency>
 
-            <!-- JAXB API，用于 Java 9+ 环境 -->
-            <dependency>
-                <groupId>jakarta.xml.bind</groupId>
-                <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>4.0.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jaxb</groupId>
-                <artifactId>jaxb-runtime</artifactId>
-                <version>4.0.3</version>
-                <scope>runtime</scope>
-            </dependency>
-
             <!-- Apache POI -->
             <dependency>
                 <groupId>org.apache.poi</groupId>
@@ -135,7 +123,34 @@
                 <version>5.2.5</version>
             </dependency>
 
+            <!-- OpenCSV CSV 导入导出 -->
+            <dependency>
+                <groupId>com.opencsv</groupId>
+                <artifactId>opencsv</artifactId>
+                <version>${opencsv}</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- 升级 surefire 以兼容 junit-platform 1.10.x（Spring Boot 3.2 默认 3.1.2 无法发现 junit-jupiter 引擎） -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.2.5</version>
+                </plugin>
+                <!-- 指定可执行主类，保证聚合根目录执行 spring-boot:run 时也能定位启动类 -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <mainClass>com.relic.RelicApplication</mainClass>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

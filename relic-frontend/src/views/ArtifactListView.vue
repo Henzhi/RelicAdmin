@@ -25,7 +25,7 @@
         <el-button :icon="Refresh" @click="handleReset">重置</el-button>
       </div>
 
-      <el-table :data="tableData" v-loading="loading" border stripe row-key="id" style="width: 100%">
+      <el-table v-loading="loading" :data="tableData" border stripe row-key="id" style="width: 100%">
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="titleZh" label="中文名" min-width="150" show-overflow-tooltip />
         <el-table-column prop="titleEn" label="英文名" min-width="180" show-overflow-tooltip />
@@ -54,9 +54,9 @@
 
       <div class="pagination-container">
         <el-pagination
-          background
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
+          background
           :page-sizes="[10, 20, 50, 100]"
           :total="pagination.total"
           layout="total, sizes, prev, pager, next, jumper"
@@ -220,21 +220,21 @@ onMounted(() => {
 })
 
 async function loadDynasties() {
-  try { const res = await getDynastyList(); dynastyList.value = res.data } catch (e) {}
+  try { const res = await getDynastyList(); dynastyList.value = res.data } catch (e) { /* 朝代列表加载失败不影响主体 */ }
 }
 
 async function loadMuseums() {
   try {
     const res = await getMuseumPage({ page: 1, pageSize: 100 })
     museumList.value = res.data.records
-  } catch (e) {}
+  } catch (e) { /* 博物馆列表加载失败不影响主体 */ }
 }
 
 async function loadArtifactTypes() {
   try {
     const res = await getArtifactTypeList()
     artifactTypeList.value = res.data
-  } catch (e) {}
+  } catch (e) { /* 类型列表加载失败不影响主体 */ }
 }
 
 async function searchCities(query) {

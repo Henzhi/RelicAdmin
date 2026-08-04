@@ -66,11 +66,11 @@
         </el-table>
       </div>
 
-      <div class="pagination-container" v-if="tableData.length > 0">
+      <div v-if="tableData.length > 0" class="pagination-container">
         <el-pagination
-          background
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
+          background
           :page-sizes="[10, 20, 50]"
           :total="pagination.total"
           layout="total, sizes, prev, pager, next, jumper"
@@ -93,7 +93,7 @@
         <el-form-item label="处罚原因">
           <el-input v-model="createForm.reason" type="textarea" :rows="3" placeholder="请输入处罚原因" />
         </el-form-item>
-        <el-form-item label="过期时间" v-if="createForm.penaltyType === 'temp_ban'">
+        <el-form-item v-if="createForm.penaltyType === 'temp_ban'" label="过期时间">
           <el-date-picker v-model="createForm.expireTime" type="datetime" placeholder="选择过期时间" format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" />
         </el-form-item>
         <el-form-item label="备注">

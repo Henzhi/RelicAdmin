@@ -26,7 +26,8 @@
                             <el-option label="备份" value="Backup" />
                             <el-option label="恢复" value="Restore" />
                         </el-select>
-                        <el-date-picker v-model="opSearch.dateRange" type="datetimerange" range-separator="至"
+                        <el-date-picker
+v-model="opSearch.dateRange" type="datetimerange" range-separator="至"
                             start-placeholder="开始时间" end-placeholder="结束时间" value-format="YYYY-MM-DD HH:mm:ss"
                             style="width:350px" @change="handleOpSearch" />
                         <el-button type="primary" :icon="Search" @click="handleOpSearch">查询</el-button>
@@ -57,9 +58,9 @@
                             <el-table-column prop="createdAt" label="操作时间" width="160" />
                         </el-table>
                     </div>
-                    <div class="pagination-container" v-if="opData.length > 0">
+                    <div v-if="opData.length > 0" class="pagination-container">
                         <el-pagination
-          background v-model:current-page="opPagination.page" v-model:page-size="opPagination.pageSize"
+          v-model:current-page="opPagination.page" v-model:page-size="opPagination.pageSize" background
                             :page-sizes="[10,20,50]" :total="opPagination.total" layout="total, sizes, prev, pager, next, jumper"
                             @size-change="handleOpSearch" @current-change="handleOpPageChange" />
                     </div>
@@ -81,7 +82,8 @@
                             <el-option label="Auth" value="Auth" />
                             <el-option label="System" value="System" />
                         </el-select>
-                        <el-date-picker v-model="sysSearch.dateRange" type="datetimerange" range-separator="至"
+                        <el-date-picker
+v-model="sysSearch.dateRange" type="datetimerange" range-separator="至"
                             start-placeholder="开始时间" end-placeholder="结束时间" value-format="YYYY-MM-DD HH:mm:ss"
                             style="width:350px" @change="handleSysSearch" />
                         <el-button type="primary" :icon="Search" @click="handleSysSearch">查询</el-button>
@@ -111,9 +113,9 @@
                             <el-table-column prop="createdAt" label="发生时间" width="160" />
                         </el-table>
                     </div>
-                    <div class="pagination-container" v-if="sysData.length > 0">
+                    <div v-if="sysData.length > 0" class="pagination-container">
                         <el-pagination
-          background v-model:current-page="sysPagination.page" v-model:page-size="sysPagination.pageSize"
+          v-model:current-page="sysPagination.page" v-model:page-size="sysPagination.pageSize" background
                             :page-sizes="[10,20,50]" :total="sysPagination.total" layout="total, sizes, prev, pager, next, jumper"
                             @size-change="handleSysSearch" @current-change="handleSysPageChange" />
                     </div>
@@ -130,7 +132,8 @@
                             <el-option label="密码修改" value="PASSWORD_CHANGE" />
                             <el-option label="令牌过期" value="TOKEN_EXPIRED" />
                         </el-select>
-                        <el-date-picker v-model="secSearch.dateRange" type="datetimerange" range-separator="至"
+                        <el-date-picker
+v-model="secSearch.dateRange" type="datetimerange" range-separator="至"
                             start-placeholder="开始时间" end-placeholder="结束时间" value-format="YYYY-MM-DD HH:mm:ss"
                             style="width:350px" @change="handleSecSearch" />
                         <el-button type="primary" :icon="Search" @click="handleSecSearch">查询</el-button>
@@ -162,9 +165,9 @@
                             <el-table-column prop="createdAt" label="发生时间" width="160" />
                         </el-table>
                     </div>
-                    <div class="pagination-container" v-if="secData.length > 0">
+                    <div v-if="secData.length > 0" class="pagination-container">
                         <el-pagination
-          background v-model:current-page="secPagination.page" v-model:page-size="secPagination.pageSize"
+          v-model:current-page="secPagination.page" v-model:page-size="secPagination.pageSize" background
                             :page-sizes="[10,20,50]" :total="secPagination.total" layout="total, sizes, prev, pager, next, jumper"
                             @size-change="handleSecSearch" @current-change="handleSecPageChange" />
                     </div>

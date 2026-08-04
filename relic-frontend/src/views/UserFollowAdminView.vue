@@ -9,18 +9,21 @@
 
       <el-form :inline="true" :model="filter" class="filter-form">
         <el-form-item label="用户名">
-          <el-input v-model="searchUsername" placeholder="用户名搜索" clearable style="width:160px"
+          <el-input
+v-model="searchUsername" placeholder="用户名搜索" clearable style="width:160px"
             @keyup.enter="handleSearch" />
         </el-form-item>
         <el-form-item label="时间范围">
           <el-date-picker v-model="dateRange" type="datetimerange" range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间" format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" style="width:360px" clearable @change="handleSearch" />
         </el-form-item>
         <el-form-item label="关注者ID">
-          <el-input v-model="filter.followerId" placeholder="请输入关注者ID" clearable
+          <el-input
+v-model="filter.followerId" placeholder="请输入关注者ID" clearable
             @keyup.enter="handleSearch" />
         </el-form-item>
         <el-form-item label="被关注者ID">
-          <el-input v-model="filter.followeeId" placeholder="请输入被关注者ID" clearable
+          <el-input
+v-model="filter.followeeId" placeholder="请输入被关注者ID" clearable
             @keyup.enter="handleSearch" />
         </el-form-item>
         <el-form-item>
@@ -29,7 +32,7 @@
         </el-form-item>
       </el-form>
 
-      <el-table :data="tableData" v-loading="loading" stripe border row-key="id">
+      <el-table v-loading="loading" :data="tableData" stripe border row-key="id">
         <el-table-column prop="followerName" label="关注者" width="120" show-overflow-tooltip />
         <el-table-column prop="followeeName" label="被关注者" width="120" show-overflow-tooltip />
         <el-table-column prop="createdAt" label="关注时间" width="170" />
@@ -37,9 +40,9 @@
 
       <div class="pagination-wrap">
         <el-pagination
-          background
           v-model:current-page="pagination.page"
           v-model:page-size="pagination.pageSize"
+          background
           :page-sizes="[10, 20, 50]"
           layout="total, sizes, prev, pager, next"
           :total="pagination.total"
@@ -79,6 +82,7 @@ async function fetchData() {
     tableData.value = res.data.records
     pagination.total = res.data.total
   } catch {
+    // 加载失败保持空列表，错误已由拦截器统一提示
   } finally {
     loading.value = false
   }

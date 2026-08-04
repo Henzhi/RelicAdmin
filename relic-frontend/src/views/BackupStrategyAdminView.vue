@@ -22,7 +22,8 @@
           <el-form-item label="Cron表达式">
             <el-input v-model="form.backupCron" style="width:300px" placeholder="0 0 2 * * ?" />
             <div class="form-tip">
-              <el-tag v-for="item in cronPresets" :key="item.label" size="small" style="cursor:pointer;margin-right:6px"
+              <el-tag
+v-for="item in cronPresets" :key="item.label" size="small" style="cursor:pointer;margin-right:6px"
                       @click="form.backupCron = item.cron">{{ item.label }}</el-tag>
             </div>
           </el-form-item>

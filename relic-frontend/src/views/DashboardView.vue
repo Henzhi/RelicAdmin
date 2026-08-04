@@ -147,10 +147,10 @@
       <template #header>
         <div class="card-header">
           <span>异常告警</span>
-          <el-button size="small" type="primary" @click="loadAlerts" :loading="alertsLoading">刷新</el-button>
+          <el-button size="small" type="primary" :loading="alertsLoading" @click="loadAlerts">刷新</el-button>
         </div>
       </template>
-      <el-table :data="alerts" v-loading="alertsLoading" stripe border empty-text="暂无活跃告警">
+      <el-table v-loading="alertsLoading" :data="alerts" stripe border empty-text="暂无活跃告警">
         <el-table-column prop="alertType" label="告警类型" width="140">
           <template #default="{ row }">
             <el-tag :type="alertTypeTag(row.alertType)" size="small">{{ alertTypeLabel(row.alertType) }}</el-tag>

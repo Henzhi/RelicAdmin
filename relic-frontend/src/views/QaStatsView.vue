@@ -4,7 +4,7 @@
       <el-col :span="12">
         <el-card shadow="never">
           <template #header><span class="card-title">高频失败问题统计</span></template>
-          <el-table :data="failureTypeData" border stripe v-loading="failureLoading" style="width: 100%;">
+          <el-table v-loading="failureLoading" :data="failureTypeData" border stripe style="width: 100%;">
             <el-table-column prop="failureType" label="失败类型" min-width="200">
               <template #default="{ row }">{{ failureTypeLabel(row.failureType) }}</template>
             </el-table-column>
@@ -16,7 +16,7 @@
       <el-col :span="12">
         <el-card shadow="never">
           <template #header><span class="card-title">高频不准确问题统计</span></template>
-          <el-table :data="inaccurateTypeData" border stripe v-loading="inaccurateLoading" style="width: 100%;">
+          <el-table v-loading="inaccurateLoading" :data="inaccurateTypeData" border stripe style="width: 100%;">
             <el-table-column prop="intent" label="意图类型" min-width="200" />
             <el-table-column prop="count" label="数量" width="100" align="center" />
           </el-table>

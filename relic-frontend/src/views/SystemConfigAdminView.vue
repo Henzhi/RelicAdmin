@@ -63,11 +63,11 @@
                             </el-table-column>
                         </el-table>
                     </div>
-                    <div class="pagination-container" v-if="configData.length > 0">
+                    <div v-if="configData.length > 0" class="pagination-container">
                         <el-pagination
-          background
-                            v-model:current-page="configPagination.page"
+          v-model:current-page="configPagination.page"
                             v-model:page-size="configPagination.pageSize"
+                            background
                             :page-sizes="[10,20,50]"
                             :total="configPagination.total"
                             layout="total, sizes, prev, pager, next, jumper"
@@ -97,7 +97,8 @@
                             </el-descriptions-item>
                         </el-descriptions>
 
-                        <el-alert title="提示" type="info" style="margin-top:20px" :closable="false"
+                        <el-alert
+title="提示" type="info" style="margin-top:20px" :closable="false"
                             description="日志级别调整将影响系统日志输出详细程度。生产环境建议使用INFO或WARN级别，开发和调试时可使用DEBUG级别。" />
                     </div>
                 </el-tab-pane>
@@ -138,13 +139,15 @@
                             <el-table-column prop="updatedAt" label="最近更新" width="160" />
                         </el-table>
                     </div>
-                    <el-alert title="功能开关说明" type="info" style="margin-top:20px" :closable="false"
+                    <el-alert
+title="功能开关说明" type="info" style="margin-top:20px" :closable="false"
                         description="功能开关用于在线控制各子系统的功能可用性，修改后实时生效无需重启服务。灰度发布时可逐项关闭非核心功能，紧急情况下可一键开启维护模式。" />
                 </el-tab-pane>
             </el-tabs>
         </el-card>
 
-        <el-dialog v-model="configDialogVisible" :title="isConfigEdit ? '编辑配置项' : '添加配置项'"
+        <el-dialog
+v-model="configDialogVisible" :title="isConfigEdit ? '编辑配置项' : '添加配置项'"
                    width="500px" :close-on-click-modal="false" @closed="resetConfigForm">
             <el-form :model="configForm" label-width="90px">
                 <el-form-item label="配置键">
@@ -185,7 +188,7 @@
                 <el-form-item label="排序">
                     <el-input-number v-model="configForm.sortOrder" :min="0" />
                 </el-form-item>
-                <el-form-item label="状态" v-if="isConfigEdit">
+                <el-form-item v-if="isConfigEdit" label="状态">
                     <el-radio-group v-model="configForm.status">
                         <el-radio :value="1">启用</el-radio>
                         <el-radio :value="0">禁用</el-radio>
@@ -340,7 +343,9 @@ async function handleConfigDelete(row) {
         await deleteSystemConfig(row.id)
         ElMessage.success('已删除')
         fetchConfigData()
-    } catch {}
+    } catch {
+        // 用户取消确认时静默返回
+    }
 }
 
 async function loadLogLevel() {
@@ -351,7 +356,7 @@ async function loadLogLevel() {
             currentLogLevel.value = logConfig.configValue
             tempLogLevel.value = logConfig.configValue
         }
-    } catch {}
+    } catch { /* 日志级别加载失败保持默认 */ }
 }
 
 function onLogLevelChange(val) {

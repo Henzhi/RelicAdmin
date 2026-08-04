@@ -7,6 +7,7 @@ import com.relic.service.SecurityLogService;
 import com.relic.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -21,8 +22,15 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
     @Autowired
     private JwtProperties jwtProperties;
 
-    @Autowired(required = false)
-    private SecurityLogService securityLogService;
+    /**
+     * 使用 ObjectProvider 惰性获取，避免与 SecurityLogService 形成循环依赖，
+     * 从而允许关闭 spring.main.allow-circular-references
+     */
+    private final ObjectProvider<SecurityLogService> securityLogServiceProvider;
+
+    public JwtTokenAdminInterceptor(ObjectProvider<SecurityLogService> securityLogServiceProvider) {
+        this.securityLogServiceProvider = securityLogServiceProvider;
+    }
 
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (!(handler instanceof HandlerMethod)) {
@@ -44,6 +52,7 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
             String path = request.getRequestURI();
             if (path.contains("/login")) {
                 try {
+                    SecurityLogService securityLogService = securityLogServiceProvider.getIfAvailable();
                     if (securityLogService != null) {
                         securityLogService.record(0L, "LOGIN_FAILED",
                                 getClientIp(request), "管理员登录失败: " + ex.getMessage());
