@@ -66,8 +66,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     public Result<Object> exceptionHandler(MultipartException ex){
+        // H-02：不回显内部异常细节，仅返回通用提示
         log.error("文件上传异常: {}", ex.getMessage());
-        return Result.error("文件上传失败: " + ex.getMessage());
+        return Result.error("文件上传失败，请检查文件大小与格式");
     }
 
     @ExceptionHandler
@@ -78,7 +79,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     public Result<Object> exceptionHandler(RuntimeException ex){
+        // H-02：内部异常细节仅记录日志，对外返回通用文案，避免泄露 SQL/路径/内网信息
         log.error("运行时异常: {}", ex.getMessage(), ex);
-        return Result.error(ex.getMessage());
+        return Result.error(MessageConstant.UNKNOWN_ERROR);
     }
 }

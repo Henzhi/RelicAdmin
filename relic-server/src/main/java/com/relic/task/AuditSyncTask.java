@@ -8,6 +8,7 @@ import com.relic.service.AuditStrategyService;
 import com.relic.service.impl.SensitiveWordChecker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +41,7 @@ public class AuditSyncTask {
      * 每3分钟执行一次，扫描三张源表中尚未同步到 audit_records 的记录
      */
     @Scheduled(fixedRate = 3 * 60 * 1000, initialDelay = 20 * 1000)
+    @SchedulerLock(name = "syncAuditRecords", lockAtMostFor = "PT10M", lockAtLeastFor = "PT30S")
     public void syncAuditRecords() {
         int postCount = syncPosts();
         int commentCount = syncComments();

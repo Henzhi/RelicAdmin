@@ -2,8 +2,10 @@ package com.relic.task;
 
 import com.relic.mapper.CrawlTaskLogMapper;
 import com.relic.mapper.CrawlTaskMapper;
+import com.relic.utils.CrawlExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 爬取任务调度器
+ *
+ * <p>M-05 整改说明：
+ * 已接入真实爬虫 {@link CrawlExecutor}，支持 web / api / rss 三种数据源，
+ * 由 {@code relic.crawl.scheduler-enabled} 开关控制调度是否启用（默认开启）。
+ * 历史模拟实现（随机数）已删除。</p>
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -20,11 +30,20 @@ public class CrawlTaskScheduler {
 
     private final CrawlTaskMapper crawlTaskMapper;
     private final CrawlTaskLogMapper crawlTaskLogMapper;
+    private final CrawlExecutor crawlExecutor;
 
     private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    /** M-05：调度开关，默认开启（已接入真实爬虫） */
+    @Value("${relic.crawl.scheduler-enabled:true}")
+    private boolean schedulerEnabled;
+
     @Scheduled(cron = "0 * * * * ?")
     public void checkScheduledTasks() {
+        if (!schedulerEnabled) {
+            // 幂等：仅启动时提示一次，避免每 60s 刷日志
+            return;
+        }
         List<Map<String, Object>> tasks = crawlTaskMapper.selectEnabledScheduled();
         if (tasks.isEmpty()) return;
 
@@ -59,6 +78,9 @@ public class CrawlTaskScheduler {
         }
     }
 
+    /**
+     * M-05：执行真实爬取任务，状态流转与日志记录保持与原实现一致。
+     */
     private void executeScheduledTask(Map<String, Object> task) {
         Integer id = (Integer) task.get("id");
         String taskName = (String) task.get("taskName");
@@ -70,8 +92,14 @@ public class CrawlTaskScheduler {
         crawlTaskLogMapper.insert(id, taskName, nowStr, "running", 0, null, 0, 0);
 
         try {
-            Thread.sleep((long) (2000 + Math.random() * 3000));
-            int crawledCount = (int) (10 + Math.random() * 100);
+            String sourceUrl = (String) task.get("sourceUrl");
+            String sourceType = (String) task.get("sourceType");
+            String crawlRule = (String) task.get("crawlRule");
+            Integer timeoutSeconds = task.get("timeoutSeconds") != null
+                    ? ((Number) task.get("timeoutSeconds")).intValue() : 300;
+
+            List<Map<String, Object>> items = crawlExecutor.crawl(sourceUrl, sourceType, crawlRule, timeoutSeconds);
+            int crawledCount = items == null ? 0 : items.size();
 
             String endTimeStr = LocalDateTime.now().format(DF);
             List<Map<String, Object>> lastLog = crawlTaskLogMapper.selectRecentByTaskId(id, 1);
@@ -94,7 +122,7 @@ public class CrawlTaskScheduler {
                 if (nextRun != null) nextRunStr = nextRun.format(DF);
             }
             crawlTaskMapper.updateRunStats(id, "completed", nowStr, nextRunStr);
-            log.info("定时任务执行完成: id={}, count={}", id, crawledCount);
+            log.info("定时任务执行完成: id={}, crawled={}", id, crawledCount);
         } catch (Exception e) {
             log.error("定时任务执行失败: id={}, error={}", id, e.getMessage());
             String endTimeStr = LocalDateTime.now().format(DF);

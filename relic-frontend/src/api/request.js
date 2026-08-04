@@ -1,13 +1,16 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
+// H-07/M-10：接口版本前缀 + 支持通过 VITE_API_BASE 覆盖生产 API 地址
+const API_BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '')
+
 const adminApi = axios.create({
-  baseURL: '/admin',
+  baseURL: API_BASE + '/v1/admin',
   timeout: 15000
 })
 
 export const longTimeoutApi = axios.create({
-  baseURL: '/admin',
+  baseURL: API_BASE + '/v1/admin',
   timeout: 120000
 })
 

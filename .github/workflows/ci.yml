@@ -11,15 +11,30 @@ jobs:
   backend:
     name: Backend Build & Test
     runs-on: ubuntu-latest
+    # M-13：MySQL 8.0 服务容器，用于 Flyway 迁移集成测试（与目标数据库版本一致）
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: seitem
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java 17
+      # H-05：pom.xml 要求 Java 21，CI 必须与本地一致
+      - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
           cache: maven
 
       - name: Backend compile
@@ -27,6 +42,24 @@ jobs:
 
       - name: Backend test
         run: mvn -B test
+
+      # M-13：Flyway 迁移冒烟验证（新库从 V1 全量执行，验证脚本可执行性与兼容性）
+      - name: Flyway migration smoke test
+        run: mvn -B flyway:migrate -pl relic-server -Dflyway.url="jdbc:mysql://127.0.0.1:3306/seitem?useSSL=false&allowPublicKeyRetrieval=true" -Dflyway.user=root -Dflyway.password=root
+
+      # L-04：打包并上传后端制品（记录 sha256，作为发布/回滚依据）
+      - name: Package backend jar
+        run: mvn -B package -DskipTests
+
+      - name: Upload backend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: relic-server-jar
+          path: relic-server/target/*.jar
+          retention-days: 30
+
+      - name: Print jar checksum
+        run: sha256sum relic-server/target/relic-server-*.jar | tee sha256.txt && cat sha256.txt
 
   frontend:
     name: Frontend Lint & Build
@@ -48,5 +81,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # L-03：lint 纳入 CI 门禁
+      - name: Frontend lint
+        run: npm run lint
+
+      # H-08：依赖漏洞门禁，高危/严重漏洞直接阻断
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+
       - name: Frontend build
         run: npm run build
+
+      # L-04：上传前端构建产物（发布/回滚制品）
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: relic-frontend-dist
+          path: relic-frontend/dist
+          retention-days: 30
+
+      - name: Print dist checksum
+        run: find dist -type f -exec sha256sum {} + | sort | sha256sum

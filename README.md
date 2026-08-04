@@ -201,9 +201,16 @@ mvn spring-boot:run -pl relic-server
 mvn spring-boot:run -pl relic-server -am
 ```
 
-后端启动后访问：
-- 应用地址：`http://localhost:8080`
-- API 文档：`http://localhost:8080/doc.html`
+后端启动后访问（H-07 起接口带 `/v1` 版本前缀）：
+- 应用地址：`http://localhost:8080/v1`
+- 接口示例：`http://localhost:8080/v1/admin/employee/login`
+- API 文档（仅开发环境）：`http://localhost:8080/v1/doc.html`
+
+> **启动前必须配置环境变量**（C-01 安全整改后密钥不再入库）：
+> - `JWT_ADMIN_SECRET_KEY` / `JWT_KNOWLEDGE_SECRET_KEY` / `JWT_MUSEUM_SECRET_KEY` / `JWT_USER_SECRET_KEY`（base64 密钥，≥32 字节）
+> - `MYSQL_PASSWORD` / `OSS_ACCESS_KEY_ID` / `OSS_ACCESS_KEY_SECRET`
+> - 可选：`BACKUP_ENCRYPT_KEY`（≥32 字符，启用备份文件 AES 加密）
+> 未配置时应用启动失败（安全兜底，防止误用默认凭据）。
 
 ### 5. 启动前端
 
@@ -213,7 +220,7 @@ npm install
 npm run dev
 ```
 
-前端启动后访问：`http://localhost:5173`
+前端启动后访问：`http://localhost:5173`（dev 代理已匹配 `/v1` 前缀）
 
 ### 6. 登录系统
 
@@ -271,23 +278,23 @@ spring:
 配置文件为 `relic-frontend/vite.config.js`：
 
 ```javascript
-// API 代理配置
+// API 代理配置（H-07：后端统一 /v1 版本前缀）
 server: {
   historyApiFallback: true,
   proxy: {
-    '^/admin/': {
+    '^/v1/admin/': {
       target: 'http://localhost:8080',
       changeOrigin: true
     },
-    '^/admin$': {
+    '^/v1/admin$': {
       target: 'http://localhost:8080',
       changeOrigin: true
     },
-    '^/user/': {
+    '^/v1/user/': {
       target: 'http://localhost:8080',
       changeOrigin: true
     },
-    '^/user$': {
+    '^/v1/user$': {
       target: 'http://localhost:8080',
       changeOrigin: true
     }
@@ -295,22 +302,26 @@ server: {
 }
 ```
 
+生产环境 API 地址可通过 `relic-frontend/.env.production` 的 `VITE_API_BASE` 覆盖（同域部署留空即可）。
+
 ## API 文档
 
-项目集成 Knife4j（基于 OpenAPI 3），启动后端后访问：
+项目集成 Knife4j（基于 OpenAPI 3），开发环境启动后端后访问：
 
 ```
-http://localhost:8080/doc.html
+http://localhost:8080/v1/doc.html
 ```
 
-### API 路由结构
+> M-03：生产环境（prod profile）已关闭 Swagger/Knife4j，防止接口文档暴露。
+
+### API 路由结构（H-07 起统一带 `/v1` 版本前缀）
 
 | 前缀 | 端点 | 说明 |
 |------|------|------|
-| `/admin/**` | 管理端 | 后台管理接口，JWT admin token 鉴权 |
-| `/museum/**` | 博物馆端 | 博物馆管理接口，JWT museum token 鉴权 |
-| `/knowledge/**` | 知识问答端 | 问答子系统接口，JWT knowledge token 鉴权 |
-| `/user/**` | 用户端 | 前台用户接口，JWT user token 鉴权 |
+| `/v1/admin/**` | 管理端 | 后台管理接口，JWT admin token 鉴权 |
+| `/v1/museum/**` | 博物馆端 | 博物馆管理接口，JWT museum token 鉴权 |
+| `/v1/knowledge/**` | 知识问答端 | 问答子系统接口，JWT knowledge token 鉴权 |
+| `/v1/user/**` | 用户端 | 前台用户接口，JWT user token 鉴权 |
 
 ## 项目结构
 

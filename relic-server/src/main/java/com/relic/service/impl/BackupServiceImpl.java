@@ -6,6 +6,7 @@ import com.relic.entity.BackupRecord;
 import com.relic.mapper.BackupRecordMapper;
 import com.relic.mapper.BackupStrategyMapper;
 import com.relic.service.BackupService;
+import com.relic.utils.BackupCryptoUtil;
 import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,8 @@ public class BackupServiceImpl implements BackupService {
     private final BackupRecordMapper backupRecordMapper;
     private final BackupStrategyMapper backupStrategyMapper;
     private final DataSource dataSource;
+    private final SuperAdminGuard superAdminGuard;
+    private final BackupCryptoUtil backupCryptoUtil;
 
     private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
     private static final String DB_NAME = "seitem";
@@ -47,6 +50,8 @@ public class BackupServiceImpl implements BackupService {
 
     @Override
     public Map<String, Object> createBackup(BackupCreateDTO dto) {
+        // H-04：仅超级管理员可手动创建备份
+        superAdminGuard.requireSuperAdmin("只有超级管理员才能创建备份");
         Integer operatorId = getCurrentOperatorId();
         String backupName = dto.getBackupName() != null ? dto.getBackupName()
                 : "手动备份_" + LocalDateTime.now().format(DF);
@@ -80,15 +85,27 @@ public class BackupServiceImpl implements BackupService {
             if (!dir.exists()) dir.mkdirs();
 
             boolean success = exportViaJdbc(filePath);
-            long fileSize = Files.exists(Paths.get(filePath)) ? Files.size(Paths.get(filePath)) : 0L;
+            // M-12：按策略 encrypt_enabled 与密钥可用性决定是否加密备份文件
+            boolean encryptEnabled = strategy != null
+                    && strategy.get("encryptEnabled") != null
+                    && Integer.valueOf(1).equals(strategy.get("encryptEnabled"));
+            String storedFilePath = filePath;
+            if (success && encryptEnabled) {
+                File plain = new File(filePath);
+                File encrypted = backupCryptoUtil.encrypt(plain);
+                if (encrypted.exists()) {
+                    storedFilePath = encrypted.getAbsolutePath();
+                }
+            }
+            long fileSize = Files.exists(Paths.get(storedFilePath)) ? Files.size(Paths.get(storedFilePath)) : 0L;
 
             if (success) {
-                backupRecordMapper.updateStatus(backupId, 1, fileSize, filePath, "备份完成");
+                backupRecordMapper.updateStatus(backupId, 1, fileSize, storedFilePath, "备份完成");
                 result.put("status", 1);
                 result.put("fileSize", fileSize);
-                log.info("备份 {} 完成, {} bytes", backupName, fileSize);
+                log.info("备份 {} 完成, {} bytes, path={}", backupName, fileSize, storedFilePath);
             } else {
-                backupRecordMapper.updateStatus(backupId, 2, 0L, filePath, "备份失败");
+                backupRecordMapper.updateStatus(backupId, 2, 0L, storedFilePath, "备份失败");
                 result.put("status", "failed");
             }
         } catch (Exception e) {
@@ -275,6 +292,8 @@ public class BackupServiceImpl implements BackupService {
 
     @Override
     public void deleteBackup(Long id) {
+        // H-04：仅超级管理员可删除备份
+        superAdminGuard.requireSuperAdmin("只有超级管理员才能删除备份");
         Map<String, Object> record = backupRecordMapper.selectById(id);
         if (record != null) {
             String filePath = (String) record.get("filePath");
@@ -319,5 +338,12 @@ public class BackupServiceImpl implements BackupService {
     public long getStorageUsage() {
         Long sum = backupRecordMapper.sumFileSize();
         return sum != null ? sum : 0L;
+    }
+
+    @Override
+    public String getBackupRoot() {
+        Map<String, Object> strategy = backupStrategyMapper.selectCurrent();
+        String storagePath = strategy != null ? (String) strategy.get("storagePath") : null;
+        return storagePath != null && !storagePath.isBlank() ? storagePath : "./backups";
     }
 }

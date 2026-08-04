@@ -4,8 +4,10 @@ import com.relic.entity.BackupRecord;
 import com.relic.mapper.BackupRecordMapper;
 import com.relic.mapper.BackupStrategyMapper;
 import com.relic.service.BackupService;
+import com.relic.utils.BackupCryptoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -28,12 +30,14 @@ public class BackupScheduledTask {
     private final BackupRecordMapper backupRecordMapper;
     private final BackupService backupService;
     private final DataSource dataSource;
+    private final BackupCryptoUtil backupCryptoUtil;
 
     private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
     private static final String DB_NAME = "seitem";
     private static final Set<String> EXCLUDE_TABLES = new HashSet<>(Arrays.asList("flyway_schema_history"));
 
     @Scheduled(cron = "0 0 3 * * ?")
+    @SchedulerLock(name = "autoBackup", lockAtMostFor = "PT2H", lockAtLeastFor = "PT1M")
     public void autoBackup() {
         log.info("=== 定时备份任务检查 ===");
         Map<String, Object> strategy = backupStrategyMapper.selectCurrent();
@@ -70,13 +74,24 @@ public class BackupScheduledTask {
             if (!dir.exists()) dir.mkdirs();
 
             boolean success = exportViaJdbc(filePath);
-            long fileSize = Files.exists(Paths.get(filePath)) ? Files.size(Paths.get(filePath)) : 0L;
+            // M-12：按策略 encrypt_enabled 决定是否加密备份文件
+            boolean encryptEnabled = strategy.get("encryptEnabled") != null
+                    && Integer.valueOf(1).equals(strategy.get("encryptEnabled"));
+            String storedFilePath = filePath;
+            if (success && encryptEnabled) {
+                File plain = new File(filePath);
+                File encrypted = backupCryptoUtil.encrypt(plain);
+                if (encrypted.exists()) {
+                    storedFilePath = encrypted.getAbsolutePath();
+                }
+            }
+            long fileSize = Files.exists(Paths.get(storedFilePath)) ? Files.size(Paths.get(storedFilePath)) : 0L;
 
             if (success) {
-                backupRecordMapper.updateStatus(backupId, 1, fileSize, filePath, "定时备份完成");
+                backupRecordMapper.updateStatus(backupId, 1, fileSize, storedFilePath, "定时备份完成");
                 log.info("定时备份完成: {}, {} bytes", backupName, fileSize);
             } else {
-                backupRecordMapper.updateStatus(backupId, 2, 0L, filePath, "备份失败");
+                backupRecordMapper.updateStatus(backupId, 2, 0L, storedFilePath, "备份失败");
             }
             backupService.cleanupExpiredBackups();
         } catch (Exception e) {

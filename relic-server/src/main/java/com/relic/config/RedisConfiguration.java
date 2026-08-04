@@ -14,7 +14,7 @@ public class RedisConfiguration {
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        log.info("创建 RedisTemplate，使用自动配置的 ConnectionFactory（已包含 SSL、密码、database 10）");
+        log.info("创建 RedisTemplate，使用自动配置的 ConnectionFactory（已包含 SSL、密码、database 配置）");
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 

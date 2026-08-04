@@ -38,20 +38,21 @@ export default defineConfig({
     },
     server: {
         historyApiFallback: true,
+        // H-07：后端统一版本前缀 /v1，代理匹配带版本号的路径
         proxy: {
-            '^/admin/': {
+            '^/v1/admin/': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-            '^/admin$': {
+            '^/v1/admin$': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-            '^/user/': {
+            '^/v1/user/': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-            '^/user$': {
+            '^/v1/user$': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             }

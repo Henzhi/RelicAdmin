@@ -7,10 +7,12 @@ import com.relic.mapper.UserPostMapper;
 import com.relic.mapper.UserUploadMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +38,7 @@ public class BehaviorSyncTask {
      * 每5分钟执行一次，扫描三张表中尚未同步到 user_behaviors 的记录
      */
     @Scheduled(fixedRate = 5 * 60 * 1000, initialDelay = 30 * 1000)
+    @SchedulerLock(name = "syncBehaviors", lockAtMostFor = "PT10M", lockAtLeastFor = "PT30S")
     public void syncBehaviors() {
         int postCount = syncPosts();
         int commentCount = syncComments();
@@ -50,6 +53,8 @@ public class BehaviorSyncTask {
     private int syncPosts() {
         try {
             List<Map<String, Object>> unsynced = userPostMapper.selectUnsynced(BATCH_SIZE);
+            if (unsynced.isEmpty()) return 0;
+            List<UserBehavior> behaviors = new ArrayList<>();
             for (Map<String, Object> row : unsynced) {
                 UserBehavior behavior = new UserBehavior();
                 behavior.setUserId(toInt(row.get("user_id")));
@@ -58,8 +63,10 @@ public class BehaviorSyncTask {
                 behavior.setTargetId(String.valueOf(row.get("id")));
                 behavior.setTargetDesc(truncate(String.valueOf(row.getOrDefault("content", "")), 200));
                 behavior.setCreatedAt(toLocalDateTime(row.get("created_at")));
-                userBehaviorMapper.insert(behavior);
+                behaviors.add(behavior);
             }
+            // M-06：批量插入，避免 N+1
+            userBehaviorMapper.insertBatch(behaviors);
             return unsynced.size();
         } catch (Exception e) {
             log.error("同步发布行为失败", e);
@@ -70,6 +77,8 @@ public class BehaviorSyncTask {
     private int syncComments() {
         try {
             List<Map<String, Object>> unsynced = userCommentMapper.selectUnsynced(BATCH_SIZE);
+            if (unsynced.isEmpty()) return 0;
+            List<UserBehavior> behaviors = new ArrayList<>();
             for (Map<String, Object> row : unsynced) {
                 UserBehavior behavior = new UserBehavior();
                 behavior.setUserId(toInt(row.get("user_id")));
@@ -78,8 +87,9 @@ public class BehaviorSyncTask {
                 behavior.setTargetId(String.valueOf(row.get("id")));
                 behavior.setTargetDesc(truncate(String.valueOf(row.getOrDefault("content", "")), 200));
                 behavior.setCreatedAt(toLocalDateTime(row.get("created_at")));
-                userBehaviorMapper.insert(behavior);
+                behaviors.add(behavior);
             }
+            userBehaviorMapper.insertBatch(behaviors);
             return unsynced.size();
         } catch (Exception e) {
             log.error("同步评论行为失败", e);
@@ -90,6 +100,8 @@ public class BehaviorSyncTask {
     private int syncUploads() {
         try {
             List<Map<String, Object>> unsynced = userUploadMapper.selectUnsynced(BATCH_SIZE);
+            if (unsynced.isEmpty()) return 0;
+            List<UserBehavior> behaviors = new ArrayList<>();
             for (Map<String, Object> row : unsynced) {
                 UserBehavior behavior = new UserBehavior();
                 behavior.setUserId(toInt(row.get("user_id")));
@@ -98,8 +110,9 @@ public class BehaviorSyncTask {
                 behavior.setTargetId(String.valueOf(row.get("id")));
                 behavior.setTargetDesc(truncate(String.valueOf(row.getOrDefault("caption", "")), 200));
                 behavior.setCreatedAt(toLocalDateTime(row.get("created_at")));
-                userBehaviorMapper.insert(behavior);
+                behaviors.add(behavior);
             }
+            userBehaviorMapper.insertBatch(behaviors);
             return unsynced.size();
         } catch (Exception e) {
             log.error("同步上传行为失败", e);

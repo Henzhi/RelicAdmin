@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.sql.DataSource;
@@ -26,7 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
                 "spring.autoconfigure.exclude=" +
-                        "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration",
+                        "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration," +
+                        "org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration",
                 "spring.task.scheduling.enabled=false",
                 "relic.redis.host=localhost",
                 "relic.redis.port=6379",
@@ -47,6 +49,10 @@ class ApplicationContextTest {
     /** Mock Redis 连接工厂，避免测试连接远程 Redis */
     @MockBean
     private RedisConnectionFactory redisConnectionFactory;
+
+    /** Mock StringRedisTemplate（LoginAttemptService 依赖），Redis 自动配置已被排除 */
+    @MockBean
+    private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
     private JwtTokenAdminInterceptor jwtTokenAdminInterceptor;

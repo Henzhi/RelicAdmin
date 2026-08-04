@@ -1,6 +1,21 @@
 {
   "private": true,
   "type": "module",
+  "name": "relic-frontend",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=18.0.0 <22",
+    "npm": ">=9.0.0"
+  },
+  "browserslist": [
+    "> 0.5%",
+    "last 2 versions",
+    "not dead",
+    "Chrome >= 80",
+    "Edge >= 80",
+    "Firefox >= 78",
+    "Safari >= 14"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -19,19 +34,16 @@
     "vue": "^3.4.0",
     "vue-router": "^4.6.4"
   },
-  "name": "relic-frontend",
-  "version": "1.0.0",
   "overrides": {
     "esbuild": ">=0.28.1",
     "postcss": "^8.5.23"
   },
   "devDependencies": {
-    "vite": "^6.4.3",
     "@vitejs/plugin-vue": "^5.2.4",
     "eslint": "^8.57.1",
-    "eslint-plugin-vue": "^9.28.0",
     "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.3.3"
+    "eslint-plugin-vue": "^9.28.0",
+    "prettier": "^3.3.3",
+    "vite": "^6.4.3"
   }
 }
-

@@ -5,6 +5,7 @@ import com.relic.dto.CrawlTaskUpdateDTO;
 import com.relic.mapper.CrawlTaskLogMapper;
 import com.relic.mapper.CrawlTaskMapper;
 import com.relic.service.CrawlTaskService;
+import com.relic.utils.CrawlExecutor;
 import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class CrawlTaskServiceImpl implements CrawlTaskService {
 
     private final CrawlTaskMapper crawlTaskMapper;
     private final CrawlTaskLogMapper crawlTaskLogMapper;
+    private final CrawlExecutor crawlExecutor;
 
     private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -115,8 +117,15 @@ public class CrawlTaskServiceImpl implements CrawlTaskService {
         crawlTaskLogMapper.insert(id, taskName, startTime, "running", 0, null, 0, executorId);
 
         try {
-            Thread.sleep((long) (2000 + Math.random() * 3000));
-            int crawledCount = (int) (10 + Math.random() * 100);
+            // M-05：真实爬虫执行
+            String sourceUrl = (String) task.get("sourceUrl");
+            String sourceType = (String) task.get("sourceType");
+            String crawlRule = (String) task.get("crawlRule");
+            Integer timeoutSeconds = task.get("timeoutSeconds") != null
+                    ? ((Number) task.get("timeoutSeconds")).intValue() : 300;
+
+            List<Map<String, Object>> items = crawlExecutor.crawl(sourceUrl, sourceType, crawlRule, timeoutSeconds);
+            int crawledCount = items == null ? 0 : items.size();
 
             String endTimeStr = LocalDateTime.now().format(DF);
             Long logId = getLastInsertId(id);
@@ -125,7 +134,7 @@ public class CrawlTaskServiceImpl implements CrawlTaskService {
             }
 
             crawlTaskMapper.updateRunStats(id, "idle", now, null);
-            log.info("任务执行成功: id={}, crawledCount={}", id, crawledCount);
+            log.info("任务执行成功: id={}, crawled={}", id, crawledCount);
         } catch (Exception e) {
             log.error("任务执行失败: id={}, error={}", id, e.getMessage());
             String endTimeStr = LocalDateTime.now().format(DF);

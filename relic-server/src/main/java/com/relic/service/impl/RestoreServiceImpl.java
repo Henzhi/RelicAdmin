@@ -7,6 +7,7 @@ import com.relic.mapper.AdminUserMapper;
 import com.relic.mapper.BackupRecordMapper;
 import com.relic.mapper.RestoreRecordMapper;
 import com.relic.service.RestoreService;
+import com.relic.utils.BackupCryptoUtil;
 import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,8 @@ public class RestoreServiceImpl implements RestoreService {
     private final AdminUserMapper adminUserMapper;
     private final BCryptPasswordEncoder passwordEncoder;
     private final DataSource dataSource;
+    private final SuperAdminGuard superAdminGuard;
+    private final BackupCryptoUtil backupCryptoUtil;
 
     @Override
     public PageResultVO<Map<String, Object>> page(Integer status, int page, int pageSize) {
@@ -43,6 +46,8 @@ public class RestoreServiceImpl implements RestoreService {
 
     @Override
     public Map<String, Object> restore(Long backupId, RestoreConfirmDTO dto) {
+        // H-04：仅超级管理员可执行数据恢复（会重建全库）
+        superAdminGuard.requireSuperAdmin("只有超级管理员才能执行数据恢复");
         Map<String, Object> backup = backupRecordMapper.selectById(backupId);
         if (backup == null) {
             throw new IllegalArgumentException("备份记录不存在");
@@ -82,14 +87,32 @@ public class RestoreServiceImpl implements RestoreService {
             if (!sqlFile.exists()) {
                 throw new IllegalArgumentException("备份文件不存在: " + filePath);
             }
+            // M-12：若备份为加密格式，先解密到临时文件再执行
+            if (backupCryptoUtil.isEncrypted(sqlFile)) {
+                File decrypted = backupCryptoUtil.decrypt(sqlFile);
+                if (!backupCryptoUtil.isEncrypted(decrypted)) {
+                    sqlFile = decrypted;
+                } else {
+                    throw new IllegalArgumentException("备份文件解密失败：请确认 BACKUP_ENCRYPT_KEY 配置正确");
+                }
+            }
+
+            // M-11：恢复前记录关键表行数，用于恢复后一致性校验
+            Map<String, Long> beforeCounts = countCriticalTables();
 
             long executedStatements = executeSqlFile(sqlFile);
 
-            String remark = "恢复成功，共处理 " + executedStatements + " 行数据。应急备份: " + emergencyPath;
+            // M-11：恢复后校验关键表行数是否正常（非空校验，防止备份为空时恢复出空库）
+            Map<String, Long> afterCounts = countCriticalTables();
+            String validation = validateAfterRestore(beforeCounts, afterCounts);
+
+            String remark = "恢复成功，共处理 " + executedStatements + " 行数据。应急备份: " + emergencyPath
+                    + "。恢复后校验: " + validation;
             Long restoreRecordId = insertFinalRecord(backupId, backupName, operatorId, 1, remark);
             result.put("status", "success");
             result.put("restoredRows", executedStatements);
-            log.info("[Restore] 数据恢复成功: restoreId={}, backupId={}, 行数={}", restoreRecordId, backupId, executedStatements);
+            log.info("[Restore] 数据恢复成功: restoreId={}, backupId={}, 行数={}, 校验={}",
+                    restoreRecordId, backupId, executedStatements, validation);
 
         } catch (Exception e) {
             log.error("[Restore] 数据恢复失败: backupId={}, reason={}", backupId, e.getMessage(), e);
@@ -292,6 +315,52 @@ public class RestoreServiceImpl implements RestoreService {
                sqlType == java.sql.Types.TIMESTAMP ||
                sqlType == java.sql.Types.TIME_WITH_TIMEZONE ||
                sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE;
+    }
+
+    /** M-11：需要做恢复一致性校验的关键业务表 */
+    private static final List<String> CRITICAL_TABLES = Arrays.asList(
+            "admin_users", "users", "artifacts", "announcements");
+
+    /**
+     * M-11：统计关键业务表行数
+     */
+    private Map<String, Long> countCriticalTables() {
+        Map<String, Long> counts = new HashMap<>();
+        try (Connection conn = dataSource.getConnection()) {
+            for (String table : CRITICAL_TABLES) {
+                try (Statement st = conn.createStatement();
+                     java.sql.ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM `" + table + "`")) {
+                    if (rs.next()) {
+                        counts.put(table, rs.getLong(1));
+                    }
+                } catch (Exception ignored) {
+                    // 表不存在时跳过（恢复脚本可能未建该表）
+                }
+            }
+        } catch (Exception e) {
+            log.warn("[Restore] 恢复前/后统计关键表行数失败: {}", e.getMessage());
+        }
+        return counts;
+    }
+
+    /**
+     * M-11：恢复后校验：关键表不应为空（恢复前有数据的关键表）
+     */
+    private String validateAfterRestore(Map<String, Long> before, Map<String, Long> after) {
+        List<String> problems = new ArrayList<>();
+        for (String table : CRITICAL_TABLES) {
+            Long beforeCount = before.get(table);
+            Long afterCount = after.get(table);
+            if (beforeCount != null && beforeCount > 0 && (afterCount == null || afterCount == 0)) {
+                problems.add(table + " 恢复后为空（恢复前=" + beforeCount + "）");
+            }
+        }
+        if (problems.isEmpty()) {
+            return "关键表行数校验通过";
+        }
+        String detail = String.join("; ", problems);
+        log.error("[Restore] 恢复后校验未通过: {}", detail);
+        return "存在异常: " + detail;
     }
 
     /**

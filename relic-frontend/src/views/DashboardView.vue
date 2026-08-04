@@ -177,7 +177,12 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import * as echarts from 'echarts'
+// M-14：ECharts 按需引入，减小产物体积
+import * as echarts from 'echarts/core'
+import { LineChart, BarChart } from 'echarts/charts'
+import { TooltipComponent, LegendComponent, GridComponent, TitleComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+echarts.use([LineChart, BarChart, TooltipComponent, LegendComponent, GridComponent, TitleComponent, CanvasRenderer])
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getDashboardOverview, getUserTrend, getVisitTrend, getDataGrowth,

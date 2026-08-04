@@ -56,20 +56,30 @@ public class BackupAdminController {
 
     @GetMapping("/{id}/download")
     public ResponseEntity<Resource> download(@PathVariable Long id) {
+        // H-03：文件必须真实存在且位于备份目录内才允许下载，禁止创建模拟文件
         Map<String, Object> record = backupService.getBackupDetail(id);
-        String filePath = record != null ? (String) record.get("filePath") : null;
-        String backupName = record != null ? (String) record.get("backupName") : "backup";
+        if (record == null) {
+            return ResponseEntity.notFound().build();
+        }
+        Object status = record.get("status");
+        if (status == null || !Integer.valueOf(1).equals(status)) {
+            // 备份未完成，不可下载
+            return ResponseEntity.status(409).build();
+        }
+        String filePath = (String) record.get("filePath");
+        if (filePath == null || filePath.isBlank()) {
+            return ResponseEntity.notFound().build();
+        }
 
-        File file = new File(filePath != null ? filePath : "./backups/" + backupName + ".sql");
-        if (!file.exists()) {
-            // 如果不存在，先创建一个模拟文件
-            try {
-                file.getParentFile().mkdirs();
-                String content = "-- 模拟备份文件 - RelicAdmin\n-- ID: " + id + "\n-- 名称: " + backupName + "\n";
-                java.nio.file.Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
-            } catch (Exception e) {
-                return ResponseEntity.notFound().build();
-            }
+        File file = new File(filePath);
+        // 路径穿越防护：仅允许备份目录内的文件
+        String normalized = file.getAbsolutePath();
+        String backupRoot = new File(backupService.getBackupRoot()).getAbsolutePath();
+        if (!normalized.startsWith(backupRoot + File.separator)) {
+            return ResponseEntity.status(403).build();
+        }
+        if (!file.isFile() || !file.exists()) {
+            return ResponseEntity.notFound().build();
         }
 
         Resource resource = new FileSystemResource(file);

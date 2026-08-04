@@ -24,4 +24,6 @@ public interface UserBehaviorMapper {
                      @Param("startTime") String startTime,
                      @Param("endTime") String endTime);
     int insert(UserBehavior userBehavior);
+    /** M-06：批量插入行为日志，避免同步任务 N+1 写入 */
+    int insertBatch(@Param("list") List<UserBehavior> list);
 }

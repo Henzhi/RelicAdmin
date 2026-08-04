@@ -12,4 +12,6 @@ public interface BackupService {
     void deleteBackup(Long id);
     void cleanupExpiredBackups();
     long getStorageUsage();
+    /** 获取备份存储根目录（用于下载路径穿越校验） */
+    String getBackupRoot();
 }

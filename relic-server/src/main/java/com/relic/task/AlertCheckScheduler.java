@@ -3,6 +3,7 @@ package com.relic.task;
 import com.relic.mapper.StatisticsMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ public class AlertCheckScheduler {
     private final DataSource dataSource;
 
     @Scheduled(fixedRate = 60000)
+    @SchedulerLock(name = "checkDatabaseConnection", lockAtMostFor = "PT2M", lockAtLeastFor = "PT10S")
     public void checkDatabaseConnection() {
         try (Connection conn = dataSource.getConnection()) {
             if (!conn.isValid(5)) {
@@ -34,6 +36,7 @@ public class AlertCheckScheduler {
     }
 
     @Scheduled(fixedRate = 300000)
+    @SchedulerLock(name = "checkDiskSpace", lockAtMostFor = "PT10M", lockAtLeastFor = "PT10S")
     public void checkDiskSpace() {
         File[] roots = File.listRoots();
         if (roots != null) {
