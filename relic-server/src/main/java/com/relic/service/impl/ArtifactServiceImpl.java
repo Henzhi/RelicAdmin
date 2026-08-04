@@ -15,8 +15,8 @@ import com.relic.mapper.LocationMapper;
 import com.relic.mapper.MuseumMapper;
 import com.relic.service.ArtifactService;
 import com.relic.vo.ArtifactDetailVO;
-import com.relic.vo.ArtifactImageVO;
 import com.relic.vo.ArtifactVO;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,17 +42,44 @@ public class ArtifactServiceImpl implements ArtifactService {
     private final MuseumMapper museumMapper;
     private final LocationMapper locationMapper;
 
+    /** 允许前端传入的排序字段白名单，key 为前端参数值，value 为数据库列名 */
+    private static final Map<String, String> SORT_FIELD_MAP = Map.ofEntries(
+            Map.entry("id", "id"),
+            Map.entry("createdAt", "created_at"),
+            Map.entry("created_at", "created_at"),
+            Map.entry("titleZh", "title_zh"),
+            Map.entry("title_zh", "title_zh"),
+            Map.entry("titleEn", "title_en"),
+            Map.entry("title_en", "title_en"),
+            Map.entry("type", "type"),
+            Map.entry("material", "material"),
+            Map.entry("dynastyId", "dynasty_id"),
+            Map.entry("dynasty_id", "dynasty_id"),
+            Map.entry("museumId", "museum_id"),
+            Map.entry("museum_id", "museum_id"),
+            Map.entry("lastUpdated", "last_updated"),
+            Map.entry("last_updated", "last_updated")
+    );
+
+    private static final Map<String, String> SORT_ORDER_MAP = Map.of(
+            "asc", "ASC", "ascending", "ASC",
+            "desc", "DESC", "descending", "DESC"
+    );
+
     @Override
     public PageResultVO<ArtifactVO> page(String titleZh, String titleEn, String type, Integer dynastyId,
                                          Integer museumId, String material, String keyword,
                                          String sortBy, String sortOrder, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
+        PageQuery pq = PageQuery.of(page, pageSize);
+        // 排序字段白名单校验，防止 SQL 注入，同时兼容驼峰/下划线命名
+        String safeSortBy = sortBy == null ? "created_at" : SORT_FIELD_MAP.getOrDefault(sortBy.trim(), "created_at");
+        String safeSortOrder = sortOrder == null ? "DESC" : SORT_ORDER_MAP.getOrDefault(sortOrder.trim().toLowerCase(), "DESC");
         List<Artifact> entities = artifactMapper.selectByPage(titleZh, titleEn, type, dynastyId,
-                museumId, material, keyword, sortBy, sortOrder, offset, pageSize);
+                museumId, material, keyword, safeSortBy, safeSortOrder, pq.getOffset(), pq.getPageSize());
         long total = artifactMapper.countByPage(titleZh, titleEn, type, dynastyId, museumId, material, keyword);
         List<ArtifactVO> records = entities.stream().map(VoConverter::toArtifactVO).collect(Collectors.toList());
         populateNames(records);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     private void populateNames(List<ArtifactVO> vos) {

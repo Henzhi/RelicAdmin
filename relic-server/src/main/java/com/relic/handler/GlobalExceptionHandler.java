@@ -17,7 +17,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
  */
 @RestControllerAdvice
 @Slf4j
-public class  GlobalExceptionHandler {
+public class GlobalExceptionHandler {
 
     /**
      * 捕获业务异常
@@ -25,7 +25,7 @@ public class  GlobalExceptionHandler {
      * @return
      */
     @ExceptionHandler
-    public Result exceptionHandler(BaseException ex){
+    public Result<Object> exceptionHandler(BaseException ex){
         log.error("异常信息：{}", ex.getMessage());
         return Result.error(ex.getMessage());
     }
@@ -36,7 +36,7 @@ public class  GlobalExceptionHandler {
      * @return
      */
     @ExceptionHandler
-    public Result exceptionHandler(SQLIntegrityConstraintViolationException ex){
+    public Result<Object> exceptionHandler(SQLIntegrityConstraintViolationException ex){
         String message = ex.getMessage();
         if(message.contains("Duplicate entry")){
             String[] split = message.split(" ");
@@ -49,7 +49,7 @@ public class  GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    public Result exceptionHandler(DataIntegrityViolationException ex){
+    public Result<Object> exceptionHandler(DataIntegrityViolationException ex){
         log.error("数据完整性异常: {}", ex.getMessage());
         String msg = ex.getMessage();
         if (msg != null && msg.contains("cannot be null")) {
@@ -59,25 +59,25 @@ public class  GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    public Result exceptionHandler(MaxUploadSizeExceededException ex){
+    public Result<Object> exceptionHandler(MaxUploadSizeExceededException ex){
         log.error("文件大小超出限制: {}", ex.getMessage());
         return Result.error("文件大小超出限制，单文件最大 10MB");
     }
 
     @ExceptionHandler
-    public Result exceptionHandler(MultipartException ex){
+    public Result<Object> exceptionHandler(MultipartException ex){
         log.error("文件上传异常: {}", ex.getMessage());
         return Result.error("文件上传失败: " + ex.getMessage());
     }
 
     @ExceptionHandler
-    public Result exceptionHandler(IllegalArgumentException ex){
+    public Result<Object> exceptionHandler(IllegalArgumentException ex){
         log.error("参数校验异常: {}", ex.getMessage());
         return Result.error(ex.getMessage());
     }
 
     @ExceptionHandler
-    public Result exceptionHandler(RuntimeException ex){
+    public Result<Object> exceptionHandler(RuntimeException ex){
         log.error("运行时异常: {}", ex.getMessage(), ex);
         return Result.error(ex.getMessage());
     }

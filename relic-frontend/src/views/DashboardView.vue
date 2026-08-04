@@ -185,9 +185,9 @@ import {
 } from '@/api/statistics'
 
 const overview = ref({})
-const visitRange = ref(30)
-const userGrowthRange = ref(30)
-const dataGrowthRange = ref(30)
+const visitRange = ref('30')
+const userGrowthRange = ref('30')
+const dataGrowthRange = ref('30')
 const alerts = ref([])
 const alertsLoading = ref(false)
 

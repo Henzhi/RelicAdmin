@@ -9,7 +9,8 @@ const userApi = axios.create({
 userApi.interceptors.request.use(config => {
   const token = localStorage.getItem('user_token')
   if (token) {
-    config.headers['authentication'] = token
+    // 与后端 JwtProperties.user-token-name 保持一致（默认 token），否则用户端鉴权永远 401
+    config.headers['token'] = token
   }
   config.headers['Content-Type'] = 'application/json;charset=UTF-8'
   return config
@@ -27,8 +28,11 @@ userApi.interceptors.response.use(
   error => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('user_token')
+      ElMessage.warning('登录已过期，请重新登录')
+      window.location.href = '/login'
+    } else {
+      ElMessage.error((error.response && error.response.data && error.response.data.msg) || error.message || '网络错误')
     }
-    ElMessage.error(error.message || '网络错误')
     return Promise.reject(error)
   }
 )

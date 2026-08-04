@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, watch } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus, Search, Refresh, Edit, Delete } from '@element-plus/icons-vue'
 import { getLocationTree, getLocationAll, getLocationList, getLocationParents, createLocation, updateLocation, deleteLocation } from '@/api/location'

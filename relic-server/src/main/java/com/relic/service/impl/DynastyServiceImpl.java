@@ -3,6 +3,7 @@ package com.relic.service.impl;
 import com.relic.entity.Dynasty;
 import com.relic.mapper.DynastyMapper;
 import com.relic.service.DynastyService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,10 +19,10 @@ public class DynastyServiceImpl implements DynastyService {
 
     @Override
     public PageResultVO<Dynasty> page(String nameZh, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Dynasty> records = dynastyMapper.selectByPage(nameZh, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Dynasty> records = dynastyMapper.selectByPage(nameZh, pq.getOffset(), pq.getPageSize());
         long total = dynastyMapper.countByPage(nameZh);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

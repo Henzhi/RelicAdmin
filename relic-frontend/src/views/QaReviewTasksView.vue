@@ -131,7 +131,8 @@ async function submitReview() {
   if (!reviewForm.value.reviewResult) { ElMessage.warning('请选择审核结果'); return }
   submitLoading.value = true
   try {
-    const adminId = localStorage.getItem('admin_id') || 1
+    const user = JSON.parse(localStorage.getItem('admin_user') || 'null')
+    const adminId = (user && user.id) ? user.id : 1
     await reviewQaTask(currentTaskId.value, {
       reviewResult: reviewForm.value.reviewResult,
       reviewComment: reviewForm.value.reviewComment,

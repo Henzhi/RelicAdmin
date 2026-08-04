@@ -178,7 +178,7 @@ public class AuditSyncTask {
             return "approved";
         } else {
             log.info("自动审核风险评分 {} >= 阈值 {}，转人工复核", riskScore, riskThreshold);
-            return "rejected";
+            return "pending";
         }
     }
 

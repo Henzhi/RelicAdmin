@@ -2,12 +2,12 @@ package com.relic.service.impl;
 
 import com.relic.context.BaseContext;
 import com.relic.dto.RestoreConfirmDTO;
-import com.relic.dto.RestoreRecordCreateDTO;
 import com.relic.entity.AdminUser;
 import com.relic.mapper.AdminUserMapper;
 import com.relic.mapper.BackupRecordMapper;
 import com.relic.mapper.RestoreRecordMapper;
 import com.relic.service.RestoreService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +35,10 @@ public class RestoreServiceImpl implements RestoreService {
 
     @Override
     public PageResultVO<Map<String, Object>> page(Integer status, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Map<String, Object>> records = restoreRecordMapper.selectByPage(status, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Map<String, Object>> records = restoreRecordMapper.selectByPage(status, pq.getOffset(), pq.getPageSize());
         long total = restoreRecordMapper.countByPage(status);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class RestoreServiceImpl implements RestoreService {
             throw new IllegalArgumentException("只能从已完成状态的备份进行恢复");
         }
 
-        Integer operatorId = Math.toIntExact(BaseContext.getCurrentId());
+        Integer operatorId = getCurrentOperatorId();
         String backupName = (String) backup.get("backupName");
         String filePath = (String) backup.get("filePath");
 
@@ -139,6 +139,8 @@ public class RestoreServiceImpl implements RestoreService {
         StringBuilder sql = new StringBuilder();
         long lineCount = 0;
         long executedCount = 0;
+        long failedCount = 0;
+        StringBuilder failedDetails = new StringBuilder();
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(sqlFile), StandardCharsets.UTF_8));
@@ -166,7 +168,10 @@ public class RestoreServiceImpl implements RestoreService {
                         st.execute(statement);
                         executedCount++;
                     } catch (Exception e) {
-                        log.warn("[Restore] SQL 执行警告 (第{}行): {}", lineCount, e.getMessage());
+                        failedCount++;
+                        if (failedDetails.length() > 0) failedDetails.append("; ");
+                        failedDetails.append("第").append(lineCount).append("行: ").append(e.getMessage());
+                        log.warn("[Restore] SQL 执行失败 (第{}行): {}", lineCount, e.getMessage());
                     }
                 }
             }
@@ -176,7 +181,17 @@ public class RestoreServiceImpl implements RestoreService {
                 try (Statement st = conn.createStatement()) {
                     st.execute(remaining);
                     executedCount++;
+                } catch (Exception e) {
+                    failedCount++;
+                    failedDetails.append("末尾语句: ").append(e.getMessage());
+                    log.warn("[Restore] SQL 执行失败 (末尾语句): {}", e.getMessage());
                 }
+            }
+
+            if (failedCount > 0) {
+                conn.rollback();
+                log.error("[Restore] SQL 恢复存在 {} 条失败语句，已回滚: {}", failedCount, failedDetails);
+                throw new RuntimeException("SQL 恢复失败，共 " + failedCount + " 条语句执行失败，已回滚。详情: " + failedDetails);
             }
 
             conn.commit();
@@ -223,11 +238,15 @@ public class RestoreServiceImpl implements RestoreService {
                 }
 
                 List<String> columns = new ArrayList<>();
+                List<Integer> columnTypes = new ArrayList<>();
                 try (Statement st = conn.createStatement();
                      java.sql.ResultSet rs = st.executeQuery("SELECT * FROM `" + table + "`")) {
                     java.sql.ResultSetMetaData meta = rs.getMetaData();
                     int colCount = meta.getColumnCount();
-                    for (int i = 1; i <= colCount; i++) columns.add(meta.getColumnName(i));
+                    for (int i = 1; i <= colCount; i++) {
+                        columns.add(meta.getColumnName(i));
+                        columnTypes.add(meta.getColumnType(i));
+                    }
 
                     while (rs.next()) {
                         writer.write("INSERT INTO `" + table + "` (");
@@ -238,8 +257,10 @@ public class RestoreServiceImpl implements RestoreService {
                             String val = rs.getString(i);
                             if (val == null) {
                                 writer.write("NULL");
-                            } else {
+                            } else if (isStringType(columnTypes.get(i - 1))) {
                                 writer.write("'" + val.replace("\\", "\\\\").replace("'", "\\'") + "'");
+                            } else {
+                                writer.write(val);
                             }
                         }
                         writer.write(");");
@@ -255,6 +276,33 @@ public class RestoreServiceImpl implements RestoreService {
         } catch (Exception e) {
             log.error("[Restore] 应急备份失败: {}", e.getMessage(), e);
         }
+    }
+
+    /** 判断 JDBC 类型是否为需要加引号的字符串/日期类型 */
+    private boolean isStringType(int sqlType) {
+        return sqlType == java.sql.Types.VARCHAR ||
+               sqlType == java.sql.Types.CHAR ||
+               sqlType == java.sql.Types.LONGVARCHAR ||
+               sqlType == java.sql.Types.CLOB ||
+               sqlType == java.sql.Types.NVARCHAR ||
+               sqlType == java.sql.Types.NCHAR ||
+               sqlType == java.sql.Types.LONGNVARCHAR ||
+               sqlType == java.sql.Types.DATE ||
+               sqlType == java.sql.Types.TIME ||
+               sqlType == java.sql.Types.TIMESTAMP ||
+               sqlType == java.sql.Types.TIME_WITH_TIMEZONE ||
+               sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE;
+    }
+
+    /**
+     * 获取当前操作人 ID，未登录时抛出业务异常，避免拆箱 NPE
+     */
+    private Integer getCurrentOperatorId() {
+        Long currentId = BaseContext.getCurrentId();
+        if (currentId == null) {
+            throw new RuntimeException("当前操作人未登录");
+        }
+        return currentId.intValue();
     }
 
     @Override

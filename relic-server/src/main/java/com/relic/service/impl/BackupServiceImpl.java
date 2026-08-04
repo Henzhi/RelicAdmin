@@ -6,6 +6,7 @@ import com.relic.entity.BackupRecord;
 import com.relic.mapper.BackupRecordMapper;
 import com.relic.mapper.BackupStrategyMapper;
 import com.relic.service.BackupService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,15 +39,15 @@ public class BackupServiceImpl implements BackupService {
 
     @Override
     public PageResultVO<Map<String, Object>> page(Integer status, String backupType, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Map<String, Object>> records = backupRecordMapper.selectByPage(status, backupType, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Map<String, Object>> records = backupRecordMapper.selectByPage(status, backupType, pq.getOffset(), pq.getPageSize());
         long total = backupRecordMapper.countByPage(status, backupType);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override
     public Map<String, Object> createBackup(BackupCreateDTO dto) {
-        Integer operatorId = Math.toIntExact(BaseContext.getCurrentId());
+        Integer operatorId = getCurrentOperatorId();
         String backupName = dto.getBackupName() != null ? dto.getBackupName()
                 : "手动备份_" + LocalDateTime.now().format(DF);
         String backupType = dto.getBackupType() != null ? dto.getBackupType() : "full";
@@ -254,6 +255,17 @@ public class BackupServiceImpl implements BackupService {
                sqlType == java.sql.Types.TIMESTAMP ||
                sqlType == java.sql.Types.TIME_WITH_TIMEZONE ||
                sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE;
+    }
+
+    /**
+     * 获取当前操作人 ID，未登录时抛出业务异常，避免拆箱 NPE
+     */
+    private Integer getCurrentOperatorId() {
+        Long currentId = BaseContext.getCurrentId();
+        if (currentId == null) {
+            throw new RuntimeException("当前操作人未登录");
+        }
+        return currentId.intValue();
     }
 
     @Override

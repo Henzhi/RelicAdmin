@@ -49,7 +49,6 @@ public class CrawlTaskScheduler {
                 if (shouldRun == null) continue;
                 if (shouldRun.isAfter(now) || (nextRun != null && nextRun.isAfter(now))) continue;
 
-                Integer taskId = (Integer) task.get("id");
                 String currentStatus = (String) task.get("status");
                 if ("running".equals(currentStatus)) continue;
 
@@ -94,7 +93,7 @@ public class CrawlTaskScheduler {
                 LocalDateTime nextRun = cron.next(LocalDateTime.now());
                 if (nextRun != null) nextRunStr = nextRun.format(DF);
             }
-            crawlTaskMapper.updateRunStats(id, "idle", nowStr, nextRunStr);
+            crawlTaskMapper.updateRunStats(id, "completed", nowStr, nextRunStr);
             log.info("定时任务执行完成: id={}, count={}", id, crawledCount);
         } catch (Exception e) {
             log.error("定时任务执行失败: id={}, error={}", id, e.getMessage());

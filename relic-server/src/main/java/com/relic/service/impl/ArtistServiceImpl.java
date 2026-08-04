@@ -9,6 +9,7 @@ import com.relic.mapper.ArtistMapper;
 import com.relic.mapper.DynastyMapper;
 import com.relic.service.ArtistService;
 import com.relic.vo.ArtistVO;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,12 +30,12 @@ public class ArtistServiceImpl implements ArtistService {
 
     @Override
     public PageResultVO<ArtistVO> page(String nameZh, String nameEn, Integer dynastyId, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Artist> entities = artistMapper.selectByPage(nameZh, nameEn, dynastyId, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Artist> entities = artistMapper.selectByPage(nameZh, nameEn, dynastyId, pq.getOffset(), pq.getPageSize());
         long total = artistMapper.countByPage(nameZh, nameEn, dynastyId);
         List<ArtistVO> records = entities.stream().map(VoConverter::toArtistVO).collect(Collectors.toList());
         populateDynastyNames(records);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     private void populateDynastyNames(List<ArtistVO> vos) {

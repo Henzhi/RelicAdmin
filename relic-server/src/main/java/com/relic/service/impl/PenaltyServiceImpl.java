@@ -6,6 +6,7 @@ import com.relic.dto.PenaltyRevokeDTO;
 import com.relic.mapper.PenaltyRecordMapper;
 import com.relic.mapper.ViolationTypeMapper;
 import com.relic.service.PenaltyService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,10 +51,10 @@ public class PenaltyServiceImpl implements PenaltyService {
 
     @Override
     public PageResultVO<Map<String, Object>> listPenalties(Integer userId, String penaltyType, Integer status, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Map<String, Object>> records = penaltyRecordMapper.selectByPage(userId, penaltyType, status, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Map<String, Object>> records = penaltyRecordMapper.selectByPage(userId, penaltyType, status, pq.getOffset(), pq.getPageSize());
         long total = penaltyRecordMapper.countByPage(userId, penaltyType, status);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

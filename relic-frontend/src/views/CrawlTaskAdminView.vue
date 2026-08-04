@@ -223,7 +223,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { getCrawlTaskPage, getCrawlTaskDetail, createCrawlTask, updateCrawlTask,
@@ -253,7 +253,18 @@ const logSearchStatus = ref(null)
 const currentLogTaskId = ref(null)
 const logPagination = reactive({ page:1, pageSize:10, total:0 })
 
-onMounted(() => { fetchData() })
+let pollingTimer = null
+onMounted(() => {
+    fetchData()
+    pollingTimer = setInterval(() => {
+        const hasRunning = tableData.value.some(r => r.status === 'running')
+        if (hasRunning) fetchData()
+    }, 10000)
+})
+onBeforeUnmount(() => {
+    if (pollingTimer) clearInterval(pollingTimer)
+    pollingTimer = null
+})
 
 async function fetchData() {
     loading.value = true
@@ -394,10 +405,6 @@ async function handleDelete(row) {
     } catch {}
 }
 
-setInterval(() => {
-    const hasRunning = tableData.value.some(r => r.status === 'running')
-    if (hasRunning) fetchData()
-}, 10000)
 </script>
 
 <style scoped>

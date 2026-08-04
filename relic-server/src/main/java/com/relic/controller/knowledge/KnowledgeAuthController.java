@@ -4,7 +4,6 @@ import com.relic.context.BaseContext;
 import com.relic.dto.LoginDTO;
 import com.relic.dto.PasswordChangeDTO;
 import com.relic.dto.RegisterDTO;
-import com.relic.dto.UserUpdateDTO;
 import com.relic.result.Result;
 import com.relic.service.KnowledgeAuthService;
 import com.relic.vo.LoginVO;

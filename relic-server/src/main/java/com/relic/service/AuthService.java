@@ -1,7 +1,6 @@
 package com.relic.service;
 
 import com.relic.dto.*;
-import com.relic.vo.LoginVO;
 import com.relic.vo.UserVO;
 
 public interface AuthService {

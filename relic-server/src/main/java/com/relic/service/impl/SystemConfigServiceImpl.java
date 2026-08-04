@@ -4,6 +4,7 @@ import com.relic.dto.SystemConfigCreateDTO;
 import com.relic.dto.SystemConfigUpdateDTO;
 import com.relic.mapper.SystemConfigMapper;
 import com.relic.service.SystemConfigService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +23,10 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 
     @Override
     public PageResultVO<Map<String, Object>> listPage(String configGroup, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Map<String, Object>> records = systemConfigMapper.selectByPage(configGroup, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Map<String, Object>> records = systemConfigMapper.selectByPage(configGroup, pq.getOffset(), pq.getPageSize());
         long total = systemConfigMapper.countByPage(configGroup);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

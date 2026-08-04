@@ -340,7 +340,6 @@ async function handleSubmit() {
     if (!payload.locationId || payload.locationId === 0 || payload.locationId === '') {
       payload.locationId = null
     }
-    console.log('Submit payload:', payload)
     if (isEdit.value) {
       await updateArtifact(editId.value, payload)
       ElMessage.success('更新成功')

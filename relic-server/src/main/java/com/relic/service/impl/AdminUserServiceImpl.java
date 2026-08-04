@@ -12,6 +12,7 @@ import com.relic.mapper.AdminUserMapper;
 import com.relic.mapper.AdminUserRoleMapper;
 import com.relic.service.AdminUserService;
 import com.relic.vo.AdminUserVO;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -35,10 +36,10 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     public PageResultVO<AdminUserVO> page(String username, String realName, String status,
                                           String createdAtStart, String createdAtEnd, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<AdminUserVO> records = adminUserMapper.selectByPage(username, realName, status, createdAtStart, createdAtEnd, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<AdminUserVO> records = adminUserMapper.selectByPage(username, realName, status, createdAtStart, createdAtEnd, pq.getOffset(), pq.getPageSize());
         long total = adminUserMapper.countByPage(username, realName, status, createdAtStart, createdAtEnd);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override
@@ -62,12 +63,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional
     public void create(AdminUserCreateDTO dto) {
-        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
-        //权限验证
-        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
-            //不是超级管理员不允许创建管理员
-            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
-        }
+        requireSuperAdmin("不是超级管理员不允许创建管理员");
         AdminUser existing = adminUserMapper.selectByUsername(dto.getUsername());
         if (existing != null) {
             throw new RuntimeException("管理员账号已存在");
@@ -97,10 +93,9 @@ public class AdminUserServiceImpl implements AdminUserService {
     public void update(Integer id, AdminUserUpdateDTO dto) {
         //目前操作人id
         Long currentId = BaseContext.getCurrentId();
-        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(currentId);
         //权限验证
         if(!Long.valueOf(id).equals(currentId)&&
-                !adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+                !isSuperAdmin(currentId)){
             //不是超级管理员不允许更新其他管理员信息
             throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
         }
@@ -183,10 +178,9 @@ public class AdminUserServiceImpl implements AdminUserService {
     public void updatePassword(Integer id, String oldPassword, String newPassword) {
         //目前操作人id
         Long currentId = BaseContext.getCurrentId();
-        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(currentId);
         //权限验证
         if(!Long.valueOf(id).equals(currentId)&&
-                !adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
+                !isSuperAdmin(currentId)){
             //不是超级管理员不允许更新其他管理员密码
             throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
         }
@@ -235,5 +229,22 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .createdAt(adminUser.getCreatedAt())
                 .updatedAt(adminUser.getUpdatedAt())
                 .build();
+    }
+
+    /**
+     * 校验当前操作人是否为超级管理员，未分配角色或非超管时抛出权限异常
+     */
+    private void requireSuperAdmin(String message) {
+        if (!isSuperAdmin(BaseContext.getCurrentId())) {
+            throw new InsufficientPermissionsException(message);
+        }
+    }
+
+    private boolean isSuperAdmin(Long currentId) {
+        if (currentId == null) {
+            return false;
+        }
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(currentId);
+        return adminUserRole != null && RoleConstant.SUPER_ADMIN.equals(adminUserRole.getRoleId());
     }
 }

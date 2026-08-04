@@ -5,6 +5,7 @@ import com.relic.entity.ArtifactType;
 import com.relic.mapper.ArtifactTypeMapper;
 import com.relic.service.ArtifactTypeService;
 import com.relic.vo.ArtifactTypeVO;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,11 @@ public class ArtifactTypeServiceImpl implements ArtifactTypeService {
 
     @Override
     public PageResultVO<ArtifactTypeVO> page(String name, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<ArtifactType> entities = artifactTypeMapper.selectByPage(name, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<ArtifactType> entities = artifactTypeMapper.selectByPage(name, pq.getOffset(), pq.getPageSize());
         long total = artifactTypeMapper.countByPage(name);
         List<ArtifactTypeVO> records = entities.stream().map(this::toVO).collect(Collectors.toList());
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

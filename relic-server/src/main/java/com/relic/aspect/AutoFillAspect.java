@@ -8,7 +8,6 @@ import com.relic.context.BaseContext;
 import com.relic.enumeration.OperationType;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
@@ -70,7 +69,7 @@ public class AutoFillAspect {
                 setUpdateUser.invoke(entity, currentId);
 
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("公共字段填充失败(INSERT)", e);
             }
         } else if (operationType == OperationType.UPDATE) {
             // 更新操作，为更新时间、更新人属性赋值
@@ -81,7 +80,7 @@ public class AutoFillAspect {
                 setUpdateTime.invoke(entity, now);
                 setUpdateUser.invoke(entity, currentId);
             } catch (Exception e){
-                e.printStackTrace();
+                log.error("公共字段填充失败(UPDATE)", e);
             }
         }
     }

@@ -3,13 +3,13 @@ package com.relic.service.impl;
 import com.relic.converter.VoConverter;
 import com.relic.dto.RoleCreateDTO;
 import com.relic.dto.RoleUpdateDTO;
-import com.relic.entity.Permission;
 import com.relic.entity.Role;
 import com.relic.exception.InsufficientPermissionsException;
 import com.relic.mapper.PermissionMapper;
 import com.relic.mapper.RoleMapper;
 import com.relic.mapper.RolePermissionMapper;
 import com.relic.service.RoleService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import com.relic.vo.PermissionVO;
 import com.relic.vo.RoleVO;
@@ -31,11 +31,11 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public PageResultVO<RoleVO> page(String name, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Role> entities = roleMapper.selectByPage(name, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Role> entities = roleMapper.selectByPage(name, pq.getOffset(), pq.getPageSize());
         long total = roleMapper.countByPage(name);
         List<RoleVO> records = entities.stream().map(VoConverter::toRoleVO).collect(Collectors.toList());
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override
@@ -82,11 +82,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public void delete(Integer id) {
         //暂时不允许删除
-        if(true){
-            throw new InsufficientPermissionsException("不允许删除");
-        }
-        rolePermissionMapper.deleteByRoleId(id);
-        roleMapper.deleteById(id);
+        throw new InsufficientPermissionsException("不允许删除");
     }
 
     @Override

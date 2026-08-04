@@ -34,7 +34,6 @@
         <fastjson>2.0.61</fastjson>                          <!-- 2.x 最新稳定版 -->
         <commons.lang3>3.14.0</commons.lang3>                <!-- 使用lang3，替换旧版lang -->
         <druid>1.2.23</druid>                                <!-- 最新稳定版 -->
-        <pagehelper>2.1.0</pagehelper>                       <!-- 新版PageHelper -->
         <aliyun.sdk.oss>3.18.3</aliyun.sdk.oss>              <!-- 阿里云OSS SDK最新版 -->
         <knife4j>4.5.0</knife4j>                             <!-- 适配Spring Boot 3.x的版本 -->
         <!-- 注意：aspectj, jjwt, jaxb-api, poi 已调整为更稳妥的配置，详见下方说明 -->
@@ -76,13 +75,6 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid-spring-boot-starter</artifactId>
                 <version>1.2.23</version>
-            </dependency>
-
-            <!-- PageHelper 分页插件 -->
-            <dependency>
-                <groupId>com.github.pagehelper</groupId>
-                <artifactId>pagehelper-spring-boot-starter</artifactId>
-                <version>2.1.0</version>
             </dependency>
 
             <!-- Knife4j API 文档（适配 Spring Boot 3.x 的版本） -->

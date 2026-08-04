@@ -2,6 +2,7 @@ package com.relic.service.impl;
 
 import com.relic.mapper.OperationLogMapper;
 import com.relic.service.OperationLogService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -37,12 +38,12 @@ public class OperationLogServiceImpl implements OperationLogService {
     public PageResultVO<Map<String, Object>> listPage(Integer userId, String operationType, String targetType,
                                                        String keyword, String startTime, String endTime,
                                                        int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
+        PageQuery pq = PageQuery.of(page, pageSize);
         List<Map<String, Object>> records = operationLogMapper.selectByPage(
-                userId, operationType, targetType, keyword, startTime, endTime, offset, pageSize);
+                userId, operationType, targetType, keyword, startTime, endTime, pq.getOffset(), pq.getPageSize());
         long total = operationLogMapper.countByPage(
                 userId, operationType, targetType, keyword, startTime, endTime);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

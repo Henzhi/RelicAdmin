@@ -2,6 +2,7 @@ package com.relic.service.impl;
 
 import com.relic.mapper.SecurityLogMapper;
 import com.relic.service.SecurityLogService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -36,11 +37,11 @@ public class SecurityLogServiceImpl implements SecurityLogService {
     public PageResultVO<Map<String, Object>> listPage(String eventType, Integer userId, String keyword,
                                                        String startTime, String endTime,
                                                        int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
+        PageQuery pq = PageQuery.of(page, pageSize);
         List<Map<String, Object>> records = securityLogMapper.selectByPage(
-                eventType, userId, keyword, startTime, endTime, offset, pageSize);
+                eventType, userId, keyword, startTime, endTime, pq.getOffset(), pq.getPageSize());
         long total = securityLogMapper.countByPage(eventType, userId, keyword, startTime, endTime);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

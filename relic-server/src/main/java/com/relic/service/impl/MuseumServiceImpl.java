@@ -7,6 +7,7 @@ import com.relic.entity.Museum;
 import com.relic.mapper.MuseumMapper;
 import com.relic.service.MuseumService;
 import com.relic.vo.MuseumVO;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,11 +24,11 @@ public class MuseumServiceImpl implements MuseumService {
 
     @Override
     public PageResultVO<MuseumVO> page(String name, String country, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Museum> entities = museumMapper.selectByPage(name, country, null, null, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Museum> entities = museumMapper.selectByPage(name, country, null, null, pq.getOffset(), pq.getPageSize());
         long total = museumMapper.countByPage(name, country, null, null);
         List<MuseumVO> records = entities.stream().map(VoConverter::toMuseumVO).collect(Collectors.toList());
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

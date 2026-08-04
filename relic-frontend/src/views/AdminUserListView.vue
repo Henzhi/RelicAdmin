@@ -216,6 +216,7 @@ import {
   updateAdminUserStatus, assignAdminRoles, resetAdminPassword, updateAdminPassword
 } from '../api/adminUser'
 import { getRoleList } from '../api/role'
+import { roleType, roleLabel } from '../utils/adminRole'
 
 const loading = ref(false)
 const tableData = ref([])
@@ -264,22 +265,6 @@ function resetFilter() {
 
 function handleAvatar(avatarUrl) {
   return avatarUrl ? avatarUrl : 'https://seitem.oss-cn-beijing.aliyuncs.com/avatar/16/185f47ad-6198-4b73-90c5-e361f2238274.png'
-}
-
-function roleType(roleId) {
-  switch(roleId){
-    case 1: return "danger";
-    case 4: return "success";
-    case 5: return "warning";
-  }
-}
-
-function roleLabel(roleId) {
-  switch(roleId){
-    case 1: return "超级审核员";
-    case 4: return "内容审核员";
-    case 5: return "数据管理员";
-  }
 }
 
 function statusType(status) {

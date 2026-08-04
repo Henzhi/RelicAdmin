@@ -32,7 +32,7 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
         String token = request.getHeader(jwtProperties.getAdminTokenName());
 
         try {
-            log.info("jwt校验:{}", token);
+            log.debug("jwt校验:{}", maskToken(token));
             Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
             Long userId = Long.valueOf(claims.get(JwtClaimsConstant.USER_ID).toString());
             log.info("当前用户id：{}", userId);
@@ -59,6 +59,12 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
                                 Object handler, Exception ex) {
         BaseContext.removeCurrentId();
+    }
+
+    /** 日志脱敏：仅展示 token 前 8 位，避免完整 JWT 落入日志 */
+    private String maskToken(String token) {
+        if (token == null) return "null";
+        return token.length() > 8 ? token.substring(0, 8) + "..." : "***";
     }
 
     private String getClientIp(HttpServletRequest request) {

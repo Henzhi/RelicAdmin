@@ -14,7 +14,6 @@ import com.relic.mapper.UserMapper;
 import com.relic.properties.JwtProperties;
 import com.relic.service.MuseumAuthService;
 import com.relic.utils.JwtUtil;
-import com.relic.vo.LoginVO;
 import com.relic.vo.UserVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

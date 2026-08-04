@@ -1,7 +1,6 @@
 package com.relic.config;
 
 import com.relic.properties.AliOssProperties;
-import com.relic.result.Result;
 import com.relic.utils.AliOssUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

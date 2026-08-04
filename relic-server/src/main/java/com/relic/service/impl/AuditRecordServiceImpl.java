@@ -8,6 +8,7 @@ import com.relic.mapper.UserCommentMapper;
 import com.relic.mapper.UserPostMapper;
 import com.relic.mapper.UserUploadMapper;
 import com.relic.service.AuditRecordService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +31,10 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     public PageResultVO<Map<String, Object>> listAudits(String contentType, String manualAuditResult,
                                                          String sourceType, String startDate, String endDate,
                                                          int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Map<String, Object>> records = auditRecordMapper.selectByPage(contentType, manualAuditResult, sourceType, startDate, endDate, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Map<String, Object>> records = auditRecordMapper.selectByPage(contentType, manualAuditResult, sourceType, startDate, endDate, pq.getOffset(), pq.getPageSize());
         long total = auditRecordMapper.countByPage(contentType, manualAuditResult, sourceType, startDate, endDate);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

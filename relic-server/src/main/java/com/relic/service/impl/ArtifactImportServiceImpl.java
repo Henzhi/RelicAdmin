@@ -10,6 +10,7 @@ import com.relic.mapper.ArtifactMapper;
 import com.relic.mapper.AdminUserMapper;
 import com.relic.mapper.ImportHistoryMapper;
 import com.relic.service.ArtifactImportService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,9 +42,6 @@ public class ArtifactImportServiceImpl implements ArtifactImportService {
             "material", "description", "dimensions", "museumId", "locationId",
             "detailUrl", "imageUrl", "creditLine", "accessionNumber", "crawlDate"
     );
-
-    /** 必填字段 */
-    private static final Set<String> REQUIRED_FIELDS = Set.of("titleZh", "type");
 
     /** 字段中文映射 */
     private static final Map<String, String> FIELD_LABELS = Map.ofEntries(
@@ -176,10 +174,10 @@ public class ArtifactImportServiceImpl implements ArtifactImportService {
 
     @Override
     public PageResultVO<ImportHistory> listHistory(int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<ImportHistory> records = importHistoryMapper.selectByPage(offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<ImportHistory> records = importHistoryMapper.selectByPage(pq.getOffset(), pq.getPageSize());
         long total = importHistoryMapper.count();
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

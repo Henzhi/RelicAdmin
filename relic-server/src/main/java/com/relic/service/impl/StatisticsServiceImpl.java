@@ -2,6 +2,7 @@ package com.relic.service.impl;
 
 import com.relic.mapper.StatisticsMapper;
 import com.relic.service.StatisticsService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -64,10 +65,10 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public PageResultVO<Map<String, Object>> getAlertPage(String alertType, String severity, String status,
                                                            int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Map<String, Object>> records = statisticsMapper.selectAlertPage(alertType, severity, status, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Map<String, Object>> records = statisticsMapper.selectAlertPage(alertType, severity, status, pq.getOffset(), pq.getPageSize());
         long total = statisticsMapper.countAlerts(alertType, severity, status);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

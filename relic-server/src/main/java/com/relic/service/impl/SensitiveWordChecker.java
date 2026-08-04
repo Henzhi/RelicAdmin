@@ -29,7 +29,6 @@ public class SensitiveWordChecker {
     /**
      * 检查文本中是否包含敏感词，返回命中的敏感词列表
      */
-    @SuppressWarnings("unchecked")
     public List<String> checkText(String text) {
         if (text == null || text.isBlank()) {
             return Collections.emptyList();

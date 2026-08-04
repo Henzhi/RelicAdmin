@@ -41,7 +41,7 @@ public class ArtifactImportController {
         log.info("确认导入: {}", file.getOriginalFilename());
         Map<String, String> fieldMapping = null;
         if (fieldMappingJson != null && !fieldMappingJson.isBlank()) {
-            fieldMapping = com.alibaba.fastjson2.JSON.parseObject(fieldMappingJson, Map.class);
+            fieldMapping = com.alibaba.fastjson2.JSON.parseObject(fieldMappingJson, new com.alibaba.fastjson2.TypeReference<Map<String, String>>() {});
         }
         return Result.success(artifactImportService.confirmImport(file, fieldMapping));
     }

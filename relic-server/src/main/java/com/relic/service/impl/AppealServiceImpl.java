@@ -5,6 +5,7 @@ import com.relic.dto.AppealCreateDTO;
 import com.relic.dto.AppealReviewDTO;
 import com.relic.mapper.AppealRecordMapper;
 import com.relic.service.AppealService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,18 +37,18 @@ public class AppealServiceImpl implements AppealService {
     @Override
     public PageResultVO<Map<String, Object>> listUserAppeals(int page, int pageSize) {
         Long currentUserId = BaseContext.getCurrentId();
-        int offset = (page - 1) * pageSize;
-        List<Map<String, Object>> records = appealRecordMapper.selectByUserId(currentUserId.intValue(), offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Map<String, Object>> records = appealRecordMapper.selectByUserId(currentUserId.intValue(), pq.getOffset(), pq.getPageSize());
         long total = appealRecordMapper.countByUserId(currentUserId.intValue());
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override
     public PageResultVO<Map<String, Object>> listAdminAppeals(String status, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Map<String, Object>> records = appealRecordMapper.selectAdminPage(status, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Map<String, Object>> records = appealRecordMapper.selectAdminPage(status, pq.getOffset(), pq.getPageSize());
         long total = appealRecordMapper.countAdminPage(status);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

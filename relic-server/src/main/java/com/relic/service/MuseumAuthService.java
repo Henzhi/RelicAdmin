@@ -3,7 +3,6 @@ package com.relic.service;
 import com.relic.dto.LoginDTO;
 import com.relic.dto.PasswordChangeDTO;
 import com.relic.dto.RegisterDTO;
-import com.relic.vo.LoginVO;
 import com.relic.vo.UserVO;
 
 public interface MuseumAuthService {

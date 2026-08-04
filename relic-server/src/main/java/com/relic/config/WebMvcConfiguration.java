@@ -109,6 +109,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         log.info("扩展消息转换器...");
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setObjectMapper(new JacksonObjectMapper());
-        converters.add(converters.size(), converter);
+        // 插入到列表头部，确保自定义 ObjectMapper（LocalDateTime 格式化等）优先生效
+        converters.add(0, converter);
     }
 }

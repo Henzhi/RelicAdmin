@@ -47,10 +47,10 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
 
         //2、校验令牌
         try {
-            log.info("jwt校验:{}", token);
+            log.debug("jwt校验:{}", maskToken(token));
             Claims claims = JwtUtil.parseJWT(jwtProperties.getUserSecretKey(), token);
             Long userId = Long.valueOf(claims.get(JwtClaimsConstant.USER_ID).toString());
-            log.info("当前用户id：", userId);
+            log.info("当前用户id：{}", userId);
             BaseContext.setCurrentId(userId);
             BaseContext.setCurrentUserType(getUserTypeOrDefault(claims));
             return true;
@@ -60,6 +60,12 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
         }
     }
 
+    /** 日志脱敏：仅展示 token 前 8 位，避免完整 JWT 落入日志 */
+    private String maskToken(String token) {
+        if (token == null) return "null";
+        return token.length() > 8 ? token.substring(0, 8) + "..." : "***";
+    }
+
     private String getUserTypeOrDefault(Claims claims) {
         try {
             String userType = claims.get(JwtClaimsConstant.USER_TYPE, String.class);
@@ -67,5 +73,12 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
         } catch (Exception e) {
             return "knowledge";
         }
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+                                Object handler, Exception ex) {
+        // 清理 ThreadLocal，防止线程池复用导致用户身份串号
+        BaseContext.removeCurrentId();
     }
 }

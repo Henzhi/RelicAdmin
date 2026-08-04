@@ -4,6 +4,7 @@ import com.relic.context.BaseContext;
 import com.relic.dto.AnnouncementCreateDTO;
 import com.relic.mapper.AnnouncementMapper;
 import com.relic.service.AnnouncementService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +22,10 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 
     @Override
     public PageResultVO<Map<String, Object>> listAdminAnnouncements(Integer status, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Map<String, Object>> records = announcementMapper.selectAdminPage(status, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Map<String, Object>> records = announcementMapper.selectAdminPage(status, pq.getOffset(), pq.getPageSize());
         long total = announcementMapper.countAdminPage(status);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

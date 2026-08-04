@@ -1,6 +1,5 @@
 package com.relic.service.impl;
 
-import com.relic.constant.MessageConstant;
 import com.relic.constant.RoleConstant;
 import com.relic.context.BaseContext;
 import com.relic.converter.VoConverter;
@@ -14,8 +13,8 @@ import com.relic.exception.InsufficientPermissionsException;
 import com.relic.mapper.AdminUserRoleMapper;
 import com.relic.mapper.UserMapper;
 import com.relic.mapper.UserRoleMapper;
-import com.relic.properties.JwtProperties;
 import com.relic.service.UserService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import com.relic.vo.UserVO;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,18 +32,17 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final UserRoleMapper userRoleMapper;
-    private final JwtProperties jwtProperties;
     private final BCryptPasswordEncoder passwordEncoder;
     private final AdminUserRoleMapper adminUserRoleMapper;
 
     @Override
     public PageResultVO<UserVO> page(String username, String nickname, String status, String userType,
                                      String registeredAtStart, String registeredAtEnd, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<User> entities = userMapper.selectByPage(username, nickname, status, userType, registeredAtStart, registeredAtEnd, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<User> entities = userMapper.selectByPage(username, nickname, status, userType, registeredAtStart, registeredAtEnd, pq.getOffset(), pq.getPageSize());
         long total = userMapper.countByPage(username, nickname, status, userType, registeredAtStart, registeredAtEnd);
         List<UserVO> records = entities.stream().map(VoConverter::toUserVO).collect(Collectors.toList());
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override
@@ -68,12 +65,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void create(UserCreateDTO dto) {
-        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
-        //权限验证
-        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
-            //不是超级管理员不允许新增用户
-            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
-        }
+        requireSuperAdmin("不是超级管理员不允许新增用户");
         User existing = userMapper.selectByUsername(dto.getUsername());
         if (existing != null) {
             throw new RuntimeException("账号已存在");
@@ -99,12 +91,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void delete(Integer id) {
-        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
-        //权限验证
-        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
-            //不是超级管理员不允许删除用户
-            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
-        }
+        requireSuperAdmin("不是超级管理员不允许删除用户");
         userRoleMapper.deleteByUserId(id);
         userMapper.deleteById(id);
     }
@@ -123,12 +110,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void ban(Integer userId, UserBanDTO dto) {
-        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
-        //权限验证
-        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
-            //不是超级管理员不允许封禁用户
-            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
-        }
+        requireSuperAdmin("不是超级管理员不允许封禁用户");
         userMapper.updateStatus(userId, dto.getStatus(), dto.getBanReason());
     }
 
@@ -147,28 +129,35 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void disableComment(Integer userId, Integer commentDisabled) {
-        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
-        //权限验证
-        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
-            //不是超级管理员不允许禁止用户评论
-            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
-        }
+        requireSuperAdmin("不是超级管理员不允许禁止用户评论");
         userMapper.updateCommentDisabled(userId, commentDisabled);
     }
 
     @Override
     public void disableUpload(Integer userId, Integer uploadDisabled) {
-        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
-        //权限验证
-        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
-            //不是超级管理员不允许禁止用户上传
-            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
-        }
+        requireSuperAdmin("不是超级管理员不允许禁止用户上传");
         userMapper.updateUploadDisabled(userId, uploadDisabled);
     }
 
     @Override
     public void updateAvatar(Integer userId, String avatarUrl) {
         userMapper.updateAvatar(userId, avatarUrl);
+    }
+
+    /**
+     * 校验当前操作人是否为超级管理员，未分配角色或非超管时抛出权限异常
+     */
+    private void requireSuperAdmin(String message) {
+        if (!isSuperAdmin(BaseContext.getCurrentId())) {
+            throw new InsufficientPermissionsException(message);
+        }
+    }
+
+    private boolean isSuperAdmin(Long currentId) {
+        if (currentId == null) {
+            return false;
+        }
+        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(currentId);
+        return adminUserRole != null && RoleConstant.SUPER_ADMIN.equals(adminUserRole.getRoleId());
     }
 }

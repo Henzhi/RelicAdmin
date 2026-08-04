@@ -4,6 +4,7 @@ import com.relic.context.BaseContext;
 import com.relic.dto.NotificationReadDTO;
 import com.relic.mapper.NotificationMapper;
 import com.relic.service.NotificationService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,10 +24,10 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public PageResultVO<Map<String, Object>> listUserNotifications(Integer isRead, int page, int pageSize) {
         Long currentUserId = BaseContext.getCurrentId();
-        int offset = (page - 1) * pageSize;
-        List<Map<String, Object>> records = notificationMapper.selectByUserId(currentUserId.intValue(), isRead, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Map<String, Object>> records = notificationMapper.selectByUserId(currentUserId.intValue(), isRead, pq.getOffset(), pq.getPageSize());
         long total = notificationMapper.countByUserId(currentUserId.intValue(), isRead);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

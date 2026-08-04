@@ -6,6 +6,7 @@ import com.relic.dto.PermissionUpdateDTO;
 import com.relic.entity.Permission;
 import com.relic.mapper.PermissionMapper;
 import com.relic.service.PermissionService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import com.relic.vo.PermissionVO;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +24,11 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public PageResultVO<PermissionVO> page(String name, String module, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Permission> entities = permissionMapper.selectByPage(name, module, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Permission> entities = permissionMapper.selectByPage(name, module, pq.getOffset(), pq.getPageSize());
         long total = permissionMapper.countByPage(name, module);
         List<PermissionVO> records = entities.stream().map(VoConverter::toPermissionVO).collect(Collectors.toList());
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.relic.dto.CrawlTaskUpdateDTO;
 import com.relic.mapper.CrawlTaskLogMapper;
 import com.relic.mapper.CrawlTaskMapper;
 import com.relic.service.CrawlTaskService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +29,10 @@ public class CrawlTaskServiceImpl implements CrawlTaskService {
 
     @Override
     public PageResultVO<Map<String, Object>> listPage(String status, Integer priority, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Map<String, Object>> records = crawlTaskMapper.selectByPage(status, priority, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Map<String, Object>> records = crawlTaskMapper.selectByPage(status, priority, pq.getOffset(), pq.getPageSize());
         long total = crawlTaskMapper.countByPage(status, priority);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override
@@ -174,10 +175,10 @@ public class CrawlTaskServiceImpl implements CrawlTaskService {
 
     @Override
     public PageResultVO<Map<String, Object>> listLogs(Integer taskId, String status, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Map<String, Object>> records = crawlTaskLogMapper.selectByPage(taskId, status, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Map<String, Object>> records = crawlTaskLogMapper.selectByPage(taskId, status, pq.getOffset(), pq.getPageSize());
         long total = crawlTaskLogMapper.countByPage(taskId, status);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     private Long getLastInsertId(Integer taskId) {

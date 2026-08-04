@@ -5,6 +5,7 @@ import com.relic.dto.SensitiveWordUpdateDTO;
 import com.relic.exception.SensitiveWordException;
 import com.relic.mapper.SensitiveWordMapper;
 import com.relic.service.SensitiveWordService;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,10 +24,10 @@ public class SensitiveWordServiceImpl implements SensitiveWordService {
 
     @Override
     public PageResultVO<Map<String, Object>> page(String word, String category, Integer status, int page, int pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<Map<String, Object>> records = sensitiveWordMapper.selectByPage(word, category, status, offset, pageSize);
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<Map<String, Object>> records = sensitiveWordMapper.selectByPage(word, category, status, pq.getOffset(), pq.getPageSize());
         long total = sensitiveWordMapper.countByPage(word, category, status);
-        return new PageResultVO<>(total, records, page, pageSize);
+        return pq.toResult(total, records);
     }
 
     @Override

@@ -71,7 +71,7 @@ public class UserBehaviorAdminController {
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime) {
-        return Result.success(userBehaviorAdminService.listPosts(title, userId, status, username, startTime, endTime, page, pageSize));
+        return Result.success(userBehaviorAdminService.listPosts(title, userId, username, status, startTime, endTime, page, pageSize));
     }
 
     @GetMapping("/comments/page")
@@ -135,6 +135,6 @@ public class UserBehaviorAdminController {
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime) {
-        return Result.success(userBehaviorAdminService.listBehaviorLogs(userId, behaviorType, keyword, username, startTime, endTime, page, pageSize));
+        return Result.success(userBehaviorAdminService.listBehaviorLogs(userId, username, behaviorType, keyword, startTime, endTime, page, pageSize));
     }
 }

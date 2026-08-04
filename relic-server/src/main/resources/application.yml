@@ -28,6 +28,13 @@ spring:
       port: ${relic.redis.port}
       password: ${relic.redis.password}
       database: ${relic.redis.database}
+      ssl: ${relic.redis.ssl:false}
+      timeout: ${relic.redis.timeout:2000ms}
+      lettuce:
+        pool:
+          max-active: ${relic.redis.lettuce.pool.max-active:8}
+          max-idle: ${relic.redis.lettuce.pool.max-idle:8}
+          min-idle: ${relic.redis.lettuce.pool.min-idle:0}
 
 mybatis:
   #mapper配置文件
@@ -68,13 +75,12 @@ relic:
     knowledge-secret-key: QjnEXgrR7DaaP2quggUJrQED2hVCKVHUcKaHRdMGHdU=
     knowledge-ttl: 72000000000
     knowledge-token-name: token
-    museum-secret-key: kR8vN2mP5xL9wQ3jF7tY1bD6hA0cE4gI
+    museum-secret-key: o0mIRWHix+bqlpYLeV4PgyoKz/E2dyH3Nh38/hvlFMg=
     museum-ttl: 72000000000
     museum-token-name: token
-    user-secret-key: QjnEXgrR7DaaP2quggUJrQED2hVCKVHUcKaHRdMGHdU=
+    user-secret-key: /MHVvN9ftpXoFVlzZxWp3OqE1W1gueCvSabRCdisdWM=
     user-ttl: 72000000000
     user-token-name: token
-    bucket-name: relic-itcast
 
 #  alioss:
 #    endpoint: ${relic.alioss.endpoint}

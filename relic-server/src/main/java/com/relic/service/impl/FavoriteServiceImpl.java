@@ -7,6 +7,7 @@ import com.relic.mapper.ArtifactMapper;
 import com.relic.mapper.UserFavoriteMapper;
 import com.relic.service.FavoriteService;
 import com.relic.vo.FavoriteVO;
+import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,15 +52,10 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Override
     public PageResultVO<FavoriteVO> list(Integer userId, String groupName, Integer page, Integer pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<FavoriteVO> records = userFavoriteMapper.selectByUserId(userId, groupName, offset, pageSize);
-        int total = userFavoriteMapper.countByUserId(userId, groupName);
-        PageResultVO<FavoriteVO> result = new PageResultVO<>();
-        result.setRecords(records);
-        result.setTotal(total);
-        result.setPage(page);
-        result.setPageSize(pageSize);
-        return result;
+        PageQuery pq = PageQuery.of(page, pageSize);
+        List<FavoriteVO> records = userFavoriteMapper.selectByUserId(userId, groupName, pq.getOffset(), pq.getPageSize());
+        long total = userFavoriteMapper.countByUserId(userId, groupName);
+        return pq.toResult(total, records);
     }
 
     @Override

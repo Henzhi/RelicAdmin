@@ -175,7 +175,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, Download } from '@element-plus/icons-vue'
 import {
@@ -207,7 +207,19 @@ const secExportingExcel = ref(false)
 const secPagination = reactive({ page:1, pageSize:10, total:0 })
 const secSearch = reactive({ keyword:null, eventType:null, dateRange:null })
 
-onMounted(() => { fetchOpLogs() })
+let pollingTimer = null
+onMounted(() => {
+    fetchOpLogs()
+    pollingTimer = setInterval(() => {
+        if (activeTab.value === 'operation') fetchOpLogs()
+        else if (activeTab.value === 'system') fetchSysLogs()
+        else if (activeTab.value === 'security') fetchSecLogs()
+    }, 30000)
+})
+onBeforeUnmount(() => {
+    if (pollingTimer) clearInterval(pollingTimer)
+    pollingTimer = null
+})
 
 function buildSearchParams(search, dateRange) {
     const params = {}
@@ -323,12 +335,6 @@ function onTabChange(tabName) {
     if (tabName === 'system') fetchSysLogs()
     if (tabName === 'security') fetchSecLogs()
 }
-
-setInterval(() => {
-    if (activeTab.value === 'operation') fetchOpLogs()
-    else if (activeTab.value === 'system') fetchSysLogs()
-    else if (activeTab.value === 'security') fetchSecLogs()
-}, 30000)
 </script>
 
 <style scoped>

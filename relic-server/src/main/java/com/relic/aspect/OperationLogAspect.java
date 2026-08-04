@@ -44,6 +44,10 @@ public class OperationLogAspect {
             OperationLog annotation = method.getAnnotation(OperationLog.class);
 
             Long userId = getCurrentUserId();
+            if (userId == null || userId <= 0L) {
+                // 未登录触发的操作不做记录，避免产生 user_id=0 的误导日志
+                return;
+            }
             String operationType = annotation.operationType();
             String targetType = annotation.targetType();
             if (targetType.isEmpty()) {
@@ -90,7 +94,7 @@ public class OperationLogAspect {
             if (userId instanceof Long) return (Long) userId;
             if (userId instanceof Integer) return ((Integer) userId).longValue();
         } catch (Exception ignored) {}
-        return 0L;
+        return null;
     }
 
     private String getClientIp(HttpServletRequest request) {
