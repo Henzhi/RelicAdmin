@@ -7,6 +7,7 @@ import com.relic.mapper.BackupRecordMapper;
 import com.relic.mapper.BackupStrategyMapper;
 import com.relic.service.BackupService;
 import com.relic.utils.BackupCryptoUtil;
+import com.relic.utils.SqlExportUtil;
 import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +36,6 @@ public class BackupServiceImpl implements BackupService {
     private final BackupCryptoUtil backupCryptoUtil;
 
     private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-    private static final String DB_NAME = "seitem";
-
-    // 排除的 Flyway 系统表
-    private static final Set<String> EXCLUDE_TABLES = new HashSet<>(Arrays.asList("flyway_schema_history"));
 
     @Override
     public PageResultVO<Map<String, Object>> page(Integer status, String backupType, int page, int pageSize) {
@@ -121,157 +118,15 @@ public class BackupServiceImpl implements BackupService {
              BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
                      new FileOutputStream(outputFile), "UTF-8"))) {
 
-            writer.write("-- RelicAdmin 数据库备份");
-            writer.newLine();
-            writer.write("-- 导出时间: " + LocalDateTime.now());
-            writer.newLine();
-            writer.write("-- 数据库: " + DB_NAME);
-            writer.newLine();
-            writer.newLine();
-            writer.write("SET NAMES utf8mb4;");
-            writer.newLine();
-            writer.write("SET FOREIGN_KEY_CHECKS = 0;");
-            writer.newLine();
-            writer.newLine();
-
-            List<String> tables = new ArrayList<>();
-            try (Statement st = conn.createStatement();
-                 ResultSet rs = st.executeQuery("SHOW TABLES")) {
-                while (rs.next()) {
-                    String table = rs.getString(1);
-                    if (!EXCLUDE_TABLES.contains(table)) tables.add(table);
-                }
-            }
-
-            for (String table : tables) {
-                writer.write("-- ----------------------------");
-                writer.newLine();
-                writer.write("-- 表结构: " + table);
-                writer.newLine();
-                writer.write("-- ----------------------------");
-                writer.newLine();
-                writer.write("DROP TABLE IF EXISTS `" + table + "`;");
-                writer.newLine();
-
-                try (Statement st = conn.createStatement();
-                     ResultSet rs = st.executeQuery("SHOW CREATE TABLE `" + table + "`")) {
-                    if (rs.next()) {
-                        writer.write(rs.getString(2) + ";");
-                        writer.newLine();
-                        writer.newLine();
-                    }
-                }
-
-                writer.write("-- ----------------------------");
-                writer.newLine();
-                writer.write("-- 表数据: " + table);
-                writer.newLine();
-                writer.write("-- ----------------------------");
-                writer.newLine();
-
-                List<String> columns = new ArrayList<>();
-                List<int[]> columnTypes = new ArrayList<>();
-                List<List<String>> allRows = new ArrayList<>();
-                try (Statement st = conn.createStatement();
-                     ResultSet rs = st.executeQuery("SELECT * FROM `" + table + "`")) {
-                    ResultSetMetaData meta = rs.getMetaData();
-                    int colCount = meta.getColumnCount();
-                    for (int i = 1; i <= colCount; i++) {
-                        columns.add(meta.getColumnName(i));
-                        columnTypes.add(new int[]{meta.getColumnType(i)});
-                    }
-                    while (rs.next()) {
-                        List<String> row = new ArrayList<>();
-                        for (int i = 1; i <= colCount; i++) {
-                            row.add(rs.getString(i));
-                        }
-                        allRows.add(row);
-                    }
-                }
-
-                if (!allRows.isEmpty()) {
-                    int total = allRows.size();
-                    int batchSize = 500;
-                    int batches = (total + batchSize - 1) / batchSize;
-
-                    for (int batch = 0; batch < batches; batch++) {
-                        int start = batch * batchSize;
-                        int end = Math.min(start + batchSize, total);
-
-                        writer.write("INSERT INTO `" + table + "` (");
-                        writer.write(columns.stream().map(c -> "`" + c + "`")
-                                .collect(Collectors.joining(", ")));
-                        writer.write(") VALUES");
-                        writer.newLine();
-
-                        for (int i = start; i < end; i++) {
-                            List<String> row = allRows.get(i);
-                            StringBuilder values = new StringBuilder("  (");
-                            int colCount = columns.size();
-                            for (int j = 0; j < colCount; j++) {
-                                if (j > 0) values.append(", ");
-                                String val = row.get(j);
-                                if (val == null) {
-                                    values.append("NULL");
-                                } else {
-                                    int sqlType = columnTypes.get(j)[0];
-                                    if (isStringType(sqlType)) {
-                                        values.append(escapeSql(val));
-                                    } else {
-                                        values.append(val);
-                                    }
-                                }
-                            }
-                            values.append(")");
-                            if (i != end - 1) {
-                                values.append(",");
-                            }
-                            writer.write(values.toString());
-                            writer.newLine();
-                        }
-                        writer.write(";");
-                        writer.newLine();
-                    }
-                }
-                writer.newLine();
-            }
-
-            writer.write("SET FOREIGN_KEY_CHECKS = 1;");
-            writer.newLine();
-            writer.flush();
-            log.info("JDBC导出完成，共 {} 张表", tables.size());
+            String header = "-- RelicAdmin 数据库备份\n"
+                    + "-- 导出时间: " + LocalDateTime.now() + "\n";
+            // 流式导出：避免大表全量加载内存导致 OOM
+            SqlExportUtil.exportAllTables(conn, writer, header);
             return true;
-
         } catch (Exception e) {
             log.error("JDBC导出失败: {}", e.getMessage(), e);
             return false;
         }
-    }
-
-    private String escapeSql(String val) {
-        String escaped = val.replace("\\", "\\\\")
-                .replace("'", "\\'")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t")
-                .replace("\0", "\\0");
-        return "'" + escaped + "'";
-    }
-
-    private boolean isStringType(int sqlType) {
-        return sqlType == java.sql.Types.VARCHAR ||
-               sqlType == java.sql.Types.CHAR ||
-               sqlType == java.sql.Types.LONGVARCHAR ||
-               sqlType == java.sql.Types.CLOB ||
-               sqlType == java.sql.Types.NVARCHAR ||
-               sqlType == java.sql.Types.NCHAR ||
-               sqlType == java.sql.Types.LONGNVARCHAR ||
-               sqlType == java.sql.Types.DATE ||
-               sqlType == java.sql.Types.TIME ||
-               sqlType == java.sql.Types.TIMESTAMP ||
-               sqlType == java.sql.Types.TIME_WITH_TIMEZONE ||
-               sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE;
     }
 
     /**

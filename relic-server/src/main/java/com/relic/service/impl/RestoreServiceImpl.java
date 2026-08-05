@@ -3,11 +3,13 @@ package com.relic.service.impl;
 import com.relic.context.BaseContext;
 import com.relic.dto.RestoreConfirmDTO;
 import com.relic.entity.AdminUser;
+import com.relic.entity.BackupRecord;
 import com.relic.mapper.AdminUserMapper;
 import com.relic.mapper.BackupRecordMapper;
 import com.relic.mapper.RestoreRecordMapper;
 import com.relic.service.RestoreService;
 import com.relic.utils.BackupCryptoUtil;
+import com.relic.utils.SqlExportUtil;
 import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
@@ -80,8 +83,10 @@ public class RestoreServiceImpl implements RestoreService {
 
         try {
             String emergencyPath = filePath + ".before_restore.sql";
-            exportCurrentToFile(emergencyPath);
-            log.info("[Restore] 恢复前应急备份已保存: {}", emergencyPath);
+            long emergencySize = exportCurrentToFile(emergencyPath);
+            // M-17：应急备份登记入库，失败后可一键还原
+            Long emergencyBackupId = registerEmergencyBackup(backupId, backupName, operatorId, emergencyPath, emergencySize);
+            log.info("[Restore] 恢复前应急备份已保存并登记: {} (backupRecordId={})", emergencyPath, emergencyBackupId);
 
             File sqlFile = new File(filePath);
             if (!sqlFile.exists()) {
@@ -111,6 +116,7 @@ public class RestoreServiceImpl implements RestoreService {
             Long restoreRecordId = insertFinalRecord(backupId, backupName, operatorId, 1, remark);
             result.put("status", "success");
             result.put("restoredRows", executedStatements);
+            result.put("emergencyBackupId", emergencyBackupId);
             log.info("[Restore] 数据恢复成功: restoreId={}, backupId={}, 行数={}, 校验={}",
                     restoreRecordId, backupId, executedStatements, validation);
 
@@ -120,6 +126,13 @@ public class RestoreServiceImpl implements RestoreService {
             Long restoreRecordId = insertFinalRecord(backupId, backupName, operatorId, 2, remark);
             log.info("[Restore] 失败记录已写入: restoreId={}", restoreRecordId);
             result.put("status", "failed");
+            // M-17：失败时返回应急备份 ID，前端可一键用应急备份还原
+            Long emergencyBackupId = findEmergencyBackupId(backupId);
+            if (emergencyBackupId != null) {
+                result.put("emergencyBackupId", emergencyBackupId);
+                result.put("emergencyHint", "恢复过程中出现问题，请使用应急备份还原（backupId="
+                        + emergencyBackupId + "）恢复到恢复前的状态");
+            }
         }
 
         return result;
@@ -157,7 +170,7 @@ public class RestoreServiceImpl implements RestoreService {
         return insertedId;
     }
 
-    private long executeSqlFile(File sqlFile) throws Exception {
+    long executeSqlFile(File sqlFile) throws Exception {
         log.info("[Restore] 开始恢复 SQL 文件: {}", sqlFile.getAbsolutePath());
         StringBuilder sql = new StringBuilder();
         long lineCount = 0;
@@ -169,52 +182,76 @@ public class RestoreServiceImpl implements RestoreService {
                 new InputStreamReader(new FileInputStream(sqlFile), StandardCharsets.UTF_8));
              Connection conn = dataSource.getConnection()) {
 
+            // 注意：备份文件含 DROP/CREATE TABLE（DDL），MySQL 中 DDL 会隐式提交事务，
+            // 因此"全量回滚"在跨表场景下不成立。DML 仍置于事务内批量执行以尽量保证原子性，
+            // 失败时如实提示依赖 before_restore 应急备份回滚。
             conn.setAutoCommit(false);
-            conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 
             String line;
-            while ((line = reader.readLine()) != null) {
-                lineCount++;
-                String trimmed = line.trim();
-                if (trimmed.isEmpty() || trimmed.startsWith("--")) {
-                    continue;
-                }
-                sql.append(line).append("\n");
+            try (Statement st = conn.createStatement()) {
+                while ((line = reader.readLine()) != null) {
+                    lineCount++;
+                    String trimmed = line.trim();
+                    if (trimmed.isEmpty() || trimmed.startsWith("--")) {
+                        continue;
+                    }
+                    sql.append(line).append("\n");
 
-                if (trimmed.endsWith(";")) {
-                    String statement = sql.toString().trim();
-                    sql.setLength(0);
+                    if (trimmed.endsWith(";")) {
+                        String statement = trimStatement(sql.toString());
+                        sql.setLength(0);
 
-                    if (statement.isEmpty() || statement.equals(";")) continue;
+                        if (statement.isEmpty() || statement.equals(";")) continue;
 
-                    try (Statement st = conn.createStatement()) {
-                        st.execute(statement);
-                        executedCount++;
-                    } catch (Exception e) {
-                        failedCount++;
-                        if (failedDetails.length() > 0) failedDetails.append("; ");
-                        failedDetails.append("第").append(lineCount).append("行: ").append(e.getMessage());
-                        log.warn("[Restore] SQL 执行失败 (第{}行): {}", lineCount, e.getMessage());
+                        if (isDDL(statement)) {
+                            // DDL 单独执行（隐式提交会打断事务与 batch），先 flush 已有 DML
+                            failedCount += flushBatchSafely(st, failedDetails);
+                            try {
+                                st.execute(statement);
+                                executedCount++;
+                            } catch (Exception e) {
+                                failedCount++;
+                                if (failedDetails.length() > 0) failedDetails.append("; ");
+                                failedDetails.append("第").append(lineCount).append("行: ").append(e.getMessage());
+                                log.warn("[Restore] DDL 执行失败 (第{}行): {}", lineCount, e.getMessage());
+                            }
+                        } else {
+                            // DML 加入批量，每 200 条执行一次
+                            st.addBatch(statement);
+                            executedCount++;
+                            if (executedCount % BATCH_SIZE == 0) {
+                                failedCount += flushBatchSafely(st, failedDetails);
+                            }
+                        }
                     }
                 }
-            }
 
-            String remaining = sql.toString().trim();
-            if (!remaining.isEmpty()) {
-                try (Statement st = conn.createStatement()) {
-                    st.execute(remaining);
-                    executedCount++;
-                } catch (Exception e) {
-                    failedCount++;
-                    failedDetails.append("末尾语句: ").append(e.getMessage());
-                    log.warn("[Restore] SQL 执行失败 (末尾语句): {}", e.getMessage());
+                String remaining = trimStatement(sql.toString());
+                if (!remaining.isEmpty() && !remaining.equals(";")) {
+                    if (isDDL(remaining)) {
+                        failedCount += flushBatchSafely(st, failedDetails);
+                        try {
+                            st.execute(remaining);
+                            executedCount++;
+                        } catch (Exception e) {
+                            failedCount++;
+                            failedDetails.append("末尾语句: ").append(e.getMessage());
+                            log.warn("[Restore] SQL 执行失败 (末尾语句): {}", e.getMessage());
+                        }
+                    } else {
+                        st.addBatch(remaining);
+                        executedCount++;
+                    }
                 }
+                failedCount += flushBatchSafely(st, failedDetails);
             }
 
             if (failedCount > 0) {
                 conn.rollback();
-                log.error("[Restore] SQL 恢复存在 {} 条失败语句，已回滚: {}", failedCount, failedDetails);
-                throw new RuntimeException("SQL 恢复失败，共 " + failedCount + " 条语句执行失败，已回滚。详情: " + failedDetails);
+                log.error("[Restore] SQL 恢复存在 {} 条失败语句，事务已回滚。注意：因备份含 DDL（隐式提交），"
+                        + "部分表可能已重建，如需还原请使用 before_restore 应急备份: {}", failedCount, failedDetails);
+                throw new RuntimeException("SQL 恢复失败，共 " + failedCount + " 条语句执行失败，已回滚。"
+                        + "注意：因备份含 DDL（隐式提交），部分表可能已重建，请使用 before_restore 应急备份还原。详情: " + failedDetails);
             }
 
             conn.commit();
@@ -223,98 +260,58 @@ public class RestoreServiceImpl implements RestoreService {
         }
     }
 
-    private void exportCurrentToFile(String outputFile) {
+    private long exportCurrentToFile(String outputFile) {
         try (Connection conn = dataSource.getConnection();
              BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
                      new FileOutputStream(outputFile), StandardCharsets.UTF_8))) {
 
-            writer.write("-- RelicAdmin 恢复前应急备份");
-            writer.newLine();
-            writer.write("-- 时间: " + java.time.LocalDateTime.now());
-            writer.newLine();
-            writer.newLine();
-            writer.write("SET NAMES utf8mb4;");
-            writer.newLine();
-            writer.write("SET FOREIGN_KEY_CHECKS = 0;");
-            writer.newLine();
-            writer.newLine();
-
-            List<String> tables = new ArrayList<>();
-            try (Statement st = conn.createStatement();
-                 java.sql.ResultSet rs = st.executeQuery("SHOW TABLES")) {
-                while (rs.next()) {
-                    String t = rs.getString(1);
-                    if (!"flyway_schema_history".equals(t)) tables.add(t);
-                }
-            }
-
-            for (String table : tables) {
-                writer.write("DROP TABLE IF EXISTS `" + table + "`;");
-                writer.newLine();
-                try (Statement st = conn.createStatement();
-                     java.sql.ResultSet rs = st.executeQuery("SHOW CREATE TABLE `" + table + "`")) {
-                    if (rs.next()) {
-                        writer.write(rs.getString(2) + ";");
-                        writer.newLine();
-                        writer.newLine();
-                    }
-                }
-
-                List<String> columns = new ArrayList<>();
-                List<Integer> columnTypes = new ArrayList<>();
-                try (Statement st = conn.createStatement();
-                     java.sql.ResultSet rs = st.executeQuery("SELECT * FROM `" + table + "`")) {
-                    java.sql.ResultSetMetaData meta = rs.getMetaData();
-                    int colCount = meta.getColumnCount();
-                    for (int i = 1; i <= colCount; i++) {
-                        columns.add(meta.getColumnName(i));
-                        columnTypes.add(meta.getColumnType(i));
-                    }
-
-                    while (rs.next()) {
-                        writer.write("INSERT INTO `" + table + "` (");
-                        writer.write(String.join(", ", columns.stream().map(c -> "`" + c + "`").toArray(String[]::new)));
-                        writer.write(") VALUES (");
-                        for (int i = 1; i <= colCount; i++) {
-                            if (i > 1) writer.write(", ");
-                            String val = rs.getString(i);
-                            if (val == null) {
-                                writer.write("NULL");
-                            } else if (isStringType(columnTypes.get(i - 1))) {
-                                writer.write("'" + val.replace("\\", "\\\\").replace("'", "\\'") + "'");
-                            } else {
-                                writer.write(val);
-                            }
-                        }
-                        writer.write(");");
-                        writer.newLine();
-                    }
-                }
-                writer.newLine();
-            }
-
-            writer.write("SET FOREIGN_KEY_CHECKS = 1;");
-            writer.newLine();
-            writer.flush();
+            String header = "-- RelicAdmin 恢复前应急备份\n"
+                    + "-- 时间: " + java.time.LocalDateTime.now() + "\n";
+            // 流式导出：避免大表全量加载内存导致 OOM
+            SqlExportUtil.exportAllTables(conn, writer, header);
+            File file = new File(outputFile);
+            return file.exists() ? file.length() : 0L;
         } catch (Exception e) {
             log.error("[Restore] 应急备份失败: {}", e.getMessage(), e);
+            return 0L;
         }
     }
 
-    /** 判断 JDBC 类型是否为需要加引号的字符串/日期类型 */
-    private boolean isStringType(int sqlType) {
-        return sqlType == java.sql.Types.VARCHAR ||
-               sqlType == java.sql.Types.CHAR ||
-               sqlType == java.sql.Types.LONGVARCHAR ||
-               sqlType == java.sql.Types.CLOB ||
-               sqlType == java.sql.Types.NVARCHAR ||
-               sqlType == java.sql.Types.NCHAR ||
-               sqlType == java.sql.Types.LONGNVARCHAR ||
-               sqlType == java.sql.Types.DATE ||
-               sqlType == java.sql.Types.TIME ||
-               sqlType == java.sql.Types.TIMESTAMP ||
-               sqlType == java.sql.Types.TIME_WITH_TIMEZONE ||
-               sqlType == java.sql.Types.TIMESTAMP_WITH_TIMEZONE;
+    /**
+     * M-17：将恢复前应急备份登记到 backup_records（type=emergency），
+     * 使管理界面可见、可下载、可一键还原。
+     *
+     * @return 应急备份在 backup_records 中的 ID；登记失败返回 null
+     */
+    private Long registerEmergencyBackup(Long sourceBackupId, String sourceBackupName,
+                                         Integer operatorId, String emergencyPath, long fileSize) {
+        try {
+            BackupRecord record = new BackupRecord();
+            record.setBackupName("应急备份(恢复前)-" + sourceBackupName);
+            record.setBackupType("emergency");
+            record.setScope("sourceBackupId=" + sourceBackupId);
+            record.setFilePath(emergencyPath);
+            record.setFileSize(fileSize);
+            record.setOperatorId(operatorId);
+            record.setStatus(1);
+            record.setRemark("数据恢复前自动生成的应急备份，用于恢复失败时一键还原");
+            backupRecordMapper.insert(record);
+            return record.getId();
+        } catch (Exception e) {
+            log.error("[Restore] 应急备份登记失败: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /** M-17：按源备份 ID 查找最近的应急备份记录 */
+    private Long findEmergencyBackupId(Long sourceBackupId) {
+        try {
+            List<Map<String, Object>> list = backupRecordMapper.selectBySourceBackupId(sourceBackupId);
+            return (list != null && !list.isEmpty()) ? ((Number) list.get(0).get("id")).longValue() : null;
+        } catch (Exception e) {
+            log.error("[Restore] 查询应急备份记录失败: {}", e.getMessage(), e);
+            return null;
+        }
     }
 
     /** M-11：需要做恢复一致性校验的关键业务表 */
@@ -361,6 +358,63 @@ public class RestoreServiceImpl implements RestoreService {
         String detail = String.join("; ", problems);
         log.error("[Restore] 恢复后校验未通过: {}", detail);
         return "存在异常: " + detail;
+    }
+
+    /** DML 批量执行批大小 */
+    private static final int BATCH_SIZE = 200;
+
+    /** 去除语句首尾空白与结尾分号 */
+    private String trimStatement(String raw) {
+        String s = raw.trim();
+        while (s.endsWith(";")) {
+            s = s.substring(0, s.length() - 1).trim();
+        }
+        return s;
+    }
+
+    /** 判断语句是否为 DDL（MySQL 中 DDL 会隐式提交事务，需单独执行） */
+    private boolean isDDL(String statement) {
+        String upper = statement.toUpperCase().trim();
+        return upper.startsWith("DROP")
+                || upper.startsWith("CREATE")
+                || upper.startsWith("ALTER")
+                || upper.startsWith("TRUNCATE")
+                || upper.startsWith("RENAME");
+    }
+
+    /**
+     * 执行当前 Statement 中累积的 DML 批量。
+     *
+     * @return 本批次失败语句数（0 表示全部成功）
+     */
+    private int flushBatchSafely(Statement st, StringBuilder failedDetails) {
+        try {
+            int[] results = st.executeBatch();
+            int failed = 0;
+            if (results != null) {
+                for (int r : results) {
+                    if (r == Statement.EXECUTE_FAILED) {
+                        failed++;
+                    }
+                }
+            }
+            if (failed > 0) {
+                if (failedDetails.length() > 0) failedDetails.append("; ");
+                failedDetails.append("批量执行中有 ").append(failed).append(" 条语句失败");
+                log.warn("[Restore] 批量执行存在 {} 条失败语句", failed);
+            }
+            return failed;
+        } catch (SQLException e) {
+            if (failedDetails.length() > 0) failedDetails.append("; ");
+            failedDetails.append("批量执行失败: ").append(e.getMessage());
+            log.warn("[Restore] 批量执行失败: {}", e.getMessage());
+            return 1;
+        } finally {
+            try {
+                st.clearBatch();
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     /**

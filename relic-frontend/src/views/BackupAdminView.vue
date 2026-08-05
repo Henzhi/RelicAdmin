@@ -263,14 +263,24 @@ async function submitRestore() {
   restoreLoading.value = true
   try {
     const res = await restoreFromBackup({ backupId:restoreRow.value.id, confirmPassword:restoreForm.confirmPassword })
-    if (res.data.status === 'success') {
+    const data = res.data
+    if (data.status === 'success') {
       ElMessage.success('数据恢复成功')
       restoreDialogVisible.value = false
       fetchData()
     } else {
-      ElMessage.error(res.data.msg || '恢复操作失败')
+      // M-17：恢复失败时提示可用应急备份一键还原
+      ElMessageBox.alert(
+        data.emergencyHint || '恢复操作失败，请重试',
+        '数据恢复失败',
+        { confirmButtonText: '知道了', type: 'error' }
+      )
+      // 若系统已自动登记应急备份，刷新列表以显示它
+      fetchData()
     }
-  } catch (err) { ElMessage.error(err.response?.data?.msg || '恢复操作失败') }
+  } catch (err) {
+    ElMessage.error(err.response?.data?.msg || '恢复操作失败')
+  }
   finally { restoreLoading.value=false }
 }
 </script>

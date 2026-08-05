@@ -20,7 +20,6 @@
                             <el-option label="公告" value="Announcement" />
                             <el-option label="违规类型" value="ViolationType" />
                             <el-option label="敏感词" value="SensitiveWord" />
-                            <el-option label="爬取任务" value="CrawlTask" />
                             <el-option label="系统配置" value="SystemConfig" />
                             <el-option label="审核策略" value="AuditStrategy" />
                             <el-option label="备份" value="Backup" />

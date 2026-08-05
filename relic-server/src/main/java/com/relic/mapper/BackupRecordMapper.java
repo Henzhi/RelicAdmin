@@ -21,6 +21,9 @@ public interface BackupRecordMapper {
 
     Map<String, Object> selectById(@Param("id") Long id);
 
+    /** M-17：按源备份 ID（scope=sourceBackupId=x）查询应急备份记录，按创建时间倒序 */
+    List<Map<String, Object>> selectBySourceBackupId(@Param("sourceBackupId") Long sourceBackupId);
+
     int updateStatus(@Param("id") Long id,
                      @Param("status") Integer status,
                      @Param("fileSize") Long fileSize,

@@ -45,6 +45,17 @@
         FROM backup_records WHERE id = #{id}
     </select>
 
+    <!-- M-17：按源备份 ID 查询应急备份记录 -->
+    <select id="selectBySourceBackupId" resultType="map">
+        SELECT id, backup_name AS backupName, backup_type AS backupType,
+               scope, file_size AS fileSize, file_path AS filePath,
+               operator_id AS operatorId, status, remark, created_at AS createdAt
+        FROM backup_records
+        WHERE scope = CONCAT('sourceBackupId=', #{sourceBackupId})
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1
+    </select>
+
     <update id="updateStatus">
         UPDATE backup_records
         SET status = #{status},
@@ -61,7 +72,9 @@
     <select id="selectExpired" resultType="map">
         SELECT id, file_path AS filePath
         FROM backup_records
-        WHERE status = 1 AND created_at &lt; DATE_SUB(NOW(), INTERVAL #{retentionDays} DAY)
+        WHERE status = 1
+          AND created_at &lt; DATE_SUB(NOW(), INTERVAL #{retentionDays} DAY)
+          AND (backup_type IS NULL OR backup_type != 'emergency')
     </select>
 
     <delete id="deleteByIds">

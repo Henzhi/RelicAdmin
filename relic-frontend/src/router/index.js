@@ -220,12 +220,6 @@ const routes = [
         meta: { title: '恢复日志', icon: 'Clock' }
       },
       {
-        path: 'crawl-task',
-        name: 'CrawlTaskAdmin',
-        component: () => import('@/views/CrawlTaskAdminView.vue'),
-        meta: { title: '爬取任务', icon: 'Monitor' }
-      },
-      {
         path: 'system-config',
         name: 'SystemConfigAdmin',
         component: () => import('@/views/SystemConfigAdminView.vue'),

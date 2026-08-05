@@ -179,10 +179,6 @@
               <el-icon><Tools /></el-icon>
               <span>系统管理</span>
             </template>
-            <el-menu-item index="/crawl-task">
-              <el-icon><Monitor /></el-icon>
-              <template #title>爬取任务</template>
-            </el-menu-item>
             <el-menu-item index="/backup">
               <el-icon><FolderOpened /></el-icon>
               <template #title>备份管理</template>
