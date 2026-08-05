@@ -165,7 +165,7 @@ cd RelicAdmin
 
 ### 2. 配置数据库
 
-创建 MySQL 数据库并执行初始化脚本，然后修改配置文件：
+创建 MySQL 数据库并执行初始化脚本（`docs/seitem.sql`，含建库、建表与基础数据），然后修改配置文件：
 
 ```yaml
 # relic-server/src/main/resources/application-dev.yml
@@ -376,6 +376,8 @@ RelicAdmin/
 │       ├── styles/                # 全局样式
 │       ├── utils/                 # 工具函数
 │       └── views/                 # 页面组件
+│
+├── docs/                          # 项目文档（用户使用手册、数据库初始化脚本 seitem.sql）
 │
 └── pom.xml                        # 父 POM
 ```
