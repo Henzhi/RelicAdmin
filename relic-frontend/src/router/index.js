@@ -100,12 +100,6 @@ const routes = [
         meta: { title: '批量导入', icon: 'Upload' }
       },
       {
-        path: 'favorites',
-        name: 'UserFavoriteList',
-        component: () => import('@/views/UserFavoriteListView.vue'),
-        meta: { title: '用户收藏(旧)', icon: 'Star' }
-      },
-      {
         path: 'user-behavior/favorites',
         name: 'UserFavoriteAdmin',
         component: () => import('@/views/UserFavoriteAdminView.vue'),

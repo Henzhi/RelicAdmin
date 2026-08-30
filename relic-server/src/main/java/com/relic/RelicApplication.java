@@ -15,8 +15,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class RelicApplication {
     public static void main(String[] args) {
         SpringApplication.run(RelicApplication.class, args);
-        log.info("server started");
-        System.out.println("server started");
-        System.out.println("http://localhost:8080/");
+        log.info("server started: http://localhost:8080/v1");
     }
 }

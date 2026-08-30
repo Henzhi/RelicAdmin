@@ -9,7 +9,6 @@ import com.relic.utils.SqlExportUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -34,7 +33,8 @@ public class BackupScheduledTask {
 
     private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
-    @Scheduled(cron = "0 0 3 * * ?")
+    // 执行时间由 BackupScheduleConfig 依据 backup_strategies.backup_cron 动态触发，
+    // 这里不再用 @Scheduled 固定 cron，否则管理员配置的备份时间会被忽略
     @SchedulerLock(name = "autoBackup", lockAtMostFor = "PT2H", lockAtLeastFor = "PT1M")
     public void autoBackup() {
         log.info("=== 定时备份任务检查 ===");

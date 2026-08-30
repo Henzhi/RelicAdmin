@@ -19,19 +19,9 @@ public interface StatisticsMapper {
 
     List<Map<String, Object>> selectArtifactByDynasty();
 
-    long countOnlineUsers(@Param("minutes") int minutes);
-
-    long countTodayNewUsers();
-
-    long countTodayContent();
-
-    long countAuditBacklog();
-
     List<Map<String, Object>> selectVisitTrend(@Param("days") int days);
 
     List<Map<String, Object>> selectDataGrowth(@Param("days") int days);
-
-    List<Map<String, Object>> selectActiveAlerts();
 
     List<Map<String, Object>> selectAlertPage(@Param("alertType") String alertType,
                                                @Param("severity") String severity,

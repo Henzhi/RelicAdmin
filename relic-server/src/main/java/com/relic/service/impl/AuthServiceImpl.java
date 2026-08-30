@@ -5,6 +5,8 @@ import com.relic.context.BaseContext;
 import com.relic.converter.VoConverter;
 import com.relic.dto.*;
 import com.relic.entity.User;
+import com.relic.exception.AccountAlreadyExistsException;
+import com.relic.exception.AccountLockedException;
 import com.relic.exception.AccountNotFoundException;
 import com.relic.exception.PasswordEditFailedException;
 import com.relic.exception.PasswordErrorException;
@@ -39,8 +41,8 @@ public class AuthServiceImpl implements AuthService {
         if (!passwordEncoder.matches(dto.getPassword(), user.getPasswordHash())) {
             throw new PasswordErrorException("密码错误");
         }
-        if (Boolean.TRUE.equals("banned".equals(user.getStatus()))) {
-            throw new AccountNotFoundException("账号被锁定");
+        if ("banned".equals(user.getStatus())) {
+            throw new AccountLockedException("账号被锁定");
         }
         userMapper.updateLastLogin(user.getId(),
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
@@ -52,7 +54,8 @@ public class AuthServiceImpl implements AuthService {
     public UserVO register(RegisterDTO dto) {
         User existing = userMapper.selectByUsername(dto.getUsername());
         if (existing != null) {
-            throw new RuntimeException("账号已存在");
+            // 抛业务异常而非 RuntimeException，避免被全局处理器吞成"未知错误"
+            throw new AccountAlreadyExistsException("账号已存在");
         }
         User user = new User();
         user.setUsername(dto.getUsername());
