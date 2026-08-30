@@ -21,7 +21,16 @@ import java.util.Map;
 public class QaProxyController {
 
     private final QaProperties qaProperties;
-    private final RestTemplate restTemplate = new RestTemplate();
+    // 必须显式设置连接/读取超时，防止问答子系统无响应时耗尽 Tomcat 线程
+    private final RestTemplate restTemplate = createRestTemplate();
+
+    private static RestTemplate createRestTemplate() {
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory =
+                new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(java.time.Duration.ofSeconds(5));
+        factory.setReadTimeout(java.time.Duration.ofSeconds(15));
+        return new RestTemplate(factory);
+    }
 
     /**
      * 查询问答日志
@@ -49,7 +58,7 @@ public class QaProxyController {
             return Result.success(response.getBody());
         } catch (Exception e) {
             log.error("问答日志请求失败", e);
-            return Result.error("问答子系统请求失败: " + e.getMessage());
+            return Result.error("问答子系统请求失败，请稍后重试");
         }
     }
 
@@ -73,7 +82,7 @@ public class QaProxyController {
             return Result.success(response.getBody());
         } catch (Exception e) {
             log.error("用户反馈请求失败", e);
-            return Result.error("问答子系统请求失败: " + e.getMessage());
+            return Result.error("问答子系统请求失败，请稍后重试");
         }
     }
 
@@ -101,7 +110,7 @@ public class QaProxyController {
             return Result.success(response.getBody());
         } catch (Exception e) {
             log.error("失败问题请求失败", e);
-            return Result.error("问答子系统请求失败: " + e.getMessage());
+            return Result.error("问答子系统请求失败，请稍后重试");
         }
     }
 
@@ -125,7 +134,7 @@ public class QaProxyController {
             return Result.success(response.getBody());
         } catch (Exception e) {
             log.error("审核任务请求失败", e);
-            return Result.error("问答子系统请求失败: " + e.getMessage());
+            return Result.error("问答子系统请求失败，请稍后重试");
         }
     }
 
@@ -144,7 +153,7 @@ public class QaProxyController {
             return Result.success(response.getBody());
         } catch (Exception e) {
             log.error("审核处理请求失败", e);
-            return Result.error("问答子系统请求失败: " + e.getMessage());
+            return Result.error("问答子系统请求失败，请稍后重试");
         }
     }
 
@@ -160,7 +169,7 @@ public class QaProxyController {
             return Result.success(response.getBody());
         } catch (Exception e) {
             log.error("失败类型统计请求失败", e);
-            return Result.error("问答子系统请求失败: " + e.getMessage());
+            return Result.error("问答子系统请求失败，请稍后重试");
         }
     }
 
@@ -176,13 +185,14 @@ public class QaProxyController {
             return Result.success(response.getBody());
         } catch (Exception e) {
             log.error("不准确类型统计请求失败", e);
-            return Result.error("问答子系统请求失败: " + e.getMessage());
+            return Result.error("问答子系统请求失败，请稍后重试");
         }
     }
 
     private void appendParam(StringBuilder url, String name, Object value) {
         if (value != null) {
-            url.append(name).append("=").append(value).append("&");
+            // 参数值需 URL 编码，避免特殊字符破坏请求 URL 或注入额外参数
+            url.append(name).append("=").append(java.net.URLEncoder.encode(value.toString(), java.nio.charset.StandardCharsets.UTF_8)).append("&");
         }
     }
 }

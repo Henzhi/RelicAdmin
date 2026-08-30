@@ -1,5 +1,6 @@
 package com.relic.websocket;
 
+import com.relic.constant.JwtClaimsConstant;
 import com.relic.properties.JwtProperties;
 import com.relic.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -71,7 +72,13 @@ public class WebSocketServer implements ApplicationContextAware {
             }
             // 校验 JWT（管理端密钥）
             Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
-            String tokenUserId = String.valueOf(claims.get("empId") == null ? claims.get("id") : claims.get("empId"));
+            Object userIdClaim = claims.get(JwtClaimsConstant.USER_ID);
+            if (userIdClaim == null) {
+                log.warn("WebSocket 连接被拒绝：token 缺少 {} 声明, sid={}", JwtClaimsConstant.USER_ID, sid);
+                session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "invalid token"));
+                return;
+            }
+            String tokenUserId = String.valueOf(userIdClaim);
             // sid 必须与 Token 内用户标识一致，防止越权订阅他人会话
             if (sid == null || !sid.equals(tokenUserId)) {
                 log.warn("WebSocket 连接被拒绝：sid 与 token 不匹配, sid={}", sid);
@@ -106,9 +113,10 @@ public class WebSocketServer implements ApplicationContextAware {
      * @param sid
      */
     @OnClose
-    public void onClose(@PathParam("sid") String sid) {
+    public void onClose(@PathParam("sid") String sid, Session session) {
         log.info("连接断开:{}", sid);
-        sessionMap.remove(sid);
+        // 仅当 map 中保存的是当前会话时才移除，避免同一管理员开多个连接时误删新会话
+        sessionMap.remove(sid, session);
     }
 
     @OnError
@@ -125,8 +133,8 @@ public class WebSocketServer implements ApplicationContextAware {
         Collection<Session> sessions = sessionMap.values();
         for (Session session : sessions) {
             try {
-                //服务器向客户端发送消息
-                session.getBasicRemote().sendText(message);
+                // 异步发送：避免某个慢客户端阻塞通知线程
+                session.getAsyncRemote().sendText(message);
             } catch (Exception e) {
                 log.error("WebSocket 发送消息失败", e);
             }

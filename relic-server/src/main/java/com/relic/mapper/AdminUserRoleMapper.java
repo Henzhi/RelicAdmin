@@ -12,4 +12,7 @@ public interface AdminUserRoleMapper {
 
     @Select("select id,admin_user_id,role_id,created_at from admin_user_role where admin_user_id=#{id}")
     AdminUserRole selectByAdminUserId(Long id);
+
+    @Select("select count(*) from admin_user_role where role_id=#{roleId}")
+    long countByRoleId(@Param("roleId") Integer roleId);
 }

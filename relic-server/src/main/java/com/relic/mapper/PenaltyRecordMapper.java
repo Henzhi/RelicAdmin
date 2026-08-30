@@ -26,4 +26,6 @@ public interface PenaltyRecordMapper {
                      @Param("status") Integer status);
 
     int updateRevoke(@Param("id") Long id, @Param("remark") String remark);
+
+    Map<String, Object> selectById(@Param("id") Long id);
 }

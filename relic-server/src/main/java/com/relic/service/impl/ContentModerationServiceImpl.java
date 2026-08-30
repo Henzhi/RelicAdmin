@@ -64,12 +64,12 @@ public class ContentModerationServiceImpl implements ContentModerationService {
         }
 
         if ("rejected".equals(autoResult)) {
-            auditRecordMapper.updateByContentId(contentId, autoResult, null);
+            auditRecordMapper.updateByContentId(contentId, contentType, submitterId, autoResult, null);
             notificationMapper.insert(submitterId, "audit_result", "内容被拦截",
                     "您提交的内容因包含违规信息被自动拦截，请修改后重新提交",
                     "{\"contentId\":\"" + contentId + "\"}");
         } else {
-            auditRecordMapper.updateByContentId(contentId, "pending", null);
+            auditRecordMapper.updateByContentId(contentId, contentType, submitterId, "pending", null);
         }
 
         Map<String, Object> result = new HashMap<>();

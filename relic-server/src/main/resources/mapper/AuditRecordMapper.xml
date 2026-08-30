@@ -81,6 +81,8 @@
         SET auto_audit_result = #{manualAuditResult},
             reject_reason = #{rejectReason}
         WHERE content_id = #{contentId}
+          AND content_type = #{contentType}
+          AND submitter_id = #{submitterId}
     </update>
 
     <select id="selectStats" resultType="map">

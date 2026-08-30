@@ -48,7 +48,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                 .excludePathPatterns("/museum/auth/login", "/museum/auth/register");
         registry.addInterceptor(jwtTokenUserInterceptor)
                 .addPathPatterns("/user/**")
-                .excludePathPatterns("/user/user/login", "/user/shop/status");
+                // /user/user/register 必须放行，否则新用户无法注册；/user/shop/status 为历史遗留路径
+                .excludePathPatterns("/user/user/login", "/user/user/register");
     }
 
     /**

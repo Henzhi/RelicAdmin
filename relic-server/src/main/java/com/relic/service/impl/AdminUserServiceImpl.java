@@ -113,12 +113,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional
     public void delete(Integer id) {
-        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
-        //权限验证
-        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
-            //不是超级管理员不允许删除管理员
-            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
-        }
+        requireSuperAdmin(MessageConstant.PERMISSION_DENIED);
         if(Long.valueOf(id).equals(BaseContext.getCurrentId())){
             throw new IllegalOperationException("不能删除自己");
         }
@@ -129,16 +124,31 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional
     public void batchDelete(Integer[] ids) {
-        AdminUserRole adminUserRole = adminUserRoleMapper.selectByAdminUserId(BaseContext.getCurrentId());
-        //权限验证
-        if(!adminUserRole.getRoleId().equals(RoleConstant.SUPER_ADMIN)){
-            //不是超级管理员不允许删除管理员
-            throw new InsufficientPermissionsException(MessageConstant.PERMISSION_DENIED);
+        requireSuperAdmin(MessageConstant.PERMISSION_DENIED);
+        if (ids == null || ids.length == 0) {
+            throw new IllegalArgumentException("请选择要删除的管理员");
         }
-        for (Integer id : ids) {
+        Long currentId = BaseContext.getCurrentId();
+        List<Integer> idList = Arrays.asList(ids);
+        if (currentId != null && idList.contains(currentId.intValue())) {
+            throw new IllegalOperationException("不能删除自己");
+        }
+        // 系统必须至少保留一名超级管理员
+        long deletingSuperAdmins = 0;
+        for (Integer id : idList) {
+            AdminUserRole targetRole = adminUserRoleMapper.selectByAdminUserId(id.longValue());
+            if (targetRole != null && RoleConstant.SUPER_ADMIN.equals(targetRole.getRoleId())) {
+                deletingSuperAdmins++;
+            }
+        }
+        if (deletingSuperAdmins > 0
+                && deletingSuperAdmins >= adminUserRoleMapper.countByRoleId(RoleConstant.SUPER_ADMIN)) {
+            throw new IllegalOperationException("不能删除最后一名超级管理员");
+        }
+        for (Integer id : idList) {
             adminUserRoleMapper.deleteByAdminUserId(id);
         }
-        adminUserMapper.batchDelete(Arrays.asList(ids));
+        adminUserMapper.batchDelete(idList);
     }
 
     @Override

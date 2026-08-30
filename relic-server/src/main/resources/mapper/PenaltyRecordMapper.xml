@@ -46,4 +46,10 @@
         WHERE id = #{id}
     </update>
 
+    <select id="selectById" resultType="map">
+        SELECT id, user_id AS userId, penalty_type AS penaltyType, status
+        FROM penalty_records
+        WHERE id = #{id}
+    </select>
+
 </mapper>

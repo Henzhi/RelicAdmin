@@ -33,6 +33,8 @@ public interface AuditRecordMapper {
                           @Param("rejectReason") String rejectReason);
 
     int updateByContentId(@Param("contentId") String contentId,
+                          @Param("contentType") String contentType,
+                          @Param("submitterId") Integer submitterId,
                           @Param("manualAuditResult") String manualAuditResult,
                           @Param("rejectReason") String rejectReason);
 
