@@ -266,11 +266,12 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { getCurrentAdmin } from '../api/adminUser'
 import { ElMessageBox } from 'element-plus'
+import { connect, closeWebSocket } from '../utils/websocket'
 
 const route = useRoute()
 const router = useRouter()
@@ -311,6 +312,14 @@ async function refreshHeaderAvatar() {
 
 onMounted(() => {
   refreshHeaderAvatar()
+  // 已登录时建立 WebSocket 长连接，接收备份/审核等实时事件通知
+  if (auth.token && auth.userInfo?.id) {
+    connect(auth.userInfo.id)
+  }
+})
+
+onBeforeUnmount(() => {
+  closeWebSocket()
 })
 
 /** 子页面自带 el-page-header / PageContainer 时不重复显示 */
@@ -337,6 +346,7 @@ function handleCommand(command) {
       cancelButtonText: '取消',
       type: 'warning'
     }).then(() => {
+      closeWebSocket()
       auth.logout()
       router.push('/login')
     })

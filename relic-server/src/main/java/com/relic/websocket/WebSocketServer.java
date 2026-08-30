@@ -86,6 +86,8 @@ public class WebSocketServer implements ApplicationContextAware {
                 return;
             }
             sessionMap.put(sid, session);
+            // 客户端每 30s 发送心跳，90s 无任何报文则判定连接死亡并回收
+            session.setMaxIdleTimeout(java.time.Duration.ofSeconds(90).toMillis());
             log.info("客户端：{} 建立连接（鉴权通过）", sid);
         } catch (Exception e) {
             log.warn("WebSocket 连接被拒绝：token 校验失败, sid={}, error={}", sid, e.getMessage());
@@ -103,7 +105,16 @@ public class WebSocketServer implements ApplicationContextAware {
      * @param message 客户端发送过来的消息
      */
     @OnMessage
-    public void onMessage(String message, @PathParam("sid") String sid) {
+    public void onMessage(String message, @PathParam("sid") String sid, Session session) {
+        // 心跳协议：客户端每 30s 发送 ping，服务端立即回 pong，重置空闲计时
+        if ("ping".equals(message)) {
+            try {
+                session.getBasicRemote().sendText("pong");
+            } catch (Exception e) {
+                log.warn("心跳应答失败: sid={}, error={}", sid, e.getMessage());
+            }
+            return;
+        }
         log.info("收到来自客户端：{} 的信息:{}", sid, message);
     }
 
@@ -138,6 +149,28 @@ public class WebSocketServer implements ApplicationContextAware {
             } catch (Exception e) {
                 log.error("WebSocket 发送消息失败", e);
             }
+        }
+    }
+
+    /**
+     * 向所有在线管理端推送结构化事件（JSON：{type, data, timestamp}）。
+     * 无在线连接时静默跳过。
+     *
+     * @param type 事件类型（如 backup / audit）
+     * @param data 事件负载
+     */
+    public void sendEvent(String type, Map<String, Object> data) {
+        if (sessionMap.isEmpty()) {
+            return;
+        }
+        try {
+            Map<String, Object> message = new java.util.HashMap<>();
+            message.put("type", type);
+            message.put("data", data == null ? java.util.Map.of() : data);
+            message.put("timestamp", System.currentTimeMillis());
+            sendToAllClient(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(message));
+        } catch (Exception e) {
+            log.error("WebSocket 事件序列化失败: type={}", type, e);
         }
     }
 

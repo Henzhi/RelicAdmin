@@ -1,5 +1,6 @@
 package com.relic.service.impl;
 
+import com.relic.cache.CacheNames;
 import com.relic.converter.VoConverter;
 import com.relic.dto.LocationCreateDTO;
 import com.relic.dto.LocationUpdateDTO;
@@ -9,6 +10,7 @@ import com.relic.service.LocationService;
 import com.relic.vo.LocationVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -168,6 +170,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
+    @CacheEvict(cacheNames = CacheNames.DICT, allEntries = true)
     public void create(LocationCreateDTO dto) {
         validateHierarchy(dto.getType(), dto.getParentId());
         Location location = new Location();
@@ -180,6 +183,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
+    @CacheEvict(cacheNames = CacheNames.DICT, allEntries = true)
     public void update(Integer id, LocationUpdateDTO dto) {
         validateHierarchy(dto.getType(), dto.getParentId());
         Location location = new Location();
@@ -192,6 +196,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
+    @CacheEvict(cacheNames = CacheNames.DICT, allEntries = true)
     public void delete(Integer id) {
         locationMapper.deleteById(id);
     }

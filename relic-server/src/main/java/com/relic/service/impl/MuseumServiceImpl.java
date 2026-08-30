@@ -1,5 +1,6 @@
 package com.relic.service.impl;
 
+import com.relic.cache.CacheNames;
 import com.relic.converter.VoConverter;
 import com.relic.dto.MuseumCreateDTO;
 import com.relic.dto.MuseumUpdateDTO;
@@ -10,6 +11,7 @@ import com.relic.vo.MuseumVO;
 import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -41,6 +43,7 @@ public class MuseumServiceImpl implements MuseumService {
     }
 
     @Override
+    @CacheEvict(cacheNames = CacheNames.DICT, allEntries = true)
     public void create(MuseumCreateDTO dto) {
         Museum museum = new Museum();
         museum.setName(dto.getName());
@@ -56,6 +59,7 @@ public class MuseumServiceImpl implements MuseumService {
     }
 
     @Override
+    @CacheEvict(cacheNames = CacheNames.DICT, allEntries = true)
     public void update(Integer id, MuseumUpdateDTO dto) {
         Museum museum = new Museum();
         museum.setId(id);
@@ -70,6 +74,7 @@ public class MuseumServiceImpl implements MuseumService {
     }
 
     @Override
+    @CacheEvict(cacheNames = CacheNames.DICT, allEntries = true)
     public void delete(Integer id) {
         museumMapper.deleteById(id);
     }

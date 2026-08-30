@@ -1,5 +1,7 @@
 package com.relic.service.impl;
 
+import com.relic.annotation.RequireRole;
+import com.relic.constant.RoleConstant;
 import com.relic.context.BaseContext;
 import com.relic.dto.BackupCreateDTO;
 import com.relic.entity.BackupRecord;
@@ -7,6 +9,7 @@ import com.relic.mapper.BackupRecordMapper;
 import com.relic.mapper.BackupStrategyMapper;
 import com.relic.service.BackupService;
 import com.relic.utils.BackupCryptoUtil;
+import com.relic.websocket.WebSocketServer;
 import com.relic.utils.SqlExportUtil;
 import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
@@ -32,7 +35,7 @@ public class BackupServiceImpl implements BackupService {
     private final BackupRecordMapper backupRecordMapper;
     private final BackupStrategyMapper backupStrategyMapper;
     private final DataSource dataSource;
-    private final SuperAdminGuard superAdminGuard;
+    private final WebSocketServer webSocketServer;
     private final BackupCryptoUtil backupCryptoUtil;
 
     private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
@@ -46,9 +49,9 @@ public class BackupServiceImpl implements BackupService {
     }
 
     @Override
+    @RequireRole(RoleConstant.SUPER_ADMIN)
     public Map<String, Object> createBackup(BackupCreateDTO dto) {
         // H-04：仅超级管理员可手动创建备份
-        superAdminGuard.requireSuperAdmin("只有超级管理员才能创建备份");
         Integer operatorId = getCurrentOperatorId();
         String backupName = dto.getBackupName() != null ? dto.getBackupName()
                 : "手动备份_" + LocalDateTime.now().format(DF);
@@ -101,9 +104,13 @@ public class BackupServiceImpl implements BackupService {
                 result.put("status", 1);
                 result.put("fileSize", fileSize);
                 log.info("备份 {} 完成, {} bytes, path={}", backupName, fileSize, storedFilePath);
+                webSocketServer.sendEvent("backup", java.util.Map.of(
+                        "backupId", backupId, "backupName", backupName, "result", "success"));
             } else {
                 backupRecordMapper.updateStatus(backupId, 2, 0L, storedFilePath, "备份失败");
                 result.put("status", "failed");
+                webSocketServer.sendEvent("backup", java.util.Map.of(
+                        "backupId", backupId, "backupName", backupName, "result", "failed"));
             }
         } catch (Exception e) {
             log.error("备份失败: {}", e.getMessage(), e);
@@ -146,9 +153,9 @@ public class BackupServiceImpl implements BackupService {
     }
 
     @Override
+    @RequireRole(RoleConstant.SUPER_ADMIN)
     public void deleteBackup(Long id) {
         // H-04：仅超级管理员可删除备份
-        superAdminGuard.requireSuperAdmin("只有超级管理员才能删除备份");
         Map<String, Object> record = backupRecordMapper.selectById(id);
         if (record != null) {
             String filePath = (String) record.get("filePath");

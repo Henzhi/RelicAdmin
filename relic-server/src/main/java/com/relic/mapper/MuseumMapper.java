@@ -9,6 +9,7 @@ import java.util.List;
 @Mapper
 public interface MuseumMapper {
     Museum selectById(@Param("id") Integer id);
+    List<Museum> selectAll();
     List<Museum> selectByPage(@Param("name") String name, @Param("country") String country,
                               @Param("createdAtStart") String createdAtStart, @Param("createdAtEnd") String createdAtEnd,
                               @Param("offset") int offset, @Param("limit") int limit);

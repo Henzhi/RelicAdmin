@@ -5,6 +5,7 @@ import com.relic.mapper.BackupRecordMapper;
 import com.relic.mapper.BackupStrategyMapper;
 import com.relic.service.BackupService;
 import com.relic.utils.BackupCryptoUtil;
+import com.relic.websocket.WebSocketServer;
 import com.relic.utils.SqlExportUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ public class BackupScheduledTask {
     private final BackupService backupService;
     private final DataSource dataSource;
     private final BackupCryptoUtil backupCryptoUtil;
+    private final WebSocketServer webSocketServer;
 
     private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
@@ -88,8 +90,12 @@ public class BackupScheduledTask {
             if (success) {
                 backupRecordMapper.updateStatus(backupId, 1, fileSize, storedFilePath, "定时备份完成");
                 log.info("定时备份完成: {}, {} bytes", backupName, fileSize);
+                webSocketServer.sendEvent("backup", java.util.Map.of(
+                        "backupId", backupId, "backupName", backupName, "result", "success"));
             } else {
                 backupRecordMapper.updateStatus(backupId, 2, 0L, storedFilePath, "备份失败");
+                webSocketServer.sendEvent("backup", java.util.Map.of(
+                        "backupId", backupId, "backupName", backupName, "result", "failed"));
             }
             backupService.cleanupExpiredBackups();
         } catch (Exception e) {

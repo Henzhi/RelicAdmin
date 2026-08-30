@@ -33,6 +33,13 @@ public class ContentModerationServiceImpl implements ContentModerationService {
 
     private Map<String, Object> doSubmit(String contentId, String contentType, String content,
                                           Integer submitterId, String imageUrl) {
+        // 防御性校验：避免调用方漏传关键字段导致 NPE 或脏数据入库
+        if (contentId == null || contentId.isBlank()) {
+            throw new IllegalArgumentException("内容ID不能为空");
+        }
+        if (contentType == null || contentType.isBlank()) {
+            throw new IllegalArgumentException("内容类型不能为空");
+        }
         String autoResult = "approved";
         List<String> hitWords = new ArrayList<>();
         boolean imageBlocked = false;

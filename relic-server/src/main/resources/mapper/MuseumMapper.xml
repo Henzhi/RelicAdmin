@@ -18,6 +18,10 @@
         SELECT * FROM museums WHERE id = #{id}
     </select>
 
+    <select id="selectAll" resultMap="museumResultMap">
+        SELECT * FROM museums ORDER BY id ASC
+    </select>
+
     <select id="selectByPage" resultMap="museumResultMap">
         SELECT * FROM museums
         <where>

@@ -8,6 +8,7 @@ import com.relic.mapper.UserCommentMapper;
 import com.relic.mapper.UserPostMapper;
 import com.relic.mapper.UserUploadMapper;
 import com.relic.service.AuditRecordService;
+import com.relic.websocket.WebSocketServer;
 import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class AuditRecordServiceImpl implements AuditRecordService {
+
+    private final WebSocketServer webSocketServer;
 
     private final AuditRecordMapper auditRecordMapper;
     private final UserPostMapper userPostMapper;
@@ -61,6 +64,8 @@ public class AuditRecordServiceImpl implements AuditRecordService {
         // 同步更新源表审核状态
         syncSourceTableStatus(id, dto.getManualAuditResult(), auditorId, dto.getRejectReason());
         log.info("审核记录 {} 被管理员 {} 审核为 {}", id, auditorId, dto.getManualAuditResult());
+        webSocketServer.sendEvent("audit", java.util.Map.of(
+                "auditRecordId", id, "result", dto.getManualAuditResult()));
     }
 
     @Override
@@ -96,6 +101,8 @@ public class AuditRecordServiceImpl implements AuditRecordService {
             syncSourceTableStatus(id, dto.getManualAuditResult(), auditorId, dto.getRejectReason());
         }
         log.info("管理员 {} 批量审核 {} 条记录为 {} (有效记录: {})", auditorId, dto.getIds().length, dto.getManualAuditResult(), validIds.size());
+        webSocketServer.sendEvent("audit", java.util.Map.of(
+                "count", validIds.size(), "result", dto.getManualAuditResult(), "batch", true));
     }
 
     @Override

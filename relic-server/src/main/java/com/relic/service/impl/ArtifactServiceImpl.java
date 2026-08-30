@@ -14,6 +14,7 @@ import com.relic.mapper.DynastyMapper;
 import com.relic.mapper.LocationMapper;
 import com.relic.mapper.MuseumMapper;
 import com.relic.service.ArtifactService;
+import com.relic.service.DictCacheService;
 import com.relic.vo.ArtifactDetailVO;
 import com.relic.vo.ArtifactVO;
 import com.relic.vo.PageQuery;
@@ -25,10 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -41,6 +40,7 @@ public class ArtifactServiceImpl implements ArtifactService {
     private final DynastyMapper dynastyMapper;
     private final MuseumMapper museumMapper;
     private final LocationMapper locationMapper;
+    private final DictCacheService dictCacheService;
 
     /** 允许前端传入的排序字段白名单，key 为前端参数值，value 为数据库列名 */
     private static final Map<String, String> SORT_FIELD_MAP = Map.ofEntries(
@@ -82,25 +82,14 @@ public class ArtifactServiceImpl implements ArtifactService {
         return pq.toResult(total, records);
     }
 
+    /**
+     * 批量补充朝代/博物馆/地点名称。
+     * 名称映射来自 DictCacheService（整表缓存 30 分钟），替代原先每行一次 selectById 的 N+1 查询。
+     */
     private void populateNames(List<ArtifactVO> vos) {
-        List<Integer> dynastyIds = vos.stream().map(ArtifactVO::getDynastyId).filter(Objects::nonNull).distinct().collect(Collectors.toList());
-        List<Integer> museumIds = vos.stream().map(ArtifactVO::getMuseumId).filter(Objects::nonNull).distinct().collect(Collectors.toList());
-        List<Integer> locationIds = vos.stream().map(ArtifactVO::getLocationId).filter(Objects::nonNull).distinct().collect(Collectors.toList());
-        Map<Integer, String> dynastyMap = new HashMap<>();
-        Map<Integer, String> museumMap = new HashMap<>();
-        Map<Integer, String> locationMap = new HashMap<>();
-        for (Integer id : dynastyIds) {
-            Dynasty d = dynastyMapper.selectById(id);
-            if (d != null) dynastyMap.put(id, d.getNameZh());
-        }
-        for (Integer id : museumIds) {
-            Museum m = museumMapper.selectById(id);
-            if (m != null) museumMap.put(id, m.getName());
-        }
-        for (Integer id : locationIds) {
-            Location l = locationMapper.selectById(id);
-            if (l != null) locationMap.put(id, l.getNameZh());
-        }
+        Map<Integer, String> dynastyMap = dictCacheService.getDynastyNames();
+        Map<Integer, String> museumMap = dictCacheService.getMuseumNames();
+        Map<Integer, String> locationMap = dictCacheService.getLocationNames();
         for (ArtifactVO vo : vos) {
             vo.setDynastyName(dynastyMap.get(vo.getDynastyId()));
             vo.setMuseumName(museumMap.get(vo.getMuseumId()));

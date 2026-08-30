@@ -1,11 +1,13 @@
 package com.relic.service.impl;
 
+import com.relic.cache.CacheNames;
 import com.relic.entity.Dynasty;
 import com.relic.mapper.DynastyMapper;
 import com.relic.service.DynastyService;
 import com.relic.vo.PageQuery;
 import com.relic.vo.PageResultVO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,17 +33,20 @@ public class DynastyServiceImpl implements DynastyService {
     }
 
     @Override
+    @CacheEvict(cacheNames = CacheNames.DICT, allEntries = true)
     public void create(Dynasty dynasty) {
         dynasty.setCreatedAt(LocalDateTime.now());
         dynastyMapper.insert(dynasty);
     }
 
     @Override
+    @CacheEvict(cacheNames = CacheNames.DICT, allEntries = true)
     public void update(Dynasty dynasty) {
         dynastyMapper.update(dynasty);
     }
 
     @Override
+    @CacheEvict(cacheNames = CacheNames.DICT, allEntries = true)
     public void delete(Integer id) {
         dynastyMapper.deleteById(id);
     }

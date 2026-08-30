@@ -52,6 +52,12 @@ export default defineConfig({
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
+            // WebSocket 长连接代理（/v1/ws/{sid}），ws:true 开启协议升级
+            '^/v1/ws/': {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+                ws: true,
+            },
             '^/v1/user$': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,

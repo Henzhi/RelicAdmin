@@ -1,5 +1,9 @@
 import request from './request'
 
+/**
+ * 获取仪表盘统计汇总。
+ * @returns {Promise<{code: number, msg: string, data: import('./types').DashboardOverview}>}
+ */
 export function getDashboardOverview() {
   return request.get('/statistics/dashboard')
 }
