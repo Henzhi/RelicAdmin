@@ -21,3 +21,6 @@ docker-compose*.yml
 .dockerignore
 relic-frontend/Dockerfile
 relic-frontend/nginx.conf
+
+# 本地开发配置不进镜像（容器通过 .env 环境变量注入配置）
+relic-server/src/main/resources/application-dev.yml

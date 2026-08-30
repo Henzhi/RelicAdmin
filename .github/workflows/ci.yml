@@ -37,8 +37,10 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Backend compile
-        run: mvn -B compile -DskipTests
+      # install（而非 compile）：把 relic-common/pojo 装入本地仓库，
+      # 后续 flyway:migrate -pl relic-server 才能解析兄弟模块依赖
+      - name: Backend install
+        run: mvn -B install -DskipTests
 
       - name: Backend test
         run: mvn -B test
