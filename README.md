@@ -52,7 +52,6 @@ RelicAdmin 是一个面向博物馆和文物管理机构的全栈后台管理系
 | Redis (Lettuce) | - | 缓存中间件 |
 | WebSocket | - | 实时通信 |
 | JWT (jjwt) | 0.11.5 | 多端令牌鉴权 |
-| PageHelper | 2.1.0 | 分页插件 |
 | Druid | 1.2.23 | 数据库连接池 |
 | Knife4j | 4.5.0 | API 文档 |
 | Apache POI | 5.2.5 | Excel 导入导出 |

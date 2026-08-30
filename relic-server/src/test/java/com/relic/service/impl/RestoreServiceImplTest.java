@@ -33,14 +33,14 @@ class RestoreServiceImplTest {
     /** 测试注入 mock 依赖的最小实例（executeSqlFile 只依赖 dataSource） */
     private RestoreServiceImpl buildService(DataSource dataSource) {
         return new RestoreServiceImpl(
-                null, null, null, null, dataSource, null, null);
+                null, null, null, null, dataSource, null);
     }
 
     /** 构造含全部 mock 依赖的实例（供 restore 全流程测试） */
     private RestoreServiceImpl buildFullService(BackupRecordMapper backupRecordMapper,
                                                 DataSource dataSource) {
         return new RestoreServiceImpl(
-                null, backupRecordMapper, null, null, dataSource, null, null);
+                null, backupRecordMapper, null, null, dataSource, null);
     }
 
     private void writeSql(Path file, String content) throws IOException {

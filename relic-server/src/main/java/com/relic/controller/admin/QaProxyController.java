@@ -52,7 +52,7 @@ public class QaProxyController {
         appendParam(url, "keyword", keyword);
         appendParam(url, "startTime", startTime);
         appendParam(url, "endTime", endTime);
-        log.info("代理请求-问答日志: {}", url);
+        log.info("代理请求-问答日志: {}", logSafeUrl(url));
         try {
             ResponseEntity<Object> response = restTemplate.getForEntity(url.toString(), Object.class);
             return Result.success(response.getBody());
@@ -76,7 +76,7 @@ public class QaProxyController {
         appendParam(url, "pageSize", pageSize);
         appendParam(url, "feedbackType", feedbackType);
         appendParam(url, "keyword", keyword);
-        log.info("代理请求-用户反馈: {}", url);
+        log.info("代理请求-用户反馈: {}", logSafeUrl(url));
         try {
             ResponseEntity<Object> response = restTemplate.getForEntity(url.toString(), Object.class);
             return Result.success(response.getBody());
@@ -104,7 +104,7 @@ public class QaProxyController {
         appendParam(url, "status", status);
         appendParam(url, "intent", intent);
         appendParam(url, "keyword", keyword);
-        log.info("代理请求-失败问题: {}", url);
+        log.info("代理请求-失败问题: {}", logSafeUrl(url));
         try {
             ResponseEntity<Object> response = restTemplate.getForEntity(url.toString(), Object.class);
             return Result.success(response.getBody());
@@ -128,7 +128,7 @@ public class QaProxyController {
         appendParam(url, "pageSize", pageSize);
         appendParam(url, "taskStatus", taskStatus);
         appendParam(url, "reviewResult", reviewResult);
-        log.info("代理请求-审核任务: {}", url);
+        log.info("代理请求-审核任务: {}", logSafeUrl(url));
         try {
             ResponseEntity<Object> response = restTemplate.getForEntity(url.toString(), Object.class);
             return Result.success(response.getBody());
@@ -186,6 +186,15 @@ public class QaProxyController {
         } catch (Exception e) {
             log.error("不准确类型统计请求失败", e);
             return Result.error("问答子系统请求失败，请稍后重试");
+        }
+    }
+
+    /** 日志脱敏：仅输出请求路径，不记录携带业务参数的 query string */
+    private String logSafeUrl(StringBuilder url) {
+        try {
+            return java.net.URI.create(url.toString()).getPath();
+        } catch (Exception e) {
+            return "(unparsable-url)";
         }
     }
 

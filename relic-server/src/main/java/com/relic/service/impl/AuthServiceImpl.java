@@ -33,7 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
-    public UserVO login(LoginDTO dto) {
+    public UserVO login(LoginDTO dto, String clientIp) {
         User user = userMapper.selectByUsername(dto.getUsername());
         if (user == null) {
             throw new AccountNotFoundException("账号不存在");
@@ -44,9 +44,10 @@ public class AuthServiceImpl implements AuthService {
         if ("banned".equals(user.getStatus())) {
             throw new AccountLockedException("账号被锁定");
         }
+        // 与管理端对齐：记录真实的登录来源IP
         userMapper.updateLastLogin(user.getId(),
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
-                "");
+                clientIp == null ? "" : clientIp);
         return VoConverter.toUserVO(user);
     }
 

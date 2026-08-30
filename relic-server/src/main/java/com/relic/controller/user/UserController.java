@@ -44,7 +44,7 @@ public class UserController {
         }
         UserVO userVO;
         try {
-            userVO = authService.login(dto);
+            userVO = authService.login(dto, ip);
         } catch (RuntimeException e) {
             loginAttemptService.recordFailure(username, ip);
             throw e;

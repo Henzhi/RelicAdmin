@@ -1,5 +1,7 @@
 package com.relic.service.impl;
 
+import com.relic.annotation.RequireRole;
+import com.relic.constant.RoleConstant;
 import com.relic.context.BaseContext;
 import com.relic.dto.RestoreConfirmDTO;
 import com.relic.entity.AdminUser;
@@ -36,7 +38,6 @@ public class RestoreServiceImpl implements RestoreService {
     private final AdminUserMapper adminUserMapper;
     private final BCryptPasswordEncoder passwordEncoder;
     private final DataSource dataSource;
-    private final SuperAdminGuard superAdminGuard;
     private final BackupCryptoUtil backupCryptoUtil;
 
     @Override
@@ -48,9 +49,9 @@ public class RestoreServiceImpl implements RestoreService {
     }
 
     @Override
+    @RequireRole(RoleConstant.SUPER_ADMIN)
     public Map<String, Object> restore(Long backupId, RestoreConfirmDTO dto) {
         // H-04：仅超级管理员可执行数据恢复（会重建全库）
-        superAdminGuard.requireSuperAdmin("只有超级管理员才能执行数据恢复");
         Map<String, Object> backup = backupRecordMapper.selectById(backupId);
         if (backup == null) {
             throw new IllegalArgumentException("备份记录不存在");
