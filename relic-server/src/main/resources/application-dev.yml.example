@@ -1,0 +1,20 @@
+relic:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: your-mysql-host
+    port: 3306
+    database: your_database
+    username: your_username
+    password: your_mysql_password
+
+  alioss:
+    endpoint: oss-cn-beijing.aliyuncs.com
+    access-key-id: your_access_key_id
+    access-key-secret: your_access_key_secret
+    bucket-name: your_bucket_name
+
+  redis:
+    host: your-redis-host
+    port: 6379
+    password: your_redis_password
+    database: 0

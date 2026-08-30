@@ -1,0 +1,23 @@
+# Frontend (not part of backend image)
+relic-frontend/
+
+# Build outputs
+**/target/
+
+# Git & IDE
+.git/
+.gitignore
+.idea/
+*.iml
+.vscode/
+
+# Docs & misc
+*.md
+agent-transcripts/
+
+# Docker build context (backend only; frontend has its own Dockerfile)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+relic-frontend/Dockerfile
+relic-frontend/nginx.conf

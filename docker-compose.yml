@@ -1,0 +1,24 @@
+services:
+  relic-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: relic-server:latest
+    container_name: relic-server
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      TZ: Asia/Shanghai
+
+  relic-frontend:
+    build:
+      context: ./relic-frontend
+      dockerfile: Dockerfile
+    image: relic-frontend:latest
+    container_name: relic-frontend
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    depends_on:
+      - relic-server
