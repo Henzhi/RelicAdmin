@@ -46,7 +46,7 @@
             SELECT DATE_ADD(d, INTERVAL 1 DAY) FROM dates WHERE d &lt; CURDATE()
         )
         SELECT
-            dates.d AS date,
+            DATE_FORMAT(dates.d, '%Y-%m-%d') AS date,
             COALESCE(u.cnt, 0) AS count
         FROM dates
         LEFT JOIN (
@@ -91,7 +91,7 @@
             SELECT DATE_ADD(d, INTERVAL 1 DAY) FROM dates WHERE d &lt; CURDATE()
         )
         SELECT
-            dates.d AS date,
+            DATE_FORMAT(dates.d, '%Y-%m-%d') AS date,
             COALESCE(v.cnt, 0) AS count
         FROM dates
         LEFT JOIN (
@@ -110,7 +110,7 @@
             SELECT DATE_ADD(d, INTERVAL 1 DAY) FROM dates WHERE d &lt; CURDATE()
         )
         SELECT
-            dates.d AS date,
+            DATE_FORMAT(dates.d, '%Y-%m-%d') AS date,
             COALESCE(v.cnt, 0) AS visits,
             COALESCE(u.cnt, 0) AS newUsers,
             COALESCE(c.cnt, 0) AS contentCounts,
