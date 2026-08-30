@@ -48,7 +48,7 @@ flowchart TB
     QA["知识问答子系统<br/>(带超时代理)"]
 
     SPA -->|REST /v1/*| INT
-    WS <-->|ws /v1/ws/{sid}| WSS
+    WS <-->|ws /v1/ws/用户ID| WSS
     INT --> AOP --> SVC
     SVC --> CACHE
     SVC --> DB
